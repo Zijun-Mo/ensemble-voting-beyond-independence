@@ -171,7 +171,7 @@ Collapse to a point happens only at the boundary. For K=3 the width is exactly 2
 ### Takeaway
 Yes, and it is short.
 - Define L̂(g) as the minimum of g·π over the confidence set C = {π ∈ Δ : ‖Zᵀπ − p̂‖_∞ ≤ ε_p, Σ_{pairs}|π(v)+π(v̄) − m̂(v)| ≤ ε_m}.
-- With probability ≥ 1−δ: **L(g) − 2(ε_p‖λ*_g‖₁ + ε_m‖μ*_g‖_∞) ≤ L̂(g) ≤ L(g) ≤ acc(g)**.
+- With probability ≥ 1−δ: **L(g) − 2(ε_p‖λ\*_g‖₁ + ε_m‖μ\*_g‖_∞) ≤ L̂(g) ≤ L(g) ≤ acc(g)**.
   - (λ*, μ*) is any optimal dual of the population LP.
   - Its norms are bounded by a constant C_K(g) that depends only on (K, g), because the constraint matrix depends only on K.
   - ε_p = √(log(4K/δ)/(2n_ℓ)) and ε_m = √(2(2^{K−1} log 2 + log(4/δ))/n_u).
