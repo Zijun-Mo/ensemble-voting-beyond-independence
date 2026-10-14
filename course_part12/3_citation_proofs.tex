@@ -1,0 +1,147 @@
+\documentclass[11pt]{article}
+\input{common.tex}
+\fancyhead[L]{\small\color{muted}基于已有结论的简明证明}
+\fancyhead[R]{\small\color{muted}Part I \& Part II}
+\hypersetup{pdftitle={基于已有结论的简明证明}}
+\counterwithout{theorem}{section}
+
+\begin{document}
+\doctitle{基于已有结论的简明证明}{Part I 与 Part II：每个结论由文献定理直接得到}{2026 年 10 月}
+
+\paragraph{记号。}$K$ 为奇数，$Z_i=\1\{f_i(X)=Y\}$，$p_i=\Prob(Z_i=1)$，$S=\sum_iZ_i$，$m=(K+1)/2$。二分类下多数投票正确当且仅当 $S\ge m$，所以集成准确率为 $A=\Prob(S\ge m)$。$\Amin,\Aplus$ 分别表示在所有满足给定约束的联合分布上取的最小值与最大值。$\pd i$ 为降序排列，$\pa i$ 为升序排列。$r_{ij}=\Prob(Z_i=Z_j=1)=p_ip_j+\rho_{ij}\sqrt{p_i(1-p_i)p_j(1-p_j)}$。
+
+\begin{warnbox}[title=引用说明]
+\cite{zk2012,kaniovski2010} 的定理与表格编号依据作者主页上的预印本，\cite{matan} 的公式依据 Kuncheva 教材 \cite{kunchevabook} 的转述，正式发表版本的编号与记号可能不同，提交前请核对原文。完整的自包含证明见配套文档《严格数学证明》。
+\end{warnbox}
+
+%=====================================================================
+\section{Part I}
+%=====================================================================
+
+\begin{theorem}[独立情形]\label{c:ind}
+若 $Z_i$ 独立同分布于 $\mathrm{Bernoulli}(p)$，则 $A=\sum_{j\ge m}\binom Kj p^j(1-p)^{K-j}$；
+\[
+A(K+2)-A(K)=\binom{K}{(K-1)/2}\,p^{\frac{K+1}{2}}(1-p)^{\frac{K+1}{2}}(2p-1);
+\]
+且 $A\to1,\ \tfrac12,\ 0$（分别对应 $p>\tfrac12,\ p=\tfrac12,\ p<\tfrac12$）。
+\end{theorem}
+\begin{proof}
+$S\sim\Bin(K,p)$。其余结论即 Condorcet 陪审团定理 \cite{condorcet}；增量公式见 \cite{shteingart} 的式 (7)；$p>\frac12$ 时的单调性与极限 1 见 \cite{shteingart} 定理 2、定理 3。$p<\frac12$ 与 $p=\frac12$ 的情形由对称性 $A(K,1-p)=1-A(K,p)$ 得到（因为 $K-S\sim\Bin(K,1-p)$，且 $\{K-S\ge m\}=\{S<m\}$）。$p>\frac12$ 时的收敛速度 $1-A\le e^{-2K(p-1/2)^2}$ 由 Hoeffding 不等式 \cite{hoeffding} 得到。
+\end{proof}
+
+\begin{theorem}[相同准确率、依赖任意]\label{c:equal}
+\[
+\Amin(K,p)=\max\Bigl\{0,\frac{2Kp-K+1}{K+1}\Bigr\},\qquad \Aplus(K,p)=\min\Bigl\{1,\frac{2Kp}{K+1}\Bigr\},
+\]
+且两者都可达。特别地，$\tfrac12<p<1$ 时 $\Amin(K,p)$ 随 $K$ 严格递减，并趋于 $2p-1$。
+\end{theorem}
+\begin{proof}
+这是 Kuncheva 等 \cite{kuncheva2003} 的 “pattern of failure” 与 “pattern of success” 给出的准确率，也是 Zaigraev 与 Kaniovski \cite{zk2012}（定理 1）对同质陪审团给出的 $\min=\frac{n(2p-1)+1}{n+1}$ 与 $\max=\min\{\frac{2np}{n+1},1\}$（该定理只陈述了 $\frac12<p<1$ 的情形）。对一般的 $p$ 可以直接验证：逐点地有 $m\1_{\{S\ge m\}}\le S\le K\1_{\{S\ge m\}}+(m-1)\1_{\{S<m\}}$，取期望并代入 $\E S=Kp$ 即得不等式；可达性只需取 $S$ 在 $\{0,m-1\}$ 或 $\{m-1,K\}$（下界）、$\{0,m\}$ 或 $\{m,K\}$（上界）上取值的可交换分布，权重由 $\E S=Kp$ 确定。单调性与极限由 $\Amin=(2p-1)+\frac{2(1-p)}{K+1}$ 立即得到。
+\end{proof}
+
+\begin{theorem}[不同准确率、依赖任意]\label{c:unequal}
+\[
+\Amin(p)=\max\Bigl\{0,\max_{m\le j\le K}\frac{\sum_{i\le j}\pd i-(m-1)}{j-m+1}\Bigr\},\qquad
+\Aplus(p)=\min\Bigl\{1,\min_{m\le j\le K}\frac{\sum_{i\le j}\pa i}{j-m+1}\Bigr\},
+\]
+且两者都可达。
+\end{theorem}
+\begin{proof}
+这是 Matan \cite{matan} 的上下界（证明见 \cite{kunchevabook} 附录 4.A.1）。在 \cite{kunchevabook} 的记号下（$L$ 个分类器按准确率升序排列，$k=(L+1)/2$），
+\begin{align*}
+\min P_{\mathrm{maj}}&=\max\{0,\xi(k),\dots,\xi(1)\}, & \xi(s)&=\frac1s\sum_{i=k-s+1}^{L}p_i-\frac{L-k}{s},\\
+\max P_{\mathrm{maj}}&=\min\{1,X_k,\dots,X_1\}, & X_s&=\frac1s\sum_{i=1}^{L-k+s}p_i .
+\end{align*}
+令 $j=m-1+s$，则 $j-m+1=s$，$L-k=m-1$。此时 $\xi(s)$ 中的和恰为最大的 $j$ 个准确率之和，$X_s$ 中的和恰为最小的 $j$ 个准确率之和，代入即得上式。
+
+另一种引用方式：$\{S\ge m\}$ 的补集是 $\{\sum_i(1-Z_i)\ge m\}$，因此
+\[
+\Amin(p)=1-\max\Prob(\text{错误事件中至少 } m \text{ 个发生}).
+\]错误事件的概率为 $1-p_i$，右边的最大值正是 Rüger \cite{ruger} 求出的“$n$ 个检验中至少 $k$ 个拒绝”的最大显著性水平。
+\end{proof}
+
+%=====================================================================
+\section{Part II}
+%=====================================================================
+
+\begin{theorem}[$K=3$ 的精确区间]\label{c:k3}
+令 $R=r_{12}+r_{13}+r_{23}$，
+\begin{align*}
+L&=\max\{0,\ r_{12}+r_{13}-p_1,\ r_{12}+r_{23}-p_2,\ r_{13}+r_{23}-p_3\},\\
+U&=\min\{r_{12},\ r_{13},\ r_{23},\ 1-p_1-p_2-p_3+R\}.
+\end{align*}
+参数相容当且仅当 $L\le U$，此时 $A$ 的可能取值恰为 $[R-2U,\ R-2L]$。对称情形 $p_i\equiv p$，$\rho_{ij}\equiv\rho$，$r=p^2+\rho p(1-p)$ 下：
+\[
+A_{\min}=\max\{r,\ 6p-3r-2\},\qquad A_{\max}=\min\{3r,\ 2p-r\},
+\]
+参数相容当且仅当 $\max\{0,p-\tfrac13,2p-1\}\le r\le p$。
+\end{theorem}
+\begin{proof}
+这一结论没有现成的文献定理可以直接引用，但只需三行。
+
+(1) 由容斥，$\1\{S\ge2\}=Z_1Z_2+Z_1Z_3+Z_2Z_3-2Z_1Z_2Z_3$，所以 $A=R-2t$，其中 $t=\Prob(Z_1=Z_2=Z_3=1)$。
+
+(2) 由 Möbius 反演，$\{0,1\}^3$ 上 8 个格点的概率都是 $t$ 的仿射函数（如 $\pi(110)=r_{12}-t$，$\pi(000)=1-\sum_ip_i+R-t$）。它们全部非负当且仅当 $t\in[L,U]$。
+
+(3) $A$ 关于 $t$ 严格递减，故得区间。对称情形代入 $L=\max\{0,2r-p\}$，$U=\min\{r,1-3p+3r\}$ 即可。
+
+Kaniovski \cite{kaniovski2010}（第 6 节，表 2）用线性规划数值求解了同一问题。上述闭式解与其全部 6 组结果一致，例如 $p=0.75,\rho=0$ 时为 $[0.8125,0.9375]$，$p=(0.75,0.6,0.6),\rho=0.2$ 时为 $[0.577,0.792]$。相容性问题的一般理论见 \cite{chaganty}。
+\end{proof}
+
+\begin{corollary}[两两相关信息不足]\label{c:counter}
+$K=3$，$p=0.6$，$\rho=0$ 时，$A$ 可以取 $[0.52,\,0.84]$ 中的任何值，而独立时 $A=0.648$。因此边缘准确率加全部两两相关系数不能唯一确定集成准确率。
+\end{corollary}
+\begin{proof}
+在定理~\ref{c:k3} 中代入 $r=0.36$：$A_{\min}=\max\{0.36,0.52\}=0.52$，$A_{\max}=\min\{1.08,0.84\}=0.84$。取到端点的分布可以选为可交换分布：$S$ 的分布分别为 $(q_0,\dots,q_3)=(0,0.48,0.24,0.28)$ 和 $(0.16,0,0.72,0.12)$，给定 $S=s$ 时均匀随机选出 $s$ 个正确的分类器。同一现象在 Kaniovski \cite{kaniovski2010} 表 2 中也有体现：$p=0.5$、$c=0$ 时区间为 $[0.25,0.75]$。
+\end{proof}
+
+\begin{theorem}[一般 $K$]\label{c:lp}
+对任意奇数 $K$，$A_{\min},A_{\max}$ 是 $\{0,1\}^K$ 上 $2^K$ 个格点概率的线性规划的最优值，约束为归一化、$p_i$ 与 $r_{ij}$。在对称情形 $p_i\equiv p$，$r_{ij}\equiv r$ 下，它们等于关于 $S$ 的分布 $(q_0,\dots,q_K)$ 的线性规划
+\[
+\min/\max\ \sum_{s\ge m}q_s\quad\text{s.t.}\quad\sum_sq_s=1,\quad\sum_s s\,q_s=Kp,\quad\sum_s\tbinom s2q_s=\tbinom K2r,\quad q\ge0
+\]
+的最优值。
+\end{theorem}
+\begin{proof}
+完整线性规划的表述与 Kaniovski \cite{kaniovski2010} 第 6 节逐条相同；只用准确率约束的版本见 Narasimhamurthy \cite{nara2003,nara2005}。对称情形下，$\E S=S_1$、$\E\binom S2=S_2$ 是二项矩，$\Prob(S\ge m)$ 的紧确界正是 Prékopa \cite{prekopa1988,prekopa1990} 的离散矩问题（以 $S$ 的分布为变量的线性规划）；其闭式解见 Boros 与 Prékopa \cite{borosprekopa}。反方向的可实现性只需注意：任一可行的 $q$ 对应的可交换分布（给定 $S=s$ 时均匀选取正确者）的边缘为 $p$，两两联合概率为 $\E[S(S-1)]/(K(K-1))=r$。
+\end{proof}
+
+%=====================================================================
+\section{对照表}
+%=====================================================================
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.25\linewidth}>{\raggedright\arraybackslash}p{0.45\linewidth}>{\raggedright\arraybackslash}p{0.20\linewidth}}
+\toprule
+结论 & 引用 & 需要补充的推导\\
+\midrule
+定理~\ref{c:ind}（独立） & Condorcet \cite{condorcet}；\cite{shteingart} 式 (7)、定理 2–3；Hoeffding \cite{hoeffding} & 无\\
+定理~\ref{c:equal}（相同 $p$） & Kuncheva 等 \cite{kuncheva2003}；Zaigraev--Kaniovski \cite{zk2012} 定理 1 & 无（可附一行验证）\\
+定理~\ref{c:unequal}（不同 $p_i$） & Matan \cite{matan}（\cite{kunchevabook} 附录 4.A.1）；Rüger \cite{ruger} & 下标换算 $j=m-1+s$\\
+定理~\ref{c:k3}（$K=3$） & 问题与数值：Kaniovski \cite{kaniovski2010}；相容性：\cite{chaganty} & 三行：容斥、Möbius 反演、单调性\\
+推论~\ref{c:counter}（反例） & Kaniovski \cite{kaniovski2010} 表 2 & 代入数值\\
+定理~\ref{c:lp}（一般 $K$） & Kaniovski \cite{kaniovski2010}；Narasimhamurthy \cite{nara2003,nara2005}；Prékopa \cite{prekopa1988,prekopa1990}；Boros--Prékopa \cite{borosprekopa} & 可交换构造一行\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{thebibliography}{99}\small
+\bibitem{condorcet} M.~de Condorcet. \emph{Essai sur l\apos application de l\apos analyse à la probabilité des décisions rendues à la pluralité des voix}. Paris, 1785.
+\bibitem{shteingart} H.~Shteingart et al. Majority voting and the Condorcet\apos s jury theorem. arXiv:2002.03153, 2020.
+\bibitem{hoeffding} W.~Hoeffding. Probability inequalities for sums of bounded random variables. \emph{Journal of the American Statistical Association}, 58(301):13--30, 1963.
+\bibitem{kuncheva2003} L.~I. Kuncheva, C.~J. Whitaker, C.~A. Shipp, R.~P.~W. Duin. Limits on the majority vote accuracy in classifier fusion. \emph{Pattern Analysis and Applications}, 6(1):22--31, 2003.
+\bibitem{kunchevabook} L.~I. Kuncheva. \emph{Combining Pattern Classifiers: Methods and Algorithms}, 2nd ed. Wiley, 2014.
+\bibitem{matan} O.~Matan. On voting ensembles of classifiers (extended abstract). AAAI-96 Workshop on Integrating Multiple Learned Models, 1996.
+\bibitem{ruger} B.~Rüger. Das maximale Signifikanzniveau des Tests \gerlq Lehne $H_0$ ab, wenn $k$ unter $n$ gegebenen Tests zur Ablehnung führen\gerrq. \emph{Metrika}, 25:171--178, 1978.
+\bibitem{zk2012} A.~Zaigraev, S.~Kaniovski. Bounds on the competence of a homogeneous jury. \emph{Theory and Decision}, 72(1):89--112, 2012.
+\bibitem{kaniovski2010} S.~Kaniovski. Aggregation of correlated votes and Condorcet\apos s jury theorem. \emph{Theory and Decision}, 69(3):453--468, 2010.
+\bibitem{nara2003} A.~M. Narasimhamurthy. A framework for the analysis of majority voting. In \emph{Lecture Notes in Computer Science}, vol.~2749. Springer, 2003.
+\bibitem{nara2005} A.~Narasimhamurthy. Theoretical bounds of majority voting performance for a binary classification problem. \emph{IEEE Transactions on Pattern Analysis and Machine Intelligence}, 27(12):1988--1995, 2005.
+\bibitem{prekopa1988} A.~Prékopa. Boolean--Bonferroni inequalities and linear programming. \emph{Operations Research}, 36(1):145--162, 1988.
+\bibitem{prekopa1990} A.~Prékopa. Sharp bounds on probabilities using linear programming. \emph{Operations Research}, 38(2):227--239, 1990.
+\bibitem{borosprekopa} E.~Boros, A.~Prékopa. Closed form two-sided bounds for probabilities that at least $r$ and exactly $r$ out of $n$ events occur. \emph{Mathematics of Operations Research}, 14(2):317--342, 1989.
+\bibitem{chaganty} N.~R. Chaganty, H.~Joe. Range of correlation matrices for dependent Bernoulli random variables. \emph{Biometrika}, 93(1):197--206, 2006.
+\end{thebibliography}
+\end{document}

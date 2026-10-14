@@ -1,0 +1,30 @@
+continuum closed form vs grid LP: max err 2.41e-06;  min_nu Thm7 vs C-bound: max |diff| 1.58e-15
+K=3: n=1643 mean sharp 0.2877 | mean best existing 0.5100 | mean gap 0.2222 (max 0.5504) | mean ratio sharp/best 0.534 (min 0.001) | best-existing sharp at 0.000; C-bound sharp at 0.000
+K=5: n=1819 mean sharp 0.3134 | mean best existing 0.4817 | mean gap 0.1683 (max 0.5407) | mean ratio sharp/best 0.619 (min 0.006) | best-existing sharp at 0.000; C-bound sharp at 0.000
+K=11: n=1900 mean sharp 0.3400 | mean best existing 0.4655 | mean gap 0.1255 (max 0.4785) | mean ratio sharp/best 0.725 (min 0.033) | best-existing sharp at 0.000; C-bound sharp at 0.000
+K=21: n=1909 mean sharp 0.3529 | mean best existing 0.4633 | mean gap 0.1104 (max 0.4781) | mean ratio sharp/best 0.776 (min 0.232) | best-existing sharp at 0.000; C-bound sharp at 0.000
+K=101: n=1911 mean sharp 0.3645 | mean best existing 0.4629 | mean gap 0.0983 (max 0.4776) | mean ratio sharp/best 0.819 (min 0.513) | best-existing sharp at 0.000; C-bound sharp at 0.000
+K=inf: n=1911 mean sharp 0.3676 | mean best existing 0.4629 | mean gap 0.0953 (max 0.4775) | mean ratio sharp/best 0.829 (min 0.513) | best-existing sharp at 0.304; C-bound sharp at 0.304
+  K=   3 mu=0.2 s=0.05: sharp nan  C 0.1000  2mu 0.400  4s 0.200
+  K=   3 mu=0.2 s=0.08: sharp 0.0600  C 0.3077  2mu 0.400  4s 0.320
+  K=   3 mu=0.2 s=0.10: sharp 0.1500  C 0.4000  2mu 0.400  4s 0.400
+  K=   3 mu=0.2 s=0.14: sharp 0.2900  C 0.5263  2mu 0.400  4s 0.560
+  K=   5 mu=0.2 s=0.05: sharp 0.0417  C 0.1000  2mu 0.400  4s 0.200
+  K=   5 mu=0.2 s=0.08: sharp 0.1667  C 0.3077  2mu 0.400  4s 0.320
+  K=   5 mu=0.2 s=0.10: sharp 0.2500  C 0.4000  2mu 0.400  4s 0.400
+  K=   5 mu=0.2 s=0.14: sharp 0.3000  C 0.5263  2mu 0.400  4s 0.560
+  K=  11 mu=0.2 s=0.05: sharp 0.0725  C 0.1000  2mu 0.400  4s 0.200
+  K=  11 mu=0.2 s=0.08: sharp 0.2493  C 0.3077  2mu 0.400  4s 0.320
+  K=  11 mu=0.2 s=0.10: sharp 0.3300  C 0.4000  2mu 0.400  4s 0.400
+  K=  11 mu=0.2 s=0.14: sharp 0.3100  C 0.5263  2mu 0.400  4s 0.560
+  K=  21 mu=0.2 s=0.05: sharp 0.0830  C 0.1000  2mu 0.400  4s 0.200
+  K=  21 mu=0.2 s=0.08: sharp 0.2742  C 0.3077  2mu 0.400  4s 0.320
+  K=  21 mu=0.2 s=0.10: sharp 0.3627  C 0.4000  2mu 0.400  4s 0.400
+  K=  21 mu=0.2 s=0.14: sharp 0.3145  C 0.5263  2mu 0.400  4s 0.560
+  K= inf mu=0.2 s=0.05: sharp 0.1000  C 0.1000  2mu 0.400  4s 0.200
+  K= inf mu=0.2 s=0.08: sharp 0.3077  C 0.3077  2mu 0.400  4s 0.320
+  K= inf mu=0.2 s=0.10: sharp 0.4000  C 0.4000  2mu 0.400  4s 0.400
+  K= inf mu=0.2 s=0.14: sharp 0.3200  C 0.5263  2mu 0.400  4s 0.560
+hierarchy K=5 [uniform] n=287: true 0.1318, sharp_p_fullunlabeled 0.1844, sharp_p_pairwise 0.2443, sharp_mu_s 0.2466, C_bound 0.4232, first_order_2mu 0.5069, tandem_4s 0.4404; chain holds: True; sharp(mu,s)==C in 0.000
+hierarchy K=5 [logodds] n=287: true 0.1104, sharp_p_fullunlabeled 0.1624, sharp_p_pairwise 0.1871, sharp_mu_s 0.3134, C_bound 0.3513, first_order_2mu 0.4321, tandem_4s 0.3655; chain holds: True; sharp(mu,s)==C in 0.000
+K=3 sharp MV error = min(sum_i<j tandem_ij, min_i(e_i + d_i)) vs LP: max err 3.33e-16

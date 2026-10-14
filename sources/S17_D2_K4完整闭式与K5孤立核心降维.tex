@@ -1,0 +1,513 @@
+\documentclass[11pt,a4paper]{ctexart}
+\usepackage[margin=23mm,top=23mm,bottom=24mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,booktabs,longtable}
+\usepackage{xcolor,hyperref,listings}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\definecolor{codebg}{RGB}{246,247,249}
+\lstset{basicstyle=\ttfamily\scriptsize,columns=fullflexible,breaklines=true,
+ breakatwhitespace=false,showstringspaces=false,keepspaces=true,
+ backgroundcolor=\color{codebg},frame=single,tabsize=4}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{corollary}[theorem]{推论}
+\newtheorem{proposition}[theorem]{命题}
+\theoremstyle{remark}\newtheorem{remark}[theorem]{备注}
+\newcommand{\Rstar}[1]{R^*_{\mathrm{det},#1}}
+\newcommand{\odd}{\mathcal C_{\mathrm{odd}}}
+\newcommand{\supp}{\operatorname{supp}}
+\setlength{\parindent}{2em}
+\begin{document}
+\begin{center}
+{\Large\bfseries D2：异质 $K=5$ 稳健投票的严格降维}\\[.4em]
+{\large\bfseries 异质 $K=4$ 的 12 项完整闭式及五维剩余证书分类}\\[.35em]
+\today\qquad 研究报告（仅 \LaTeX{} 源文件）
+\end{center}
+\begin{abstract}
+本文继续研究已知分类器边际错误概率与成对共同出错概率上界的
+确定性 self-dual 稳健集成。新结果是\emph{计算机辅助但使用精确有理数证书的
+异质四分类器完整闭式}：$\Rstar{4}$ 恰为 12 个显式仿射式的最小值。
+证明同时穷尽 104 个必要阈值规则的 14 个置换类型、
+262 个对偶极点和 262 份精确 Farkas 支配性证书。
+结合解析的孤立交互变量消元定理，进一步严格证明：
+对 $K=5$，所有二次交互支撑未覆盖全部五个顶点的证书都被
+5 个边际项、22 个奇环项和 20 个四变量锚点项覆盖。
+因此尚未完成的正截距部分只须考虑 17 种覆盖全部五顶点的
+非二分交互支撑图。\textbf{本文不宣称已证明 $K=5$ 的最终简洁闭式。}
+\end{abstract}
+
+\section{问题、二次对偶与证明目标}
+设 $X_i\in\{0,1\}$ 为分类器的错误指示量，$q_i=\mathbb E X_i\in(0,1/2)$，
+$\mathbb E(X_iX_j)\le b_{ij}$，并假设这些矩约束由至少一个联合分布实现。
+确定性 self-dual 规则满足 $F(x)+F(\mathbf1-x)=1$。
+对于固定 $F$，线性规划对偶为
+\begin{align}
+R(F)&=\max_{\pi\in\mathcal P(q,b)}\mathbb E_\pi F(X)
+=\min_{(a,\beta,\gamma)\in\mathcal D_F}
+\left[a+\sum_i\beta_iq_i+\sum_{i<j}\gamma_{ij}b_{ij}\right],\\
+\mathcal D_F&=\left\{(a,\beta,\gamma):
+Q(x)=a+\sum_i\beta_ix_i+\sum_{i<j}\gamma_{ij}x_ix_j\ge F(x),\ \gamma_{ij}\ge0\right\}.
+\end{align}
+全部联合约束可行时强对偶成立。消去规则 $F$ 后，可以只考虑
+$Q(x)\ge0$ 与 $\max\{Q(x),Q(\mathbf1-x)\}\ge1$ 的二次证书。
+
+\begin{lemma}[必要规则可选为有符号阈值]
+对任何固定 $K$，存在一个 minimax 最优的确定性 self-dual 规则，具有
+\[
+F_w(x)=\mathbf1\!\left\{\sum_iw_i(2x_i-1)>0\right\},
+\qquad \sum_iw_i(2x_i-1)\ne0\quad(\forall x).
+\]
+\end{lemma}
+\begin{proof}
+对任意合法的 $Q$，取互补状态中 $Q$ 值较大的一侧为失败侧。
+注意差
+$Q(x)-Q(\mathbf1-x)=\sum_i
+(\beta_i+\frac12\sum_{j\ne i}\gamma_{ij})(2x_i-1)$
+是线性的。若某对互补状态出现平局，则两侧均有 $Q\ge1$，
+可以对权重作任意充分小的泛化扰动消除所有平局，而不破坏其余比较，
+并在平局对任取失败方向；对应的 $F_w$ 仍被 $Q$ 逐点支配。
+因此优化二次证书时可以只考虑无平局的有符号阈值规则。
+\end{proof}
+
+\section{异质 $K=4$ 的严格 12 项完整闭式}
+设 $T$ 为任意四元素模型集合，并对 $r\in T$ 定义
+\begin{equation}\label{eq:anchor}
+H_{T,r}(q,b)=
+1-\sum_{i\in T}q_i
++\sum_{\{j,k\}\subset T\setminus\{r\}}b_{jk}
++2\sum_{j\in T\setminus\{r\}}b_{rj}.
+\end{equation}
+\begin{theorem}[四模型精确闭式；本轮主结果]\label{thm:k4}
+对于任意可行的异质四模型联合矩参数 $0<q_i<1/2$，
+\begin{equation}\label{eq:k4}
+\boxed{
+\Rstar{4}(q_T,b_T)=
+\min\left\{
+\min_{i\in T}q_i,\ 
+\min_{\substack{S\subset T\\|S|=3}}\sum_{\{i,j\}\subset S}b_{ij},\ 
+\min_{r\in T}H_{T,r}(q,b)
+\right\}.}
+\end{equation}
+共计 $4+4+4=12$ 个显式仿射项，不需要 $\sum_{i\in T}q_i\le1$。
+\end{theorem}
+
+\subsection{上界：三种可实现的 self-dual 规则}
+四个 $q_i$ 由独裁规则达到；四个三角形代价由三人多数规则及
+$Q=\sum_{\{i,j\}\subset S}x_ix_j$ 给出。
+对锚点 $r$，取 $w_r=2$、其余三模型权重为 1。
+其失败事件在 $x_r=0$ 时要求其余三模型全错，
+在 $x_r=1$ 时要求其余三模型至少一个出错。
+逐点的合法二次证书是
+\begin{equation}\label{eq:Qr}
+Q_r(x)=1-\sum_{i\in T}x_i
++\sum_{\{j,k\}\subset T\setminus\{r\}}x_jx_k
++2\sum_{j\in T\setminus\{r\}}x_rx_j.
+\end{equation}
+令 $t=\sum_{j\ne r}x_j$。若 $x_r=0$，则
+$Q_r=1-t+\binom t2$，对 $t=0,1,2,3$ 取值 $1,0,0,1$；
+若 $x_r=1$，则 $Q_r=t+\binom t2$，对 $t=0,1,2,3$ 取值 $0,1,3,6$。
+故 $Q_r\ge F_w$ 在全部 16 个状态上成立，取期望得到式~\eqref{eq:anchor}。
+
+\subsection{规则结构：从 256 个 self-dual 规则到 14 个类型}
+\begin{lemma}[四变量单调 self-dual 规则的完整分类]
+四变量单调 self-dual 布尔规则恰好有 12 条，即 4 个独裁、
+4 个三模型多数和 4 个权重 $(2,1,1,1)$ 的锚点多数。
+所有无平局有符号线性阈值规则则恰好有 104 条，
+按模型编号置换分成 14 种类型。
+\end{lemma}
+\begin{proof}
+若单个模型出错即可导致失败，则单调性及 self-dual 性质强制该模型独裁。
+否则所有单模型集合均不失败，所有三模型集合均失败；
+只需对三对互补的二模型集合各选一侧为失败侧，有 $2^3=8$ 种选择。
+得到的三条获胜边两两相交，因而只能组成星形或三角形，
+分别对应四个锚点规则及四个三人多数规则，得到 12 条。
+对于任意有符号线性阈值，翻转所有负权重对应的输入坐标，
+即变成非负权重的单调 self-dual 阈值规则。
+反向对 12 条基本规则作有效输入翻转，独裁有 $4\cdot2=8$ 条，
+三模型多数有 $4\cdot2^3=32$ 条，锚点规则有 $4\cdot2^4=64$ 条；
+三类彼此不同，总计 104 条。
+三种情形按权重符号数分类，置换轨道数分别为 $2,4,8$，合计 14。
+\end{proof}
+
+\subsection{下界：262 个极点的完整整数枚举与 Farkas 认证}
+四变量的固定规则对偶包含 11 个系数（1 个常数、4 个线性系数、6 个非负二次系数），
+对应 16 条状态约束和 6 条非负性约束，即
+\[
+\mathcal D_F=\{z\in\mathbb R^{11}:A z\ge h_F\},
+\qquad A\in\{0,1\}^{22\times11}.
+\]
+它无直线，每个极点均由 11 条线性无关活跃约束确定。
+对每个置换类型，使用\emph{精确整数} Bareiss 消元穷尽
+$\binom{22}{11}=705432$ 个活跃基组合，并检查全部 22 条原约束。
+分类结果如下：
+\begin{center}\begin{tabular}{lrrr}\toprule
+规则类型 & 轨道数 & 各轨道极点数 & 极点出现次数\\\midrule
+有符号独裁 & 2 & $1$ & $2$\\
+有符号三人多数 & 4 & $17$ & $68$\\
+正锚点 $(+2,\pm1,\pm1,\pm1)$ & 4 & $23,32,23,18$ & $96$\\
+负锚点 $(-2,\pm1,\pm1,\pm1)$ & 4 & $18,23,32,23$ & $96$\\\midrule
+合计 & $14$ & & $262$\\\bottomrule\end{tabular}\end{center}
+
+为证明这些极点不可能使最坏风险小于式~\eqref{eq:k4}，
+记右侧 12 个仿射项为 $L_{C_1},\ldots,L_{C_{12}}$；对任意极点 $V$，
+在\emph{全部可行的四模型矩参数域}上考虑
+\begin{equation}\label{eq:delta}
+\Delta(V)=\max_{(q,b)\ \mathrm{feasible},\ q_i\le1/2}
+\min_{j=1}^{12}\{L_{C_j}(q,b)-L_V(q,b)\}.
+\end{equation}
+将 $(q,b)$ 写成联合分布 $\pi\in\mathbb R_{\ge0}^{16}$ 与上界 $b\in\mathbb R_{\ge0}^{6}$，
+加入自由变量 $t$ 及 $t\le L_{C_j}-L_V$，可将~\eqref{eq:delta}
+精确转化为一个含 23 个变量、34 条不等式的 LP。
+
+对全部 262 个极点，分别构造并\emph{精确有理数验证}了该 LP 的
+Farkas 对偶证书：令 $Gz\le h$ 是全部 34 条不等式、
+$e^\top z=1$ 表示联合分布归一化，目标为最小化 $-t$；
+存在 $\lambda\ge0$、$\mu\in\mathbb Q$，满足
+\[
+- e_t+G^\top\lambda+\mu e\ge0
+\quad(\text{22 个非负变量坐标}),\qquad
+(- e_t+G^\top\lambda+\mu e)_t=0,
+\]
+以及
+\begin{equation}\label{eq:farkas}
+-\lambda^\top h-\mu\ge0.
+\end{equation}
+故每个极点都满足 $\Delta(V)\le0$。证明数据包含
+262 份独立的有理乘子见证；附录中的验证器按 \texttt{Fraction} 精确核查
+每个坐标及目标值。
+
+最后，由多面体的顶点--衰退锥分解，任意 $Q\in\mathcal D_F$ 都是
+这些顶点的凸组合加上一个衰退方向。由于原始矩约束可行，
+衰退方向的矩目标非负，因而 $L_Q\ge\min_{j\le12}L_{C_j}$。
+再对全部必要的 104 条阈值规则取最小，得到
+$\Rstar{4}\ge\min_jL_{C_j}$。结合上界，定理~\ref{thm:k4} 得证。
+\begin{remark}
+上述计算机辅助步骤不是数值证据：活跃基枚举只作整数四则运算与整除，
+Farkas 检查使用精确有理数；\texttt{scipy} 仅曾用于寻找候选乘子，
+最终核验完全不依赖浮点运算或优化软件。
+\end{remark}
+
+\section{解析降维：五变量交互孤立点的完整消元}
+\begin{lemma}[孤立交互变量消元]
+设某个合法 $K$ 变量证书中 $\gamma_{ij}=0$ 对所有 $j\ne i$，
+且 $q_i<1/2$。则该整类证书的最优目标恰等于
+\begin{equation}\label{eq:isol}
+\inf_{Q:\,i\ \mathrm{isolated}}L_Q
+=\min\{q_i,\Rstar{K-1}(q_{-i},b_{-i})\}.
+\end{equation}
+\end{lemma}
+\begin{proof}
+写 $Q(x_i,y)=A(y)+\beta_i x_i$。
+若 $\beta_i<0$，将证书输入中的 $x_i$ 换成 $1-x_i$，
+其约束不变且目标变化量为 $\beta_i(1-2q_i)<0$；
+故可假设 $\beta_i\ge0$。
+若 $\beta_i\ge1$，由 $A(y)\ge0$ 和矩约束可行性，
+$L_Q=L_A+\beta_iq_i\ge q_i$。
+若 $0\le\beta_i<1$，两对互补条件迫使
+$\max\{A(y),A(\mathbf1-y)\}\ge1-\beta_i$，
+所以 $A/(1-\beta_i)$ 是合法的低维二次证书，从而
+$L_Q\ge(1-\beta_i)\Rstar{K-1}+\beta_iq_i
+\ge\min(q_i,\Rstar{K-1})$。
+独裁 $x_i$ 及从 $K-1$ 维提升的任意最优证书分别给出反向不等式。
+\end{proof}
+
+\begin{corollary}[全部四变量及以下交互支撑已被显式证书覆盖]
+在异质 $K=5$ 中，设二次系数支撑图的某个顶点孤立。
+则该证书的目标必不小于
+\[
+U_{47}(q,b)=\min\left\{
+\underbrace{\min_{i\in[5]}q_i}_{5\ \mathrm{项}},\ 
+\underbrace{\min_{C\in\odd(K_5)}\sum_{e\in C}b_e}_{22\ \mathrm{项}},\
+\underbrace{\min_{\substack{T\subset[5],\,|T|=4\\r\in T}}H_{T,r}(q,b)}_{20\ \mathrm{项}}
+\right\}.
+\]
+因此全部此类证书在完整 minimax 问题中可由 $U_{47}$ 的
+47 个显式项覆盖。该命题覆盖任意实系数、正截距与负一阶系数。
+\end{corollary}
+\begin{proof}
+孤立变量消元将目标降到剩余四个模型的精确 minimax 值，
+直接代入定理~\ref{thm:k4}；四模型三角形项已经包含在
+$K_5$ 的 22 个奇环项中。若原来有多个孤立顶点，任取一个即可。
+\end{proof}
+
+\section{五模型精确分解与尚待证明的核心}
+引用此前已证明的两项结果：零截距图证书等于 $K_5$ 最便宜奇环代价，
+以及当 $q_i<1/2$ 时，任意二分图二次支撑证书都不优于 $q_{\min}$。
+将其与上节的降维结论结合，令 $\mathcal V_{5,\mathrm{span,odd}}^+$ 表示
+此前构造的\emph{参数无关、有限的有理对偶极点全集}中满足
+$Q(0)>0$、二次交互图覆盖全部五顶点且非二分的元素，得到
+\begin{equation}\label{eq:k5decomp}
+\boxed{
+\Rstar{5}(q,b)=\min\left\{
+U_{47}(q,b),\ 
+\min_{V\in\mathcal V_{5,\mathrm{span,odd}}^+}L_V(q,b)
+\right\}.}
+\end{equation}
+对每个可行的 $0<q_i<1/2$ 参数都成立。
+这\emph{仍是有限但尚不简洁的}精确表示，不是 $U_{47}$ 完整性的断言。
+
+在五顶点的 $2^{10}=1024$ 种标号交互图中，二分图为 376 种；
+非二分且恰好支撑三个顶点的为 10 种，支撑四个顶点的为 95 种，
+覆盖全部五个顶点的为 543 种。后者按模型置换仅有\textbf{17 种无标号图结构}。
+因此本轮使\emph{全部}原来尚待处理的四顶点非二分交互图，也获得了
+严格的实系数完整性处理。今后的任务集中在式~\eqref{eq:k5decomp}
+最后的五顶点核心，不应再对四变量支撑重复搜索经验公式。
+
+\subsection{四变量锚点项在 $K=5$ 的高精度区域内不可省略}
+取 $p\in(1/3,1/2)$。令 $X_0=X_4$，并定义联合错误分布：
+以概率 $p$ 仅有模型 $0$ 与 $4$ 出错；
+以概率 $(1-p)/3$，在模型 $1,2,3$ 的三个可能二元错误集合中各选一种，
+模型 $0,4$ 均正确。其边际为
+\[
+q_0=q_4=p,\quad
+q_1=q_2=q_3=\frac{2(1-p)}3,\qquad
+\sum_{i=0}^4q_i=2.
+\]
+恰好取真实共同错误概率作为 $b$，则
+$\ b_{0j}=b_{4j}=0$（$j=1,2,3$），
+$b_{04}=p$，
+$b_{12}=b_{13}=b_{23}=(1-p)/3$。
+满足 $0<q_i<1/2$ 且
+$\sum_iq_i-3q_{\min}<1$，故严格位于区域 $R$。
+但四模型锚点 $(T,r)=(\{0,1,2,3\},0)$ 的证书期望为
+\[
+H_{T,0}=1-(2-p)+(1-p)=0.
+\]
+所以完整五模型 minimax 错误率\emph{严格等于零}；
+另一方面所有 $q_i>0$，22 条奇环的边代价也全部 $>0$。
+该有理参数族说明，四模型锚点家族不能整体被独裁或奇环族替代。
+
+\section{最终结论及验证方法}
+\begin{itemize}
+\item 已\textbf{严格完成}异质 $K=4$ 的 12 项闭式及全部实系数对偶极点的完备支配性证明。
+\item 已\textbf{严格消去}异质 $K=5$ 所有含孤立交互顶点的证书；
+主问题现在可以使用 47 项显式基底，加上仅 17 种图结构的真正五变量正截距极点全集。
+\item \textbf{未证明}这 47 项已经覆盖全部五变量核心，亦未证明
+$U_{188}$ 或其他有限小表的完整性。
+\end{itemize}
+核心证明材料是 14 类的精确顶点表（262 个，JSON）、
+262 份有理 Farkas 对偶证书（JSON），以及下面的两段完整验证代码。
+执行方式：\texttt{python D2\_K4\_exact\_closed\_form\_verify.py --rebuild}。
+没有 \texttt{--rebuild} 参数时仅用 Python 标准库检查全部 262 份有理证书；
+加上该参数，则会编译 C++ 并逐类重做约 988 万个精确活跃基的穷举，
+与存档顶点表逐项比较。\textbf{所有证明均可独立复验而无浮点容差。}
+
+\appendix
+\section{完全整数运算的对偶极点枚举程序（C++17）}
+\begin{lstlisting}[language=C++]
+// Exhaust all C(22,11)=705432 active bases of the K=4 anchor-rule LP dual.
+// Fraction-free Bareiss elimination and exact integer feasibility tests.
+// Compile: g++ -O3 -std=c++17 D2_K4_anchor_all_vertices_exact.cpp -o k4_vertices
+// Run: ./k4_vertices
+#include <array>
+#include <set>
+#include <vector>
+#include <cstdint>
+#include <iostream>
+#include <numeric>
+#include <cassert>
+using i64=long long;
+using i128=__int128_t;
+using Vec=std::array<i64,12>;
+constexpr int N=11, M=22;
+std::array<Vec,M> rows;
+std::array<int,N> chosen;
+std::set<std::array<i64,N+1>> vertices; // common positive denominator plus 11 numerators
+long long all_bases=0,nonsingular_bases=0,feasible_bases=0;
+
+void solve_basis(){
+    ++all_bases;
+    i64 T[N][N+1];
+    for(int i=0;i<N;i++) for(int j=0;j<=N;j++) T[i][j]=rows[chosen[i]][j];
+    i64 previous=1;
+    for(int k=0;k<N;k++){
+        int pivot=k;
+        while(pivot<N && T[pivot][k]==0) ++pivot;
+        if(pivot==N) return;
+        if(pivot!=k) for(int j=k;j<=N;j++) std::swap(T[k][j],T[pivot][j]);
+        i64 d=T[k][k];
+        if(k<N-1){
+            for(int i=k+1;i<N;i++){
+                for(int j=k+1;j<=N;j++){
+                    i128 num=(i128)T[i][j]*d-(i128)T[i][k]*T[k][j];
+                    assert(num%previous==0);
+                    i128 v=num/previous;
+                    assert(v>=INT64_MIN && v<=INT64_MAX);
+                    T[i][j]=(i64)v;
+                }
+                T[i][k]=0;
+            }
+        }
+        previous=d;
+    }
+    ++nonsingular_bases;
+    i64 denom=T[N-1][N-1];
+    i64 numer[N];
+    for(int j=N-1;j>=0;j--){
+        i128 val=(i128)T[j][N]*denom;
+        for(int k=j+1;k<N;k++) val-=(i128)T[j][k]*numer[k];
+        assert(val%T[j][j]==0);
+        val/=T[j][j];
+        assert(val>=INT64_MIN && val<=INT64_MAX);
+        numer[j]=(i64)val;
+    }
+    if(denom<0){denom=-denom;for(int j=0;j<N;j++)numer[j]=-numer[j];}
+    // Full dual feasibility with exact arithmetic.
+    for(int i=0;i<M;i++){
+        i128 lhs=0;
+        for(int j=0;j<N;j++)lhs+=(i128)rows[i][j]*numer[j];
+        if(lhs<(i128)rows[i][N]*denom)return;
+    }
+    ++feasible_bases;
+    i64 gcd=denom;
+    for(int j=0;j<N;j++)gcd=std::gcd(gcd,numer[j]);
+    std::array<i64,N+1> key{};
+    key[0]=denom/gcd;
+    for(int j=0;j<N;j++)key[j+1]=numer[j]/gcd;
+    vertices.insert(key);
+}
+void combinations(int start,int pos){
+    if(pos==N){solve_basis();return;}
+    for(int i=start;i<=M-(N-pos);i++){
+        chosen[pos]=i;combinations(i+1,pos+1);
+    }
+}
+int main(int argc,char**argv){
+    int w[4]={2,1,1,1};
+    if(argc==5)for(int j=0;j<4;j++)w[j]=std::stoi(argv[j+1]);
+    // Variables a,beta_0..beta_3,gamma_01,gamma_02,gamma_03,
+    // gamma_12,gamma_13,gamma_23.
+    constexpr int e1[6]={0,0,0,1,1,2};
+    constexpr int e2[6]={1,2,3,2,3,3};
+    for(int mask=0;mask<16;mask++){
+        auto &r=rows[mask];r.fill(0);r[0]=1;
+        int x[4];for(int i=0;i<4;i++){x[i]=(mask>>i)&1;r[1+i]=x[i];}
+        for(int k=0;k<6;k++)r[5+k]=x[e1[k]]*x[e2[k]];
+        int score=0;for(int i=0;i<4;i++)score+=w[i]*(2*x[i]-1);
+        assert(score!=0);r[11]=(score>0)?1:0;
+    }
+    for(int k=0;k<6;k++){
+        auto &r=rows[16+k];r.fill(0);r[5+k]=1;
+    }
+    combinations(0,0);
+    std::cout<<"total_bases "<<all_bases<<" nonsingular "<<nonsingular_bases
+             <<" feasible_bases "<<feasible_bases<<" distinct_vertices "<<vertices.size()<<"\n";
+    assert(all_bases==705432);
+    for(auto const &v:vertices){
+        for(int i=0;i<N+1;i++) std::cout<<(i?" ":"")<<v[i];
+        std::cout<<"\n";
+    }
+}
+\end{lstlisting}
+\section{有理数 Farkas 证书检查及穷举比对（Python 3）}
+\begin{lstlisting}[language=Python]
+"""Self-contained rational certificate verifier for the heterogeneous K=4
+closed form, using the finite vertex atlas and 262 Farkas certificates.
+
+Usage: python D2_K4_exact_closed_form_verify.py
+Optional: python D2_K4_exact_closed_form_verify.py --rebuild
+The optional rebuild uses g++ to exhaust 705432 exact bases per orbit.
+Requirements: Python standard library; g++ for optional --rebuild.
+"""
+import json,itertools,subprocess,sys,tempfile
+from pathlib import Path
+from fractions import Fraction as F
+ROOT=Path(__file__).resolve().parent
+ATLAS=json.loads((ROOT/'D2_K4_all_signed_vertex_atlas.json').read_text())
+WITNESS=json.loads((ROOT/'D2_K4_12term_Farkas_exact.json').read_text())
+E=list(itertools.combinations(range(4),2))
+X=[[int((m>>i)&1) for i in range(4)] for m in range(16)]
+D=23
+
+# Exact dual constraints: Q_z(x)>=F(x), gamma_ij >=0.
+A=[[1,*x,*(x[i]*x[j] for i,j in E)] for x in X]
+A += [[0]*5+[int(k==j) for k in range(6)] for j in range(6)]
+C=[]
+for i in range(4):
+ c=[0]*11;c[1+i]=1;C.append(c)
+for T in itertools.combinations(range(4),3):
+ c=[0]*11
+ for e in itertools.combinations(T,2):c[5+E.index(e)]=1
+ C.append(c)
+for r in range(4):
+ c=[1]+[-1]*4+[2 if r in e else 1 for e in E]
+ C.append(c)
+assert len(C)==12 and len(A)==22
+
+# Param domain x=(pi[16], b[6], t): pi>=0, b>=0,
+# q=X^T pi <= 1/2, E[XiXj] <= b_ij <= min(q_i,q_j).
+G=[];h=[]
+for k,(i,j) in enumerate(E):
+ for v in (i,j):
+  z=[0]*D
+  for m in range(16):z[m]=-X[m][v]
+  z[16+k]=1;G.append(z);h.append(F(0))
+ z=[0]*D
+ for m in range(16):z[m]=X[m][i]*X[m][j]
+ z[16+k]=-1;G.append(z);h.append(F(0))
+for i in range(4):
+ z=[0]*D
+ for m in range(16):z[m]=X[m][i]
+ G.append(z);h.append(F(1,2))
+assert len(G)==22
+
+def rational(s):return F(s)
+
+def audit_record(rec):
+ w=tuple(map(int,rec['w'].split(',')))
+ den,*nn=rec['v']; v=[F(n,den) for n in nn]
+ f=[int(sum(w[i]*(2*x[i]-1) for i in range(4))>0) for x in X]+[0]*6
+ assert all(sum(F(a)*z for a,z in zip(row,v))>=rhs for row,rhs in zip(A,f))
+ assert den>0
+ # Add t<=L_C-L_V constraints to parameter polytope.
+ rows=[list(map(F,z)) for z in G];hs=h.copy()
+ for c in C:
+  d=[F(u)-zz for u,zz in zip(c,v)]
+  z=[F(0)]*D
+  for m in range(16):z[m]=-sum(X[m][i]*d[1+i] for i in range(4))
+  for k in range(6):z[16+k]=-d[5+k]
+  z[22]=1
+  rows.append(z);hs.append(d[0])
+ assert len(rows)==34
+ lamb=[F(0)]*34
+ for i,s in rec['lam']:
+  assert lamb[i]==0
+  lamb[i]=rational(s)
+ mu=rational(rec['mu'])
+ assert all(z>=0 for z in lamb)
+ # Stationarity for min (-t); pi,b>=0, t free.
+ reduced=[F(int(j==22)*-1) for j in range(D)]
+ for i,z in enumerate(lamb):
+  if z:
+   for j in range(D):reduced[j]+=z*rows[i][j]
+ for j in range(16):reduced[j]+=mu
+ assert all(z>=0 for z in reduced[:22])
+ assert reduced[22]==0
+ bound=-sum(a*b for a,b in zip(lamb,hs))-mu
+ assert bound==rational(rec['bound'])>=0
+ return (rec['w'],tuple(rec['v']))
+
+seen=set()
+for rec in WITNESS:
+ key=audit_record(rec)
+ assert key not in seen
+ seen.add(key)
+all_keys={(w,tuple(v)) for w,vertices in ATLAS.items() for v in vertices}
+assert seen==all_keys
+assert len(seen)==262 and len(ATLAS)==14
+print('PASS: 262/262 exact rational Farkas inequalities; all 14 rule orbits')
+
+# Independent exact basis enumeration, if requested.
+if '--rebuild' in sys.argv:
+ src=ROOT/'D2_K4_all_signed_rule_vertices_exact.cpp'
+ with tempfile.TemporaryDirectory() as tmp:
+  exe=Path(tmp)/'enumerate'
+  subprocess.run(['g++','-O3','-std=c++17',str(src),'-o',str(exe)],check=True)
+  for w,verts in ATLAS.items():
+   p=subprocess.run([str(exe),*w.split(',')],check=True,capture_output=True,text=True)
+   lines=p.stdout.splitlines()
+   assert 'total_bases 705432 ' in lines[0]
+   assert set(tuple(map(int,z.split())) for z in lines[1:])==set(tuple(v) for v in verts)
+ print('PASS: independently rebuilt all 14 exact vertex atlases (14*705432 bases)')
+print('THEOREM: R*_det,K4=min(q_i, triangle b-sums, H_r), all feasible q_i<1/2')
+\end{lstlisting}
+\end{document}

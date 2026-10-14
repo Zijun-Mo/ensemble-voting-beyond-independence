@@ -1,0 +1,23 @@
+{
+  "finiteK_closed_form_max_err": {
+    "3": 1.3495107250857271e-07,
+    "5": 4.3318271192305247e-10,
+    "7": 9.992007221626409e-16,
+    "11": 1.6930901125533637e-15,
+    "21": 1.4710455076283324e-15,
+    "101": 4.440892098500626e-16
+  },
+  "poly_3w_minus_2w2_minus_indicator_min": 0.0,
+  "weighted_K3_closed_form_max_err": 9.992007221626409e-16,
+  "weighted_K3_continuum_minus_sharp_mean": 0.05218308969969353,
+  "weighted_K5_closed_form_max_err": 1.6653345369377348e-15,
+  "weighted_K5_continuum_minus_sharp_mean": 0.03727038647211962,
+  "K3_D_identity_max_err": 6.661338147750939e-16,
+  "K3_tandem_rule_agree_of_2000": 2000,
+  "K5_subset_majority_vs_K3_closed_form_max_diff": 4.440892098500626e-16,
+  "K5_subset_majority_frac_equal": 1.0,
+  "BF_sym_minus_randselfdual_maxabs": 1.1102230246251565e-15,
+  "BF_truephi_minus_randselfdual_mean": -1.3877787807814457e-17,
+  "BF_truephi_minus_randselfdual_max": 1.6653345369377348e-15,
+  "BF_truephi_frac_strict_gain": 0.0
+}

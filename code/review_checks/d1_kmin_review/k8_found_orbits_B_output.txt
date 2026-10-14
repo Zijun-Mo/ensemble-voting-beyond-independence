@@ -1,0 +1,23 @@
+user vector denom4: exact feasible=True, exact tight rank=28/28
+user vector d5_I: exact feasible=True, exact tight rank=28/28
+user vector d5_II: exact feasible=True, exact tight rank=28/28
+orbits found so far: 23  unexpanded: 15
+den 3  zero edges 2 NON-matching  min positive 1/3  expanded=True                               B=1.000000000 dual=1.000000000
+den 3  zero edges 1 matching  min positive 1/3  expanded=True   canonical b*(8,1)/3         B=1.000000000 dual=1.000000000
+den 3  zero edges 3 NON-matching  min positive 1/3  expanded=True                               B=1.000000000 dual=1.000000000
+den 3  zero edges 3 NON-matching  min positive 1/3  expanded=True                               B=1.000000000 dual=1.000000000
+den 3  zero edges 2 matching  min positive 1/3  expanded=True   canonical b*(8,2)/3         B=1.000000000 dual=1.000000000
+den 3  zero edges 0 matching  min positive 1/3  expanded=False   canonical b*(8,0)/3         B=1.000000000 dual=1.000000000
+den 3  zero edges 4 NON-matching  min positive 1/3  expanded=False                               B=1.000000000 dual=1.000000000
+den 3  zero edges 3 NON-matching  min positive 1/3  expanded=False                               B=1.000000000 dual=1.000000000
+den 3  zero edges 3 NON-matching  min positive 1/3  expanded=False                               B=1.000000000 dual=1.000000000
+den 3  zero edges 2 NON-matching  min positive 1/3  expanded=False                               B=1.000000000 dual=1.000000000
+den 5  zero edges 1 matching  min positive 1/5  expanded=False                               B=1.000000000 dual=1.000000000
+den 5  zero edges 1 matching  min positive 1/5  expanded=False                               B=1.000000000 dual=1.000000000
+den 3  zero edges 3 matching  min positive 1/3  expanded=False   canonical b*(8,3)/3         B=1.000000000 dual=1.000000000
+den 4  zero edges 1 matching  min positive 1/4  expanded=False  denom4                       B=1.000000000 dual=1.000000000
+den 7  zero edges 0 matching  min positive 1/7  expanded=False                               B=1.000000000 dual=1.000000000
+den 5  zero edges 0 matching  min positive 1/5  expanded=False  d5_II                        B=1.000000000 dual=1.000000000
+den 3  zero edges 1 matching  min positive 1/3  expanded=False                               B=1.000000000 dual=1.000000000
+den 5  zero edges 0 matching  min positive 1/5  expanded=False  d5_I                         B=1.000000000 dual=1.000000000
+den 6  zero edges 1 matching  min positive 1/6  expanded=False                               B=1.000000000 dual=1.000000000

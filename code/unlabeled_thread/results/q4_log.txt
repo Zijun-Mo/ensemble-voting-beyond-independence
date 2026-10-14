@@ -1,0 +1,96 @@
+breast_cancer: 30 reps in 61s (n=569, n_lab=57, n_unl=142, n_test=143)
+digits_even_odd: 30 reps in 69s (n=1797, n_lab=180, n_unl=449, n_test=450)
+synthetic_corr: 30 reps in 88s (n=6000, n_lab=600, n_unl=1500, n_test=1500)
+moons_noisy: 30 reps in 70s (n=4000, n_lab=400, n_unl=1000, n_test=1000)
+
+=== breast_cancer === p_test mean [0.9744, 0.9427, 0.9291, 0.9585, 0.9538]; slack t_pw 0.0112 t_full 0.0135; eps {'eps_p': np.float64(0.22925249519597118), 'eps_a': np.float64(0.1534189207310081), 'eps_m': np.float64(0.46681949048689)}
+   best_single(val)     0.9662 +- 0.0169
+   majority             0.9611 +- 0.0175
+   logodds              0.9611 +- 0.0175
+   maxmin_pw_plug       0.9643 +- 0.0165
+   maxmin_full_plug     0.9653 +- 0.0160
+   maxmin_pw_conf       0.9627 +- 0.0188
+   maxmin_full_conf     0.9662 +- 0.0175
+   oracle_rule(test)    0.9786 +- 0.0120
+   dictator freq: pw_plug 0.77, full_plug 0.67; logodds==majority 1.00
+   interval maj_pw_plug      coverage 0.60  width 0.0395  test-lower 0.0192
+   interval lo_pw_plug       coverage 0.60  width 0.0395  test-lower 0.0192
+   interval rob_pw_plug      coverage 0.03  width 0.0042  test-lower -0.0114
+   interval maj_full_plug    coverage 0.23  width 0.0133  test-lower 0.0050
+   interval lo_full_plug     coverage 0.23  width 0.0133  test-lower 0.0050
+   interval rob_full_plug    coverage 0.07  width 0.0041  test-lower -0.0098
+   interval maj_pw_conf      coverage 1.00  width 0.3973  test-lower 0.3584
+   interval lo_pw_conf       coverage 1.00  width 0.3973  test-lower 0.3584
+   interval rob_pw_conf      coverage 1.00  width 0.2439  test-lower 0.2066
+   interval maj_full_conf    coverage 1.00  width 0.3929  test-lower 0.3540
+   interval lo_full_conf     coverage 1.00  width 0.3929  test-lower 0.3540
+   interval rob_full_conf    coverage 1.00  width 0.2439  test-lower 0.2101
+
+=== digits_even_odd === p_test mean [0.9111, 0.6472, 0.8744, 0.9748, 0.9428]; slack t_pw 0.0072 t_full 0.0089; eps {'eps_p': np.float64(0.129007585340165), 'eps_a': np.float64(0.08627797133776544), 'eps_m': np.float64(0.26252458580878135)}
+   best_single(val)     0.9748 +- 0.0076
+   majority             0.9484 +- 0.0126
+   logodds              0.9601 +- 0.0101
+   maxmin_pw_plug       0.9714 +- 0.0111
+   maxmin_full_plug     0.9715 +- 0.0123
+   maxmin_pw_conf       0.9737 +- 0.0091
+   maxmin_full_conf     0.9737 +- 0.0091
+   oracle_rule(test)    0.9765 +- 0.0071
+   dictator freq: pw_plug 0.90, full_plug 0.83; logodds==majority 0.00
+   interval maj_pw_plug      coverage 0.77  width 0.0728  test-lower 0.0454
+   interval lo_pw_plug       coverage 0.77  width 0.0451  test-lower 0.0279
+   interval rob_pw_plug      coverage 0.07  width 0.0022  test-lower 0.0042
+   interval maj_full_plug    coverage 0.27  width 0.0187  test-lower 0.0184
+   interval lo_full_plug     coverage 0.47  width 0.0173  test-lower 0.0190
+   interval rob_full_plug    coverage 0.07  width 0.0025  test-lower 0.0049
+   interval maj_pw_conf      coverage 1.00  width 0.3314  test-lower 0.2798
+   interval lo_pw_conf       coverage 1.00  width 0.2429  test-lower 0.2030
+   interval rob_pw_conf      coverage 1.00  width 0.1547  test-lower 0.1285
+   interval maj_full_conf    coverage 1.00  width 0.3190  test-lower 0.2674
+   interval lo_full_conf     coverage 1.00  width 0.2652  test-lower 0.2253
+   interval rob_full_conf    coverage 1.00  width 0.1547  test-lower 0.1285
+
+=== synthetic_corr === p_test mean [0.6293, 0.676, 0.7131, 0.7752, 0.7914]; slack t_pw 0.0000 t_full 0.0000; eps {'eps_p': np.float64(0.07066036458008114), 'eps_a': np.float64(0.04720385481316798), 'eps_m': np.float64(0.14363078131370594)}
+   best_single(val)     0.7901 +- 0.0140
+   majority             0.7556 +- 0.0172
+   logodds              0.7778 +- 0.0140
+   maxmin_pw_plug       0.7906 +- 0.0142
+   maxmin_full_plug     0.7906 +- 0.0142
+   maxmin_pw_conf       0.7906 +- 0.0142
+   maxmin_full_conf     0.7906 +- 0.0142
+   oracle_rule(test)    0.7945 +- 0.0120
+   dictator freq: pw_plug 1.00, full_plug 1.00; logodds==majority 0.00
+   interval maj_pw_plug      coverage 1.00  width 0.1835  test-lower 0.0849
+   interval lo_pw_plug       coverage 1.00  width 0.1489  test-lower 0.0665
+   interval rob_pw_plug      coverage 0.03  width 0.0000  test-lower -0.0048
+   interval maj_full_plug    coverage 1.00  width 0.1074  test-lower 0.0556
+   interval lo_full_plug     coverage 0.93  width 0.1015  test-lower 0.0421
+   interval rob_full_plug    coverage 0.03  width 0.0000  test-lower -0.0048
+   interval maj_pw_conf      coverage 1.00  width 0.4636  test-lower 0.2541
+   interval lo_pw_conf       coverage 1.00  width 0.3505  test-lower 0.1688
+   interval rob_pw_conf      coverage 1.00  width 0.1413  test-lower 0.0658
+   interval maj_full_conf    coverage 1.00  width 0.3875  test-lower 0.1981
+   interval lo_full_conf     coverage 1.00  width 0.3597  test-lower 0.1755
+   interval rob_full_conf    coverage 1.00  width 0.1413  test-lower 0.0658
+
+=== moons_noisy === p_test mean [0.85, 0.8267, 0.8734, 0.8619, 0.875]; slack t_pw 0.0000 t_full 0.0000; eps {'eps_p': np.float64(0.08654091913011426), 'eps_a': np.float64(0.05781267909234066), 'eps_m': np.float64(0.1759110627879282)}
+   best_single(val)     0.8726 +- 0.0095
+   majority             0.8699 +- 0.0081
+   logodds              0.8699 +- 0.0081
+   maxmin_pw_plug       0.8727 +- 0.0095
+   maxmin_full_plug     0.8724 +- 0.0096
+   maxmin_pw_conf       0.8728 +- 0.0095
+   maxmin_full_conf     0.8724 +- 0.0096
+   oracle_rule(test)    0.8774 +- 0.0074
+   dictator freq: pw_plug 1.00, full_plug 1.00; logodds==majority 1.00
+   interval maj_pw_plug      coverage 0.83  width 0.0377  test-lower 0.0164
+   interval lo_pw_plug       coverage 0.83  width 0.0377  test-lower 0.0164
+   interval rob_pw_plug      coverage 0.00  width 0.0000  test-lower -0.0059
+   interval maj_full_plug    coverage 0.60  width 0.0234  test-lower 0.0108
+   interval lo_full_plug     coverage 0.60  width 0.0234  test-lower 0.0108
+   interval rob_full_plug    coverage 0.00  width 0.0000  test-lower -0.0062
+   interval maj_pw_conf      coverage 1.00  width 0.3047  test-lower 0.1746
+   interval lo_pw_conf       coverage 1.00  width 0.3047  test-lower 0.1746
+   interval rob_pw_conf      coverage 1.00  width 0.1731  test-lower 0.0808
+   interval maj_full_conf    coverage 1.00  width 0.3044  test-lower 0.1743
+   interval lo_full_conf     coverage 1.00  width 0.3044  test-lower 0.1743
+   interval rob_full_conf    coverage 1.00  width 0.1731  test-lower 0.0804

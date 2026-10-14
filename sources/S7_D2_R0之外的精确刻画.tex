@@ -1,0 +1,565 @@
+% -*- coding: utf-8 -*-
+% D2 research notes -- fully self-contained LaTeX source, including the Python code.
+% Compile with: xelatex -interaction=nonstopmode D2_robust_voting_certificates_full.tex
+\documentclass[11pt,a4paper]{ctexart}
+\usepackage[margin=24mm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{booktabs,tabularx,longtable,array}
+\usepackage{microtype,enumitem,xcolor,hyperref,fancyhdr}
+\usepackage{fvextra}
+\DefineVerbatimEnvironment{CodeListing}{Verbatim}{fontsize=\footnotesize,breaklines=true,breakanywhere=true,frame=single,framesep=2mm}
+\hypersetup{colorlinks=true,urlcolor=blue!55!black,linkcolor=blue!50!black,citecolor=blue!55!black}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.2em}
+\setlist{topsep=0.3em,itemsep=0.2em}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small D2：超出 $R_0$ 的稳健投票证书}
+\fancyhead[R]{\small 数学与计算机辅助证明}
+\fancyfoot[C]{\thepage}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{proposition}[theorem]{命题}
+\newtheorem{corollary}[theorem]{推论}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{定义}
+\newtheorem{remark}[theorem]{说明}
+\newcommand{\Pset}{\mathcal P}
+\newcommand{\Qset}{\mathcal Q}
+\newcommand{\Risk}{\mathsf R}
+\newcommand{\I}{\mathbf 1}
+\newcommand{\bbone}{\mathbf 1}
+\newcommand{\GG}{\mathcal G}
+\newcommand{\E}{\mathbb E}
+\newcommand{\Prb}{\mathbb P}
+\newenvironment{proofzh}{\par\noindent\textbf{证明.}\ }{\hfill$\square$\par}
+\begin{document}
+\begin{center}
+{\LARGE\bfseries D2：$R_0$ 之外的稳健投票精确刻画}\\[7pt]
+{\large 图证书、平移二项矩界、对称 $K=5$ 闭式和异质 MILP}\\[8pt]
+{\normalsize 研究成果整理与可复现代码附录 \quad 2026 年 10 月 13 日}
+\end{center}
+
+\begin{abstract}
+\sloppy
+研究 $K$ 个二元分类器的确定性 self-dual minimax 集成投票：已知单个模型错误概率 $q_i$，并仅掌握成对共同出错概率的上界 $b_{ij}$。前期已证明图证书在 $R_0=\{\sum_iq_i\le1\}$ 中精确，但 $R_0$ 以外无法丢掉二次对偶中的常数项与负一阶系数。本 D2 阶段得到：\textbf{（1）} 完全对称的 $K=5$ 模型具有闭式
+\[
+\Risk_{\rm det}^*(q,b)=\min\{q,3b,1-5q+10b\},
+\]
+以关键顶点上覆盖全部 65,536 个 self-dual 布尔规则的精确有理数证书构成\textbf{计算机辅助证明}；\textbf{（2）} 为异质 $K=5$ 给出使用 16 个二元变量与 16 个连续变量、无 big-$M$ 的精确 MILP 数学表述；\textbf{（3）} 给出适用于奇数子集的平移二阶矩上界、图证书的统一候选族及其严谨的适用边界。异质 $K=5$ 的简单闭式仍是猜想，不能把 MILP 的浮点吻合写成证明。
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{问题设定与 D2 的边界}
+对二元分类器记错误指标 $X_i=\I\{f_i(X)\neq Y\}\in\{0,1\}$，令
+\[
+q_i=\Prb(X_i=1)=1-p_i,\qquad 0<q_i<\tfrac12,
+\qquad b_{ij}=\min\{\bar e_{ij},q_i,q_j\}.
+\]
+允许的联合错误分布模糊集为
+\begin{equation}\label{eq:P}
+\Pset(q,b)=\Bigl\{\pi\ge0:\ \sum_{x\in\{0,1\}^K}\pi_x=1,\quad
+\sum_x x_i\pi_x=q_i,\quad
+\sum_xx_ix_j\pi_x\le b_{ij}\ (i<j)\Bigr\}.
+\end{equation}
+假定模糊集非空。确定性 self-dual 错误规则 $F:\{0,1\}^K\to\{0,1\}$ 满足
+\[
+F(x)+F(\bbone-x)=1.
+\]
+最优最坏错误率定义为
+\begin{equation}\label{eq:minimax}
+\Risk_{\rm det}^*:=\min_{F\text{ self-dual}}\max_{\pi\in\Pset(q,b)}\sum_xF(x)\pi_x.
+\end{equation}
+记 $q_{\min}=\min_iq_i$，高精度区域与其已证精确子区域分别为
+\[
+R:\ \sum_iq_i-(K-2)q_{\min}\le1,
+\qquad
+R_0:\ \sum_iq_i\le1.
+\]
+此前在 $R_0$ 中证明
+\begin{equation}\label{eq:R0}
+\Risk_{\rm det}^*=\min\{q_{\min},B_{\rm graph}\}.
+\end{equation}
+完整 $R$ 内的上述图证书等式已由对称 $K=5$ 解析反例否定。本报告\textbf{不重复主张}其对所有 $R$ 成立，而是研究额外的二阶矩项可以在多大范围内修正等式。
+
+\section{两类基本证书}
+\subsection{加权图证书与奇环多数}
+对完全图的边取非负权 $y_{ij}$，记
+\[
+y(E(S))=\sum_{\{i,j\}\subseteq S}y_{ij},\qquad
+g(y)=\min_{S\subseteq[K]}\max\{y(E(S)),y(E(S^c))\}.
+\]
+若 $g(y)>0$，令
+\begin{equation}\label{eq:Bgraph}
+B_{\rm graph}=\inf_{y\ge0:g(y)>0}\frac{\sum_{i<j}b_{ij}y_{ij}}{g(y)}.
+\end{equation}
+按 $w_i=\sum_{j\ne i}y_{ij}$ 分配加权多数权重，若错误侧拥有至少半数总权重，则错误侧内部边权至少为 $g(y)$。Markov 不等式于是给出
+\begin{equation}\label{eq:graphbound}
+\Risk_{\rm det}^*\le\min\{q_{\min},B_{\rm graph}\}.
+\end{equation}
+若 $y$ 是单个奇环的边指示向量，则 $g(y)=1$，上述表达退化为奇环共错上界和。对于 $K=5$，完全图的简单奇环只有 10 个三角形和 12 个五环，故
+\[
+c^*=\min_{\substack{C\text{ 为三角形或五环}}}\sum_{ij\in C}b_{ij}.
+\]
+其诱导的奇环多数也保证 $\Risk_{\rm det}^*\le c^*$。
+
+\subsection{奇数子集上的平移二阶矩证书}
+取奇数大小的子集 $S$，$|S|=2m+1$，$m\ge1$；记 $N_S=\sum_{i\in S}X_i$。该子集的简单多数失败当且仅当 $N_S\ge m+1$。对任意整数 $t\in\{0,1,\ldots,m-1\}$，下列多项式是逐点合法上界：
+\begin{equation}\label{eq:translated}
+\I\{N_S\ge m+1\}\le
+h_{m,t}(N_S):=\frac{(N_S-t)(N_S-t-1)}{(m+1-t)(m-t)}.
+\end{equation}
+\textbf{核查理由：} 分子是两个相邻整数的乘积，对整数 $N_S$ 始终非负；若 $N_S\ge m+1$，该乘积至少等于分母。利用
+\[
+N_S(N_S-1)=2\sum_{i<j\in S}X_iX_j
+\]
+得到上界
+\begin{equation}\label{eq:BPfamily}
+\boxed{\ B_{S,t}:=
+\frac{t(t+1)-2t\sum_{i\in S}q_i+2\sum_{i<j\in S}b_{ij}}
+{(m+1-t)(m-t)}.\ }
+\end{equation}
+此处 $\Risk(\mathrm{Maj}_S)\le B_{S,t}$；若有数个 $t$，取其中最小值。在 $m=2,t=1$ 时，$S$ 含五人，退化为
+\begin{equation}\label{eq:B5}
+B_{S,1}=1-\sum_{i\in S}q_i+\sum_{i<j\in S}b_{ij}.
+\end{equation}
+在 $m=1,t=0$ 时对应三人多数的三条边共错之和。
+
+\begin{remark}[文献归属]
+Boros--Pr\'{e}kopa \cite{BorosPrekopa1989} 研究的是 ``至少 $r$ 个事件发生'' 的概率在二项矩信息下的上下界。式~\eqref{eq:translated}--\eqref{eq:BPfamily} 是文中直接逐点证明的一组具体二次多项式证书，属于该经典二项矩方法的脉络；本文\textbf{不声称}这些是原论文全部界的完整列举，也没有把该经典结果归为本研究首创。
+\end{remark}
+
+\subsection{正确的统一候选族}
+可以定义一个始终有效的上界
+\begin{equation}\label{eq:hybrid}
+B_{\rm hybrid}=\min\Bigl\{q_{\min},\ B_{\rm graph},\
+\inf_{\substack{S\subseteq[K],\ |S|=2m+1\ge3\\0\le t<m}}B_{S,t}\Bigr\},
+\qquad \Risk_{\rm det}^*\le B_{\rm hybrid}.
+\end{equation}
+这里的 ``统一'' 意味着\textbf{比较不同合法投票/对偶证书的上界并选择最好者}。不能没有额外约束就把两份 self-dual 二次证书取凸组合，因为每个互补状态对的取向不一定一致，平均后可能破坏至少一侧的值达到 1 的析取约束。
+
+\section{LP 对偶与精确数学参照}
+对固定 $F$，最坏分布 LP 的对偶是
+\begin{equation}\label{eq:dual}
+\begin{aligned}
+\min_{a,\beta,\gamma}\quad &a+\sum_iq_i\beta_i+\sum_{i<j}b_{ij}\gamma_{ij}\\
+\mathrm{s.t.}\quad &Q(x):=a+\sum_i\beta_ix_i+\sum_{i<j}\gamma_{ij}x_ix_j\ge F(x),\\
+&\gamma_{ij}\ge0,\quad a,\beta_i\in\mathbb R.
+\end{aligned}
+\end{equation}
+由有限维 LP 强对偶及 self-dual 互补性，消去 $F$ 后得到精确的非凸证书问题
+\begin{equation}\label{eq:exactQ}
+\Risk_{\rm det}^*=\min\biggl\{a+\sum_iq_i\beta_i+\sum_{i<j}b_{ij}\gamma_{ij}:\quad
+Q(x)\ge0,\quad
+\max\{Q(x),Q(\bbone-x)\}\ge1\ \forall x,\quad\gamma\ge0\biggr\}.
+\end{equation}
+这里的 $\max$ 是析取可行性，不等同于凸规划。另一方面
+\begin{equation}\label{eq:lin}
+Q(x)-Q(\bbone-x)
+=\sum_i\left(\beta_i+\tfrac12\sum_{j\ne i}\gamma_{ij}\right)(2x_i-1),
+\end{equation}
+所以总存在最优确定性 self-dual 线性阈值规则（通常允许有符号权重）；这并不自动说明非负权重或简单多数总最优。
+
+\section{对称 $K=5$ 的完整闭式（计算机辅助证明）}
+\begin{theorem}[完全对称五分类器闭式]\label{thm:K5sym}
+取 $K=5$，$q_i=q$、$b_{ij}=b$，且 $0\le q\le1/2$。在模糊集非空、$0\le b\le q$ 的前提下，
+\begin{equation}\label{eq:symclosed}
+\boxed{\ \Risk_{\rm det}^*(q,b)=\min\{q,\ 3b,\ 1-5q+10b\}.\ }
+\end{equation}
+上述闭式由有限关键顶点的解析论证，配合单个关键顶点上的完整有理数计算机辅助证明得到。原问题要求 $q<1/2$，闭区间的端点仅用于几何延拓。
+\end{theorem}
+
+\subsection{可行参数区域是明确多边形}
+对称化任意可行分布不会改变 $q$，也不会违反统一的 $b$ 上界。记总错误个数 $N=\sum_iX_i$，则
+\[
+\E[N]=5q,\qquad \E[N(N-1)]=20e,\quad e=\E[X_iX_j]\le b\ \text{（对称化后）}.
+\]
+在整数支撑 $\{0,1,2,3,4,5\}$ 上固定 $\E[N]$，$\E[N(N-1)]$ 的最小值由相邻整数点混合达到。因此 $q\in[0,1/2]$ 时的准确可行域为
+\begin{equation}\label{eq:feasiblesym}
+\boxed{\ 0\le q\le\tfrac12,\qquad
+\max\left\{0,\frac{5q-1}{10},q-\frac3{10}\right\}\le b\le q.\ }
+\end{equation}
+注意 $b$ 是\textbf{上界}而非要求恰好取到的真实二阶矩；一旦存在某个 $e\le b$ 即为可行。
+
+\subsection{上界：三个显式投票规则}
+一个分类器的最坏错误率为 $q$；三人多数错误意味着三人中至少某一对同时出错，故错误率至多 $3b$；五人多数的失败指标满足
+\[
+\I\{N\ge3\}\le1-N+\binom N2,
+\]
+所以最坏错误率至多 $1-5q+10b$。这给出~\eqref{eq:symclosed} 的 ``$\le$'' 方向。
+
+\subsection{下界：分区、关键顶点和精确有理数证书}
+将~\eqref{eq:feasiblesym} 中的多边形按 $q$、$3b$、$1-5q+10b$ 哪一个最小分成三个凸多边形。交线分别为
+\[
+q=3b,\qquad q=1-5q+10b,\qquad 3b=1-5q+10b.
+\]
+三个分区的所有顶点合并恰好是六个点：
+\begin{center}
+\begin{tabular}{@{}ccc p{6.9cm}@{}}
+\toprule
+$q$ & $b$ & 候选值 & 下界论证 \\
+\midrule
+$0$ & $0$ & $0$ & 风险非负即可 \\
+$1/5$ & $0$ & $0$ & 风险非负即可 \\
+$3/8$ & $1/8$ & $3/8$ & \textbf{唯一需枚举规则的顶点}，见附录 A \\
+$2/5$ & $1/10$ & $0$ & 风险非负即可 \\
+$1/2$ & $1/5$ & $1/2$ & 取补集不变的分布：均匀二人错误集合与均匀三人错误集合各占一半 \\
+$1/2$ & $1/2$ & $1/2$ & 只取全正确和全错误，各概率 $1/2$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+后两个点的对手分布满足 $\pi_x=\pi_{\bbone-x}$，因此对\emph{每一个} self-dual $F$，$\E[F(X)]=1/2$。
+
+对固定规则 $F$，其最坏风险 $\Risk(F;q,b)$ 是 $(q,b)$ 的凹函数：由~\eqref{eq:dual}，它是（与参数 $(q,b)$ 线性相关的）对偶目标仿射函数族的下确界。对某个分区内 $u=\sum_v\lambda_vv$（$v$ 为该分区顶点）有
+\[
+\Risk(F;u)\ge\sum_v\lambda_v\Risk(F;v)
+\ge\sum_v\lambda_v L(v)=L(u),
+\]
+其中 $L$ 是该分区内固定的候选仿射函数。因为该不等式针对\textbf{所有} $F$ 成立，取 $F$ 的最小值便得到全域下界。
+
+唯一非平凡的 $(3/8,1/8)$ 顶点用附录 A 的脚本验证：$K=5$ 的确定性 self-dual 规则一共有 $2^{2^{4}}=65,536$ 个；在 $S_5$ 模型置换下压缩为 $1,088$ 个等价类。脚本对每个代表规则求出一个候选对手分布，再用 Python \texttt{fractions.Fraction} \textbf{严格检查}其非负性、概率归一化、所有边际等式、全部 10 条共错不等式以及失败率至少 $3/8$，因此覆盖全部规则。该步骤属于\textbf{可复现的计算机辅助证明}：浮点 LP 只负责\emph{寻找}证书，不负责证明证书合法。
+
+\subsection{关键顶点的运行核验}
+附录 A 原样收录验证脚本。对其实际运行得到：
+\begin{CodeListing}
+SUCCESS — all possible 65,536 self-dual rules are covered.
+Number of S5 rule orbits: 1088
+Exact rational lower bound for every orbit representative: 3/8
+Minimum adversarial witness failure: 3/8
+Maximum denominator in the generated witnesses: 48
+The other critical vertices are handled analytically.
+\end{CodeListing}
+\begin{remark}[证明性质与新颖性]
+上面的连续参数闭式并非只靠有限浮点网格支持：有限分区顶点归约是数学推导，唯一非平凡顶点由完整的精确有理数证书验证。但它尚未被替换成一份完全手工的 $1,088$ 类统一解析证明；也未完成所有相关文献的优先权审查。
+\end{remark}
+
+\section{异质 $K=5$：候选闭式、确切 MILP 与证明缺口}
+\subsection{候选式与其已证方向}
+对任意 $q=(q_i)$、$b=(b_{ij})$，定义
+\[
+B_5:=1-\sum_{i=1}^5q_i+\sum_{1\le i<j\le5}b_{ij},\qquad
+c^*:=\min_{C\in\GG_{\rm odd}(K_5)}\sum_{ij\in C}b_{ij}.
+\]
+从独裁、奇环多数及五人多数的多项式证书可以严格证明
+\begin{equation}\label{eq:heteroupper}
+\boxed{\ \Risk_{\rm det}^*\le\min\{q_{\min},c^*,B_5\}.\ }
+\end{equation}
+更强的候选命题（\textbf{尚未证明}）为
+\begin{equation}\label{eq:heteroconj}
+\boxed{\ K=5,\ (q,b)\in R:\qquad
+\Risk_{\rm det}^*\stackrel{?}{=}\min\{q_{\min},c^*,B_5\}.\ }
+\end{equation}
+若要证明等号，不仅需说明 $K=5$ 时最佳图证书是否总可由某条奇环实现，还需证明二次对偶中的混合系数不可能进一步降低目标。\textbf{目前两个必要步骤均没有全称证明。}
+
+\subsection{无 big-$M$ 的确切二次证书 MILP}
+取每个互补状态对的代表 $x$（约定 $x_0=0$），共 16 个；令 $z_x\in\{0,1\}$ 表示选择 $x$ 作为失败模式。引入
+\[
+Q(x)=a+\sum_{i=1}^5\beta_ix_i+\sum_{1\le i<j\le5}\gamma_{ij}x_ix_j,\qquad\gamma_{ij}\ge0.
+\]
+则以下混合整数线性规划\textbf{精确等价}于对所有确定性 self-dual 规则的 minimax 搜索：
+\begin{equation}\label{eq:MILP}
+\begin{aligned}
+\min_{a,\beta,\gamma,z}\quad & a+\sum_iq_i\beta_i+\sum_{i<j}b_{ij}\gamma_{ij}\\
+\text{s.t.}\quad & Q(x)\ge z_x,\\
+&Q(\bbone-x)\ge1-z_x\qquad(x_0=0),\\
+& z_x\in\{0,1\},\quad\gamma_{ij}\ge0,
+\quad a,\beta_i\in\mathbb R.
+\end{aligned}
+\end{equation}
+共有 $1+5+10=16$ 个连续变量、16 个二元变量。约束直接是 LP 对偶的左右取向，\textbf{不需要任何 big-$M$ 常数}。若求解器输出值为 $r$，数学上它对应~\eqref{eq:minimax} 的最优错误率；但浮点 MILP 求解器返回的数值要检查求解状态、可行性残差和整数最优性 gap，不能称为 ``精确有理数证明''。
+
+附录 B 收录完整可执行的 SciPy 实现，并枚举全部 10 个三角形与 12 个五环，计算~\eqref{eq:heteroconj} 右侧用于比较。
+
+\subsection{数值证据与其有限性}
+在先前 D2 讨论中，报告过 $7,858$ 个满足 $R$ 的异质可行实例的完整 MILP 与候选式数值吻合。该数字\textbf{是前一阶段报告的实验记录}；当前附录 B 的代码只包含模型和三个示例测试，并\textbf{没有包含上述 7,858 个实例的生成器或完整日志}，因此此文档不声称可直接复现这项大规模统计。若用于投稿，应另行附上采样代码、随机种子、结果表、求解精度和反例搜索策略。
+
+在本轮实际执行附录 B 中的三组自检数据（$(q,b)=(0.3,0.05),(0.375,0.125),(0.1,0.01)$，各坐标同值）时，MILP 与候选值在浮点误差范围内一致；这只用于验证\emph{代码可运行}。
+
+\section{D2 的数学结论、局限与后续证明目标}
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}p{0.29\textwidth}X p{0.2\textwidth}@{}}
+\toprule
+项目 & 准确陈述 & 当前状态\\
+\midrule
+对称 $K=5$ 连续闭式 & $\min\{q,3b,1-5q+10b\}$ & 计算机辅助证明\\
+全规则覆盖 & 65,536 个规则，1,088 个置换等价类 & 严格有理数验证\\
+奇数子集平移二次界 & 式~\eqref{eq:BPfamily} & 逐点不等式已证\\
+异质 $K=5$ 完整数学优化 & 式~\eqref{eq:MILP} & 精确等价 MILP\\
+异质 $K=5$ 简单闭式 & 式~\eqref{eq:heteroconj} & 猜想；有数值支持\\
+图证书与平移二次界组合 & 式~\eqref{eq:hybrid} & 有效上界；未证普遍紧性\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+下一步应优先尝试对称证明的手工简化，再针对异质 $K=5$ 的每个 self-dual 规则构造通用的对手分布或对偶下界。如果出现新的混合证书，则应以~\eqref{eq:exactQ} 作为真值参照，而非强行把它归入已有两种证书。另一个值得研究的问题是：对给定 $K$ 与 $R$ 的某个子区域，是否可以通过有限组结构化二次多项式，将精确析取对偶完整刻画。
+
+\begin{thebibliography}{9}
+\bibitem{BorosPrekopa1989}
+E. Boros and A. Pr\'{e}kopa,
+``Closed Form Two-Sided Bounds for Probabilities that At Least $r$ and Exactly $r$ Out of $n$ Events Occur,''
+\emph{Mathematics of Operations Research}, vol. 14, no. 2, pp. 317--342, 1989.
+\href{https://doi.org/10.1287/moor.14.2.317}{doi:10.1287/moor.14.2.317}.
+\end{thebibliography}
+
+\appendix
+\section{完整代码：对称 $K=5$ 的精确有理数证书检验}
+\noindent\textbf{用途：} 在 $(q,b)=(3/8,1/8)$ 对每个置换轨道代表规则构造、精确复核一个联合错误分布。依赖 \texttt{numpy}、\texttt{scipy}；Python 标准库中的 \texttt{fractions} 用于精确证书检查。
+
+\begin{CodeListing}
+"""Exact post-checked finite certificate for symmetric K=5 robust self-dual voting.
+
+Claim, for 0 <= q <= 1/2 and b_min(q) <= b <= q:
+    R_det^*(q,b) = min(q, 3*b, 1 - 5*q + 10*b).
+
+The only nontrivial vertex of the relevant piecewise-affine decomposition
+is (q,b)=(3/8,1/8).  This script verifies for ALL 2^16 deterministic
+self-dual Boolean rules that an exact rational adversarial distribution
+with failure >= 3/8 exists.  It reduces 65,536 rules to 1,088 S_5-orbits.
+
+SciPy HiGHS is used ONLY to propose rational distributions; all certificates
+are converted to fractions and checked with exact integer arithmetic.
+
+The remaining elementary geometric/concavity proof appears in the
+accompanying research discussion.  This script is a computer-assisted
+certificate, not a general heterogeneous K=5 proof.
+"""
+
+from fractions import Fraction as Q
+from itertools import product
+from scipy.optimize import linprog
+import numpy as np
+
+K = 5
+N = 1 << K
+N_PAIRS = 1 << (K - 1)
+MASK = (1 << K) - 1
+patterns = range(N)
+
+# Representative state in each complement pair always has bit 0 = 0.
+# A bit in an encoded rule indicates failure on that representative state.
+def failure(bits, x):
+    if not (x & 1):
+        return (bits >> (x // 2)) & 1
+    return 1 - ((bits >> ((MASK ^ x) // 2)) & 1)
+
+# Four adjacent transpositions generate the full permutation group S_5.
+def permute_mask(mask, perm):
+    return sum(((mask >> i) & 1) << perm[i] for i in range(K))
+
+transforms = []
+for t in range(K - 1):
+    perm = list(range(K))
+    perm[t], perm[t + 1] = perm[t + 1], perm[t]
+    tr = []
+    for j in range(N_PAIRS):
+        z = permute_mask(2 * j, perm)
+        tr.append(((z if not (z & 1) else MASK ^ z) // 2, z & 1))
+    transforms.append(tr)
+
+def transform(bits, tr):
+    ans = 0
+    for j, (k, flipped) in enumerate(tr):
+        ans |= (((bits >> k) & 1) ^ flipped) << j
+    return ans
+
+visited = bytearray(1 << N_PAIRS)
+orbits = []
+for bits in range(1 << N_PAIRS):
+    if visited[bits]:
+        continue
+    queue = [bits]
+    visited[bits] = 1
+    for cur in queue:
+        for tr in transforms:
+            nxt = transform(cur, tr)
+            if not visited[nxt]:
+                visited[nxt] = 1
+                queue.append(nxt)
+    orbits.append((bits, len(queue)))
+
+assert all(visited), "The permutation orbits must cover all rules"
+assert sum(size for _, size in orbits) == 1 << N_PAIRS
+assert len(orbits) == 1088
+
+# Exact constraint matrices with 32 probability variables (one per mask).
+row_sum = tuple([1] * N)
+row_margin = [tuple((m >> i) & 1 for m in patterns) for i in range(K)]
+row_pairs = [tuple(((m >> i) & 1) * ((m >> j) & 1) for m in patterns)
+             for i in range(K) for j in range(i + 1, K)]
+
+def dot(a, b):
+    return sum(x * y for x, y in zip(a, b))
+
+A_eq = np.array([row_sum] + row_margin, dtype=float)
+A_ub = np.array(row_pairs, dtype=float)
+q, b = Q(3, 8), Q(1, 8)
+max_denominator = 0
+minimum_witness_failure = Q(1)
+
+for bits, orbit_size in orbits:
+    f = tuple(failure(bits, x) for x in patterns)
+    assert all(f[x] + f[MASK ^ x] == 1 for x in patterns)
+    # Floating point solve proposes a solution; none of its inequalities
+    # or equalities are trusted until the exact rational checks below.
+    result = linprog(
+        c=-np.array(f, dtype=float),
+        A_eq=A_eq, b_eq=[1] + [float(q)] * K,
+        A_ub=A_ub, b_ub=[float(b)] * len(row_pairs),
+        bounds=(0, None), method="highs",
+    )
+    assert result.success, (bits, result.message)
+    p = tuple(Q(float(v)).limit_denominator(100_000) for v in result.x)
+    assert min(p) >= 0, bits
+    assert dot(row_sum, p) == Q(1), bits
+    assert all(dot(row, p) == q for row in row_margin), bits
+    assert all(dot(row, p) <= b for row in row_pairs), bits
+    risk = dot(f, p)
+    assert risk >= q, (bits, risk)
+    minimum_witness_failure = min(minimum_witness_failure, risk)
+    max_denominator = max(max_denominator, max(t.denominator for t in p))
+
+print("SUCCESS — all possible 65,536 self-dual rules are covered.")
+print(f"Number of S5 rule orbits: {len(orbits)}")
+print(f"Exact rational lower bound for every orbit representative: {q}")
+print(f"Minimum adversarial witness failure: {minimum_witness_failure}")
+print(f"Maximum denominator in the generated witnesses: {max_denominator}")
+print("The other critical vertices are handled analytically.")
+\end{CodeListing}
+
+\section{完整代码：异质 $K=5$ minimax MILP 与候选式比较}
+\noindent\textbf{用途：} 精确的数学 MILP 形式由浮点 SciPy/HiGHS 求解，返回最优错误率及二次对偶证书。使用 \texttt{numpy}、\texttt{scipy}。实现\textbf{不构成}异质候选式的严格数学证明；\texttt{MILP} 求解输出仍是数值计算结果。
+
+\begin{CodeListing}
+"""Exact mathematical MILP formulation (numerically solved) for K=5.
+
+The formulation optimizes over ALL 2^(2^4)=65,536 deterministic
+self-dual rules, *not* only majority or nonnegative linear thresholds.
+
+Variables:
+    a (free), beta[5] (free), gamma[10] (nonnegative),
+    z[16] (binary orientation of each complementary error-pattern pair)
+
+For each representative x with x_0=0, the constraints are:
+    Q(x) >= z_x, Q(1-x) >= 1-z_x
+and the objective is a + q @ beta + b @ gamma.
+
+By fixed-rule LP strong duality this is the exact finite-dimensional
+minimax objective. The numerical solver is NOT an exact-rational proof.
+"""
+
+from itertools import combinations
+import numpy as np
+from scipy.optimize import milp, Bounds, LinearConstraint
+
+K = 5
+EDGES = tuple(combinations(range(K), 2))
+REPRESENTATIVES = tuple(mask for mask in range(1 << K) if mask & 1 == 0)
+assert len(REPRESENTATIVES) == 16
+
+# Each row: [coefficient for a, beta0..4, gamma01..34, z0..15]
+N_CONT = 1 + K + len(EDGES)
+N_TOTAL = N_CONT + len(REPRESENTATIVES)
+
+
+def quadratic_row(mask):
+    x = np.array([(mask >> i) & 1 for i in range(K)], dtype=float)
+    return np.r_[1.0, x, [x[i] * x[j] for (i, j) in EDGES], np.zeros(16)]
+
+
+def minimax_selfdual(q, b, *, tol=1e-10):
+    """Return solver-certified numerical optimum, rule and dual certificate.
+
+    q: shape (5,) error marginals; b: shape (10,) pair upper bounds
+    in the EDGES order. The ambiguity set must be nonempty.
+    """
+    q = np.asarray(q, dtype=float)
+    b = np.asarray(b, dtype=float)
+    assert q.shape == (K,) and b.shape == (len(EDGES),)
+    assert np.all((q >= 0) & (q <= .5))
+    assert np.all(b >= -tol)
+    assert all(b[h] <= min(q[i], q[j]) + tol
+               for h, (i, j) in enumerate(EDGES))
+
+    objective = np.r_[1.0, q, b, np.zeros(16)]
+    lower = np.r_[np.full(K + 1, -np.inf), np.zeros(10 + 16)]
+    upper = np.r_[np.full(N_CONT, np.inf), np.ones(16)]
+    integer = np.r_[np.zeros(N_CONT), np.ones(16)]
+
+    rows, rhs = [], []
+    for k, x in enumerate(REPRESENTATIVES):
+        row = quadratic_row(x)
+        row[N_CONT + k] = -1  # Q(x) - z >= 0
+        rows.append(row)
+        rhs.append(0)
+        row = quadratic_row(31 ^ x)
+        row[N_CONT + k] = 1  # Q(1-x) + z >= 1
+        rows.append(row)
+        rhs.append(1)
+
+    ans = milp(
+        objective, integrality=integer,
+        bounds=Bounds(lower, upper),
+        constraints=LinearConstraint(np.array(rows), np.array(rhs), np.inf),
+        options={'mip_rel_gap': 1e-10, 'time_limit': 20},
+    )
+    if not ans.success:
+        raise RuntimeError(ans.message)
+    rule_bits = tuple(int(round(t)) for t in ans.x[N_CONT:])
+    return {'minimax_error': float(ans.fun),
+            'orientation_bits': rule_bits,
+            'a': float(ans.x[0]),
+            'beta': ans.x[1:6],
+            'gamma': ans.x[6:16],
+            'gap': ans.mip_gap}
+
+
+def odd_cycles():
+    edge_id = {e: i for i, e in enumerate(EDGES)}
+    cycles = []
+    for V in combinations(range(5), 3):
+        cycles.append(tuple(edge_id[e] for e in combinations(V, 2)))
+    from itertools import permutations
+    for rest in permutations(range(1, 5)):
+        C = (0,) + rest
+        if C[1] > C[-1]:
+            continue
+        cycles.append(tuple(edge_id[tuple(sorted((C[j], C[(j + 1) % 5])))]
+                            for j in range(5)))
+    assert len(cycles) == 22
+    return tuple(cycles)
+
+CYCLES = odd_cycles()
+
+
+def proposed_heterogeneous_k5_bound(q, b):
+    """Unproved outside known exact subregions; valid upper bound only."""
+    q, b = np.asarray(q), np.asarray(b)
+    q_best = min(q)
+    cstar = min(sum(b[j] for j in C) for C in CYCLES)
+    b5 = 1.0 - sum(q) + sum(b)
+    return min(q_best, cstar, b5), (q_best, cstar, b5)
+
+
+if __name__ == '__main__':
+    for q, b in [(0.3, 0.05), (0.375, 0.125), (0.1, 0.01)]:
+        Q = [q] * K
+        B = [b] * 10
+        oracle = minimax_selfdual(Q, B)
+        candidate, pieces = proposed_heterogeneous_k5_bound(Q, B)
+        print(f'q={q:.5g}, b={b:.5g}; '
+              f'exact MINIMAX MILP={oracle["minimax_error"]:.12g}; '
+              f'candidate={candidate:.12g}; pieces={pieces}')
+\end{CodeListing}
+
+\section{复现说明与证据边界}
+\begin{CodeListing}
+python -m pip install numpy scipy
+python d2_k5_symmetric_rational_certificate.py
+python d2_k5_heterogeneous_exact_milp.py
+\end{CodeListing}
+前两份代码已完整嵌入本 \texttt{.tex}，不依赖 \texttt{\\lstinputlisting} 引用外部路径。若需运行，可将附录相应 \texttt{CodeListing} 内的纯 Python 文本分别保存为与上文命令对应的 \texttt{.py} 文件。输出中的极小负数（如 $-5\times10^{-17}$）属于浮点数值误差，不代表真实错误概率为负。
+
+本文没有附带 $7,858$ 个异质测试实例的原始采样或求解日志，因此该统计只按前期研究记录引用；对称闭式的关键顶点则由附录 A 给出的代码完全可复现。文中所有结果遵循确定性 self-dual 规则和非空模糊集的模型假设，不能直接外推为允许任意随机化或多分类标签时的最优性结论。
+\end{document}

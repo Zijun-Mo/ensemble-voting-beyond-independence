@@ -1,0 +1,620 @@
+\documentclass[11pt,a4paper]{ctexart}
+\usepackage[margin=22mm,top=20mm,bottom=23mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,booktabs,array,xcolor,hyperref,fvextra}
+\hypersetup{colorlinks=true,urlcolor=blue,linkcolor=blue}
+\DefineVerbatimEnvironment{CodeListing}{Verbatim}{fontsize=\scriptsize,breaklines=true,breakanywhere=true,frame=single,framesep=2mm}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{corollary}[theorem]{推论}
+\newtheorem{proposition}[theorem]{命题}
+\theoremstyle{remark}\newtheorem{remark}[theorem]{说明}
+\newcommand{\Rdet}{R^*_{\mathrm{det},5}}
+\newcommand{\Tc}{T_H}
+\newcommand{\bx}{\boldsymbol 1}
+\newcommand{\EE}{\mathbb E}
+\newcommand{\Prb}{\mathbb P}
+\setlength{\parindent}{2em}
+\sloppy
+\begin{document}
+\begin{center}
+{\LARGE\bfseries D2：异质 $K=5$ 鲁棒投票的结构化闭式研究}\\[5pt]
+{\large 五节点扇形图：完整上界矩刻画、8 变量精确投影与有理数见证}\\[5pt]
+{\small 仅 LaTeX 源码；已证明部分与开放问题严格区分；含完整代码}
+\end{center}
+\begin{abstract}
+考虑五个二元分类器的错误指标 $X_i$，已知边际 $0<q_i<1/2$ 和成对共同出错概率上界 $b_{ij}$，寻求未知依赖结构下的确定性 self-dual minimax 投票。
+聚焦此前未完全解决的七边扇形有效图
+$E=\{01,02,03,04,12,14,23\}$。
+保留先前已证的“9 个奇环覆盖极点及条件性闭式”，本轮主要给出两项进一步的\emph{精确解析}结果：
+(1) 以共享边的两项交集概率为消元变量，给出扇形图\emph{任意质量、任意异质边际及成对上界}的完整概率可行性充要判据；
+(2) 结合 clique-tree 拼接，将最大互补对称对抗质量从原始 48 变量或此前 18 变量 LP 精确压缩至\emph{仅 8 个连续变量}，全部约束为显式线性不等式。
+此外用纯有理数、直接构造 32 状态联合分布，证明旧闭式的三角形边际附加条件并非必要：某个严格位于高精度区域 $R\setminus R_0$ 的异质实例，虽然该条件严重不满足，仍有匹配的确定性 minimax 值。
+\textbf{局限：} 8 变量 LP 求得的是共同对抗分布值 $T_H$；在全扇形图参数域证明 $T_H=\Rdet$ 及无优化闭式，仍是未解决问题。
+\end{abstract}
+
+\section{模型及已建立的扇形图结果}
+\label{sec:model}
+设 $V=\{0,1,2,3,4\}$，$X_i\in\{0,1\}$，
+\[
+\EE X_i=q_i,\qquad \EE(X_iX_j)\le b_{ij}\le\min(q_i,q_j),
+\]
+并假设联合分布集合 $\mathcal P(q,b)$ 非空。确定性 self-dual 错误指示函数满足
+$F(x)+F(\bx-x)=1$，鲁棒目标是
+\[
+\Rdet(q,b)=\min_{F:\,F(x)+F(\bx-x)=1}
+\max_{\pi\in\mathcal P(q,b)}\EE_\pi F(X).
+\]
+称一对非负子分布 $(\nu,\rho)$ 是\emph{共同对抗分解}，如果
+$\pi=\nu+\rho\in\mathcal P(q,b)$，
+$\nu(x)=\nu(\bx-x)$，且 $\sum_x\nu(x)=2t$。
+此时所有 self-dual $F$ 均满足 $\EE_\pi F\ge t$。最大可实现 $t$ 记作 $\Tc(q,b)$，恒有 $\Tc\le\Rdet$。
+
+考察扇形有效图（其余非有效边的上界取自动满足的 $\min(q_i,q_j)$）
+\begin{equation}\label{eq:fan}
+E=\{01,02,03,04,12,14,23\},\qquad
+\mathcal C_3=\{012,014,023\}.
+\end{equation}
+另外一条五环为 $0-3-2-1-4-0$。相应奇环代价最小值记作
+\begin{equation}\label{eq:cH}
+\begin{split}
+c_H=\min\{&b_{01}+b_{02}+b_{12},\quad b_{01}+b_{04}+b_{14},\\
+&b_{02}+b_{03}+b_{23},\\
+&b_{03}+b_{04}+b_{12}+b_{14}+b_{23}\},\\
+t_0&=\min\{q_{\min},c_H\}.
+\end{split}
+\end{equation}
+上界 $\Rdet\le t_0$ 由最佳单模型与三角形/五环多数投票逐点保证。
+
+\begin{theorem}[先前结果：条件性的扇形图闭式]\label{thm:old}
+若 $H$ 为式 \eqref{eq:fan} 的扇形图，且
+\begin{equation}\label{eq:old}
+t_0\ge\max\{0,q_0+q_1+q_2-1,\ q_0+q_1+q_4-1,\ q_0+q_2+q_3-1\},
+\end{equation}
+则 $\Tc=\Rdet=t_0$。
+\end{theorem}
+\begin{proof}[仅列出此前证明的关键结构]
+扇形图的奇环覆盖多面体
+$\{u\ge0:\sum_{e\in C}u_e\ge1,\ C\text{ 为四条奇环}\}$
+通过穷尽 $\binom{11}{7}=330$ 个候选活跃基，得到恰好 9 个极点；
+每个极点均为某个二元着色的\emph{同色边向量}。
+所以若 $t_0\le c_H$，可构造半质量 $t_0$ 的互补对称子分布，
+其边共错开销受 $b$ 控制。
+剩余的归一化边际是
+$y_i=(q_i-t_0)/(1-2t_0)$。
+条件 \eqref{eq:old} 恰是三个极大三角团上的
+$\sum_{i\in C}y_i\le1$；
+扇形图为弦图，其稳定集多面体由非负性与团不等式完整描述，
+故剩余质量可放在独立集上，完全不增加有效边共错。
+于是共同对抗分布与奇环/独裁上界匹配。
+\end{proof}
+
+\section{本轮新定理：扇形图上界矩域的完整显式刻画}
+\label{sec:cap}
+本节暂时不涉及投票规则。给定质量 $h\ge0$、五个未经归一化的边际
+$r_i$、以及七个边共错\emph{上界} $d_e\ge0$，问题是是否存在
+$\rho\ge0$ 满足
+\[
+\sum_x\rho(x)=h,\quad\sum_x x_i\rho(x)=r_i,\quad
+\sum_xx_ix_j\rho(x)\le d_{ij}\ (ij\in E).
+\]
+特别注意：$d_e$ 是上界，不要求每个共错矩取等号。
+
+\begin{lemma}[三元 Bernoulli：固定一条共享边的精确投影]\label{lem:triangle}
+在质量 $h$ 的三个二元变量 $(X_i,X_j,X_k)$ 中，已知边际
+$r_i,r_j,r_k$、固定 $\EE(X_iX_j)=v$，并规定
+$\EE(X_iX_k)\le d_{ik}$、$\EE(X_jX_k)\le d_{jk}$。
+当 $0\le r_i,r_j,r_k\le h$、$d_{ik},d_{jk}\ge0$ 时，可行的充要条件是
+\begin{align}
+&\max\{0,r_i+r_j-h,\ r_i+r_j+r_k-h-d_{ik}-d_{jk}\}\le v\le\min\{r_i,r_j\},\label{eq:tri-interval}\\
+&r_i+r_k-h\le d_{ik},\qquad r_j+r_k-h\le d_{jk}.\label{eq:tri-pair}
+\end{align}
+如共享边另有上界 $d_{ij}$，只需在式 \eqref{eq:tri-interval} 的右侧再取 $\min\{\cdot,d_{ij}\}$。
+\end{lemma}
+\begin{proof}
+由固定共享边可得到 $ij$ 的四个格子，其质量依次为
+\[
+p_{00}=h-r_i-r_j+v,\quad p_{10}=r_i-v,\quad
+p_{01}=r_j-v,\quad p_{11}=v.
+\]
+将 $X_k=1$ 的质量分配到这四格：$00$ 不消耗共错预算，
+$10$ 只消耗 $d_{ik}$，$01$ 只消耗 $d_{jk}$，$11$ 同时消耗两份预算。
+因此优先填充 $00$，再填充 $10,01$，最后填充 $11$，
+可实现的第三边际最大值是
+\[
+M=\min\{h,\ h-r_i+d_{ik},\ h-r_j+d_{jk},\
+h-r_i-r_j+v+d_{ik}+d_{jk}\}.
+\]
+四个上界分别来自总质量、对 $X_i=0$ 事件的分拆、
+对 $X_j=0$ 事件的分拆，以及对 $ij=00$ 状态和两份共错预算的分拆。
+上述贪心分配确实达到这四个上界的最小值：
+若优先填充任一消耗单份预算的格子而不是 $11$ 格子，
+不会降低总可用容量；枚举两个预算是否在单份格子中耗尽的四种情形即得上式。
+当 $0\le r_k\le M$，将达到 $M$ 的各格 $X_k=1$ 质量同比例缩小为 $r_k/M$（若 $M=0$ 则 $r_k=0$），即得到所需联合分布。
+将 $r_k\le M$ 及四格非负写出，恰好等价于所列条件。
+\end{proof}
+
+\begin{lemma}[中央三角形：两个共享边的精确相容区间]\label{lem:center}
+对于三角形 $012$，固定
+$\EE(X_0X_1)=v_{01}$、$\EE(X_0X_2)=v_{02}$，第三条边仅有上界 $d_{12}$。
+在各共享边本身满足 Fr\'echet 上下界的前提下，中央三元分布存在当且仅当
+\begin{equation}\label{eq:center}
+ r_1+r_2-h\le d_{12},\qquad
+ r_0+r_1+r_2-h-d_{12}\le v_{01}+v_{02}\le r_0+d_{12}.
+\end{equation}
+\end{lemma}
+\begin{proof}
+按 $X_0=1$ 和 $X_0=0$ 分层。
+第一层质量为 $r_0$，$X_1,X_2$ 的未归一化边际分别为
+$v_{01},v_{02}$；第二层质量为 $h-r_0$，边际分别为
+$r_1-v_{01},r_2-v_{02}$。
+二元 Fr\'echet 下界说明能够实现的\emph{最小} $12$ 共错是
+\[
+(v_{01}+v_{02}-r_0)_+
++(r_1+r_2-v_{01}-v_{02}-h+r_0)_+.
+\]
+令 $S=v_{01}+v_{02}$，并展开 $y_++z_+=\max\{0,y,z,y+z\}$；
+要求该式不超过 $d_{12}$ 正好得到式 \eqref{eq:center}。
+上述分层同时给出了实现最小共错的显式四格构造。
+\end{proof}
+
+定义四组只包含参数 $h,r,d$ 的候选端点：
+\begin{equation}\label{eq:LU}
+\begin{aligned}
+\mathcal L_{01}&=\{0,\ r_0+r_1-h,\ r_0+r_1+r_4-h-d_{04}-d_{14}\},\\
+\mathcal U_{01}&=\{r_0,r_1,d_{01}\},\\
+\mathcal L_{02}&=\{0,\ r_0+r_2-h,\ r_0+r_2+r_3-h-d_{03}-d_{23}\},\\
+\mathcal U_{02}&=\{r_0,r_2,d_{02}\}.
+\end{aligned}
+\end{equation}
+将 $L_{01}=\max\mathcal L_{01}$、$U_{01}=\min\mathcal U_{01}$，
+以及 $L_{02},U_{02}$ 类似定义。
+
+\begin{theorem}[新：七边扇形图共错\emph{上界}矩域的完整刻画]\label{thm:moments}
+存在满足指定 $h,r,d$ 的五元联合子分布，当且仅当下列\emph{全部}条件成立：
+\begin{align}
+&0\le r_i\le h\quad(i=0,\ldots,4),\qquad d_e\ge0\quad(e\in E),\label{eq:base}\\
+&r_i+r_j-h\le d_{ij}
+&&\bigl(ij\in\{03,04,12,14,23\}\bigr),\label{eq:edges}\\
+&L_{01}\le U_{01},\qquad L_{02}\le U_{02},\label{eq:interval}\\
+&L_{01}+L_{02}\le r_0+d_{12},\label{eq:sumupper}\\
+&U_{01}+U_{02}\ge r_0+r_1+r_2-h-d_{12}.\label{eq:sumlower}
+\end{align}
+特别地，它是没有任何隐藏非线性或分数系数的\emph{有限分段线性充要判据}。
+\end{theorem}
+\begin{proof}
+按 clique tree
+$014\;\text{--}_{01}\;012\;\text{--}_{02}\;023$
+考虑三份三元联合分布。
+由引理 \ref{lem:triangle}，叶片 $014$ 对共享交集 $v_{01}$ 的限制恰为
+$v_{01}\in[L_{01},U_{01}]$，其另外两条边的 Fr\'echet 上界
+正是式 \eqref{eq:edges} 中的 $04,14$。
+叶片 $023$ 类似给出 $v_{02}\in[L_{02},U_{02}]$ 和 $03,23$ 上界。
+引理 \ref{lem:center} 则精确描述中央三角形在给定两个交集下的可行性，
+其中对边 $12$ 的基本 Fr\'echet 条件是式 \eqref{eq:edges} 的剩余一条。
+因而需要从上述两个区间选出 $v_{01},v_{02}$，使
+\[
+r_0+r_1+r_2-h-d_{12}\le v_{01}+v_{02}\le r_0+d_{12}.
+\]
+两个闭区间之和恰是
+$[L_{01}+L_{02},\,U_{01}+U_{02}]$，
+所以选取存在当且仅当式 \eqref{eq:interval}--\eqref{eq:sumlower} 同时成立。
+三份局部分布在共享边上的四格分布由同一
+$(h,r_0,r_1,v_{01})$ 或 $(h,r_0,r_2,v_{02})$ 唯一确定，
+因此可依次作条件独立拼接，得到全五元联合分布。
+反向对任意联合分布取局部边际，以上条件显然必要。
+\end{proof}
+
+\section{本轮新定理：共同对抗质量的精确 8 变量 LP}
+\label{sec:lp}
+定义 8 个非负连续变量
+\[
+(t,u_{01},u_{02},u_{03},u_{04},u_{12},u_{14},u_{23}),
+\]
+其中 $u_{ij}$ 是互补对称子分布在边 $ij$ 的\emph{未经归一化共错质量}。
+对每个三角形 $C\in\mathcal C_3$，要求
+\begin{equation}\label{eq:sym}
+\sum_{e\in E(C)}u_e\ge t,\qquad
+2u_e+t\ge\sum_{f\in E(C)}u_f\quad(e\in E(C)).
+\end{equation}
+另外定义
+\begin{equation}\label{eq:res}
+h=1-2t,\qquad r_i=q_i-t,\qquad d_e=b_e-u_e.
+\end{equation}
+
+\begin{theorem}[新：仅 8 个连续变量的\emph{精确} LP]\label{thm:8lp}
+扇形图上的最大互补对称对抗半质量 $\Tc(q,b)$ 精确等于下列优化问题的值：
+\begin{equation}\label{eq:8lp}
+\begin{split}
+\max\quad&t\\
+\mathrm{s.t.}\quad
+&0\le t\le\min\{1/2,q_0,\ldots,q_4\},\\
+&0\le u_e\le\min\{t,b_e\}\quad(e\in E),\\
+&\text{式 \eqref{eq:sym} 对每个三角形成立},\\
+&\text{式 \eqref{eq:base}--\eqref{eq:sumlower} 对式 \eqref{eq:res} 成立}.
+\end{split}
+\end{equation}
+所有表面上的 $\max$/$\min$ 均可通过有限次展开改写为\emph{线性不等式}，
+因此式 \eqref{eq:8lp} 只有 8 个连续变量、无需二元变量或二次约束。
+\end{theorem}
+\begin{proof}
+互补对称子分布 $\nu$ 在任意三角形上的总质量 $2t$，
+每个节点边际为 $t$。
+三元互补成对配置恰好分成四类：三类\emph{仅一条同色边}以及
+一类\emph{三条边全部同色}。
+四类配置的每个互补状态概率分别为
+\[
+\alpha_{\rm all}=\frac{\sum_{e\in E(C)}u_e-t}{2},\qquad
+\alpha_e=\frac{2u_e-\sum_{f\in E(C)}u_f+t}{2}.
+\]
+四类质量均非负恰好等价于式 \eqref{eq:sym}。
+局部 $\nu$ 在共享边上的四格质量为
+$(u_{ij},t-u_{ij},t-u_{ij},u_{ij})$，
+故这些局部对称分布可沿 clique tree 拼接成全局互补对称 $\nu$，总质量 $2t$。
+相减后的 $\rho$ 必须有质量 $h$、边际 $r_i$、共错上界 $d_e$；
+由定理 \ref{thm:moments}，其存在性恰由列出的线性不等式保证。
+$\nu$ 与 $\rho$ 相加是满足原全部矩上界的全局概率分布。
+反过来，任意原始可行的 $(\nu,\rho)$ 都诱导符合这些条件的 $t,u$。
+两方向成立，故 LP 值严格等于 $\Tc$。
+\end{proof}
+
+\paragraph{展开规则与维数。}
+式 \eqref{eq:interval} 的每个 $L\le U$ 产生 $3\times3$ 条线性不等式；
+式 \eqref{eq:sumupper} 等价于
+$\ell_{01}+\ell_{02}\le r_0+d_{12}$
+对 $\ell_{01}\in\mathcal L_{01}$、$\ell_{02}\in\mathcal L_{02}$ 的
+9 种组合全部成立；
+式 \eqref{eq:sumlower} 等价于
+$u_{01}+u_{02}\ge r_0+r_1+r_2-h-d_{12}$
+对 $u_{01}\in\mathcal U_{01}$、$u_{02}\in\mathcal U_{02}$ 的 9 种组合全部成立。
+从而原先的 18 变量 clique LP 里 7 个残余边交集和 3 个三元交集均不再是优化变量。
+
+\begin{remark}[与最终确定性闭式的逻辑关系]
+定理 \ref{thm:8lp} 精确求得 $T_H$，而不是未经证明就令 $T_H=\Rdet$。
+对所有参数已经有
+\[
+\Tc\le\Rdet\le t_0.
+\]
+若能进一步证明式 \eqref{eq:8lp} 的最优值总等于 $t_0$，
+就会推出\emph{整个扇形有效图}的确定性无优化闭式
+$\Rdet=t_0$。
+但此 LP 完整性/对偶消元命题本轮\textbf{没有证明}。
+此处 8 变量 LP 的用途是将证明难点从 48 状态的分布优化缩小为
+8 变量多面体的投影及少数活跃面。
+\end{remark}
+
+\section{新：旧充分条件外的精确有理数 minimax 见证}
+\label{sec:example}
+取
+\[
+q=\left(\frac3{10},\frac8{25},\frac{23}{50},\frac{23}{50},\frac3{10}\right),
+\]
+沿边序 $01,02,03,04,12,14,23$ 取
+\[
+b=\left(\frac{12}{625},\frac{69}{500},\frac{69}{500},
+\frac9{500},\frac{92}{625},\frac{12}{625},\frac{529}{2500}\right).
+\]
+其余非有效边的上界取 $\min(q_i,q_j)$。
+参数域检验：
+\[
+\sum_iq_i=\frac{46}{25}>1,\qquad
+\sum_iq_i-3q_{\min}=\frac{47}{50}<1,
+\]
+所以该参数严格属于 $R\setminus R_0$。
+四条奇环成本与边际的最小值是
+\[
+\boxed{t_0=\frac{141}{2500}=0.0564},
+\]
+但是旧条件 \eqref{eq:old} 的右端为
+$\displaystyle \max_{C\in\mathcal C_3}(\sum_{i\in C}q_i-1)=\frac{11}{50}=0.22$，
+明显有 $t_0<11/50$。
+
+下面给出式 \eqref{eq:8lp} 的\emph{精确有理可行点}：
+\[
+\begin{aligned}
+t&=\frac{141}{2500},\\
+(u_{01},u_{02},u_{03},u_{04},u_{12},u_{14},u_{23})
+&=\left(\frac{12}{625},\frac{93}{2500},0,\frac9{500},0,
+\frac{12}{625},\frac{12}{625}\right).
+\end{aligned}
+\]
+两条中央共享残余边交集可以同时取 $v_{01}=v_{02}=0$，
+剩余全部状态概率可通过引理 \ref{lem:triangle}、\ref{lem:center}
+与 clique-tree 条件拼接显式构造。
+附录 B 的纯 $\texttt{fractions.Fraction}$ 程序直接生成\emph{全部 32 个状态}上的
+$\pi=\nu+\rho$，并逐项精确验证
+\[
+\sum_x\pi(x)=1,\quad \EE_\pi X_i=q_i,\quad
+\EE_\pi X_iX_j\le b_{ij},\quad
+\nu(x)=\nu(\bx-x),\quad\sum_x\nu(x)=2t_0.
+\]
+因此 $\Rdet\ge t_0$，与奇环投票上界匹配，获得
+\[
+\boxed{\Rdet=\Tc=\frac{141}{2500}}
+\quad\text{（旧充分条件不满足，但仍严格精确）}.
+\]
+这既是对旧条件\emph{非必要性}的明确解析证明，
+也为继续研究整个扇形图的参数投影提供了一个靠近困难边界的验证点。
+
+\section{下一步完整闭式证明的明确入口}
+本轮已经确定，扇形图中\emph{唯一剩余的理论任务}不是求解一个新的概率 LP，
+而是证明或否定如下凸多面体包含命题：
+\begin{equation}\label{eq:open}
+\boxed{\text{凡 $q,b$ 可行且 $0<q_i<1/2$，式 \eqref{eq:8lp} 在 $t=t_0$ 时必可行。}}
+\end{equation}
+如该命题成立，$\Tc=t_0$，由夹逼便得到完整扇形图的确定性闭式。
+它可以表述为一个\emph{参数多面体投影的包含问题}，而非随机试验。
+在式 \eqref{eq:8lp} 中，所有系数与参数无关，
+故可以对其\emph{有限对偶极射线}使用 Farkas 证书，
+结合扇形图原始矩参数域的精确刻画（定理 \ref{thm:moments}，取 $h=1,r=q,d=b$）完成严格证明。
+若失败，Farkas 分离向量也会指出新的必要仿射不等式；
+但本轮\textbf{未断言}式 \eqref{eq:open} 已成立。
+
+\section*{附录 A：8 变量投影 LP 的完整可执行实现}
+以下代码与独立文件 \texttt{D2\_K5\_fan\_8var\_exact\_LP.py} 内容一致。
+它用 SciPy 解数值 LP，\emph{数值测试不构成定理证明}；
+严格等价性来自引理 \ref{lem:triangle}、\ref{lem:center}
+和定理 \ref{thm:8lp} 的解析证明。
+\begin{CodeListing}
+"""D2 fan graph: exact 8-variable LP for common symmetric adversary mass.
+
+Graph E=(01,02,03,04,12,14,23); clique tree (014)-(012)-(023).
+The algebraic projection is exact; scipy linprog is only a numerical solver.
+Run: python D2_K5_fan_8var_exact_LP.py
+"""
+from itertools import combinations
+import numpy as np
+from scipy.optimize import linprog
+
+E = [(0,1),(0,2),(0,3),(0,4),(1,2),(1,4),(2,3)]
+TRI = [(0,1,2),(0,1,4),(0,2,3)]
+STATES = np.array([[m >> i & 1 for i in range(5)] for m in range(32)], dtype=float)
+PAIRS = np.array([STATES[:,i]*STATES[:,j] for i,j in E]).T
+
+class Aff:
+    """An affine function const + coef @ (t, u_01, ..., u_23)."""
+    def __init__(self, const=0., coef=None):
+        self.const = float(const)
+        self.coef = np.zeros(8) if coef is None else np.array(coef, dtype=float)
+    def __add__(self, other):
+        if not isinstance(other, Aff): other=Aff(other)
+        return Aff(self.const+other.const, self.coef+other.coef)
+    __radd__=__add__
+    def __neg__(self): return Aff(-self.const,-self.coef)
+    def __sub__(self,other): return self+-other if isinstance(other,Aff) else self+(-other)
+    def __rsub__(self,other): return -self+other
+
+
+def fan_8var_lp(q, b):
+    q=np.asarray(q,dtype=float); b=np.asarray(b,dtype=float)
+    assert q.shape==(5,) and b.shape==(7,)
+    v=[]
+    for k in range(8):
+        coef=np.zeros(8);coef[k]=1
+        v.append(Aff(coef=coef))
+    t=v[0];u=v[1:]
+    r=[Aff(q[i])-t for i in range(5)]
+    h=Aff(1)-t-t
+    d=[Aff(b[k])-u[k] for k in range(7)]
+    rows=[];rhs=[]
+    def le(f,g=0):
+        if not isinstance(g,Aff):g=Aff(g)
+        diff=f-g
+        rows.append(diff.coef);rhs.append(-diff.const)
+    for i in range(5):
+        le(t,q[i]);le(r[i],h)
+    le(t+t,1)
+    for k in range(7):
+        le(u[k],t);le(u[k],b[k])
+    # Symmetric 3-bit mass: for each clique, agreement edge masses lie
+    # in the simplex of 3 one-agreement cuts and the all-agreement cut.
+    for c in TRI:
+        ids=[E.index(pair) for pair in combinations(c,2)]
+        le(t,sum(u[k] for k in ids))
+        for k in ids:
+            le(sum(u[j] for j in ids if j!=k),u[k]+t)
+    # Residual local pair Frechet inequalities on leaf edges and central 12.
+    for k in [2,3,4,5,6]:
+        i,j=E[k]
+        le(r[i]+r[j]-h,d[k])
+    # Projected interval for v01, v02, exact after eliminating 3rd moments.
+    L01=[Aff(0),r[0]+r[1]-h,r[0]+r[1]+r[4]-h-d[3]-d[5]]
+    U01=[r[0],r[1],d[0]]
+    L02=[Aff(0),r[0]+r[2]-h,r[0]+r[2]+r[3]-h-d[2]-d[6]]
+    U02=[r[0],r[2],d[1]]
+    for aa in L01:
+        for bb in U01:le(aa,bb)
+    for aa in L02:
+        for bb in U02:le(aa,bb)
+    for aa in L01:
+        for bb in L02:le(aa+bb,r[0]+d[4])
+    for aa in U01:
+        for bb in U02:le(r[0]+r[1]+r[2]-h-d[4],aa+bb)
+    c=np.zeros(8);c[0]=-1
+    return linprog(c,A_ub=np.array(rows),b_ub=np.array(rhs),bounds=[(0,None)]*8,method='highs')
+
+
+def fan_full_lp(q,b):
+    """Independent 48-variable primal (32 pi states +16 complement masses)."""
+    q=np.asarray(q,float);b=np.asarray(b,float)
+    Aeq=np.zeros((6,48));Aeq[0,:32]=1;Aeq[1:,:32]=STATES.T
+    Aub=np.zeros((39,48));Aub[:7,:32]=PAIRS.T
+    for j in range(16):
+        for m in (j,31-j):Aub[7+m,m]=-1;Aub[7+m,32+j]=1
+    c=np.zeros(48);c[32:]=-1
+    return linprog(c,A_ub=Aub,b_ub=np.r_[b,np.zeros(32)],A_eq=Aeq,b_eq=np.r_[1,q],bounds=(0,None),method='highs')
+
+if __name__=='__main__':
+    rng=np.random.default_rng(175)
+    count=0; old_condition_failed=0
+    for k in range(800):
+        q=np.array([.3,.32,.46,.46,.3])+rng.normal(0,.015,5)
+        q=np.clip(q,.16,.49)
+        if q[[0,1,4]].sum()>1:continue
+        pi=np.zeros(32)
+        for mask,prob in [(0,1-q[[0,1,4]].sum()),(1,q[0]),(2,q[1]),(16,q[4])]:
+            for x2 in range(2):
+                for x3 in range(2):
+                    pi[mask|(x2<<2)|(x3<<3)] += prob*(q[2] if x2 else 1-q[2])*(q[3] if x3 else 1-q[3])
+        indep=np.prod(np.where(STATES,q,1-q),axis=1)
+        pi=(1-rng.uniform(.01,.5))*pi
+        pi+= (1-pi.sum())*indep
+        actual=PAIRS.T@pi
+        b=actual+(np.minimum(q[[i for i,j in E]],q[[j for i,j in E]])-actual)*rng.uniform(0,1,7)
+        a=fan_8var_lp(q,b); f=fan_full_lp(q,b)
+        assert a.success and f.success,(a.message,f.message)
+        assert abs(a.fun-f.fun)<1e-8,(q,b,a.fun,f.fun)
+        cycles=[[(0,1),(0,2),(1,2)],[(0,1),(0,4),(1,4)],[(0,2),(0,3),(2,3)],[(0,3),(0,4),(1,2),(1,4),(2,3)]]
+        candidate=min(*q,*[sum(b[E.index(e)] for e in cyc) for cyc in cycles])
+        surplus=max(sum(q[list(tri)])-1 for tri in TRI)
+        if candidate<surplus-1e-8:old_condition_failed+=1
+        count+=1
+    print('VERIFIED',count,'feasible cases: 8-variable = 48-variable LP; old sufficient condition fails in',old_condition_failed)
+    print('The formulation is a theorem of clique gluing + triangle projection, not an inference from tests.')
+\end{CodeListing}
+
+\section*{附录 B：完全独立的有理数共同对抗分布构造}
+以下代码使用 Python 标准库，\emph{不需要浮点优化器}；
+它独立给出并检查上一节的 32 状态联合分布和互补对称质量。
+\begin{CodeListing}
+"""Exact rational, constructive minimax witness for the five-vertex fan.
+
+Checks an instance outside the earlier triangle-surplus condition and
+constructs a common adversarial distribution (nu + rho) on all 32 states.
+Only Python's standard-library fractions; no numerical optimizer required.
+"""
+from fractions import Fraction as F
+from itertools import combinations
+
+E=[(0,1),(0,2),(0,3),(0,4),(1,2),(1,4),(2,3)]
+TRI=[(0,1,2),(0,1,4),(0,2,3)]
+q=[F(3,10),F(8,25),F(23,50),F(23,50),F(3,10)]
+eps=F(1,5)
+
+# A distribution witnessing feasibility of the original marginal/cap data.
+source=[]
+for m in range(32):
+    only={0:1-q[0]-q[1]-q[4],1:q[0],2:q[1],16:q[4]}.get(m & 19,F(0))
+    for i in (2,3): only*=q[i] if (m>>i)&1 else 1-q[i]
+    independent=F(1)
+    for i in range(5): independent*=q[i] if (m>>i)&1 else 1-q[i]
+    source.append((1-eps)*only+eps*independent)
+b=[sum(source[m] for m in range(32) if (m>>i)&1 and (m>>j)&1)
+   for i,j in E]
+assert sum(source)==1
+assert all(sum(source[m] for m in range(32) if (m>>i)&1)==q[i]
+           for i in range(5))
+
+# Rational t,u from the projected 8-variable LP (verified below by
+# explicitly constructing its matching joint law, not trusting the LP).
+t=F(141,2500)
+u=[F(12,625),F(93,2500),F(0),F(9,500),
+   F(0),F(12,625),F(12,625)]
+h=1-2*t
+r=[qi-t for qi in q]
+d=[be-ue for be,ue in zip(b,u)]
+
+def marg(law,ids):
+    mask=sum(1<<i for i in ids)
+    return {z:sum(mass for m,mass in law.items() if (m&mask)==z)
+            for z in range(32) if (z&mask)==z}
+
+def glue(law_a,nodes_a,law_b,nodes_b):
+    """Clique-tree gluing of two unnormalized laws sharing a separator."""
+    overlap=set(nodes_a)&set(nodes_b)
+    common=sum(1<<i for i in overlap)
+    sep=marg(law_a,overlap)
+    assert sep==marg(law_b,overlap)
+    joined={}
+    for ma,pa in law_a.items():
+        for mb,pb in law_b.items():
+            if (ma&common)!=(mb&common): continue
+            den=sep[ma&common]
+            if den==0: assert pa==0 or pb==0;continue
+            key=ma|mb
+            joined[key]=joined.get(key,F(0))+pa*pb/den
+    return joined
+
+def symmetric_triangle(nodes):
+    ids=[E.index(edge) for edge in combinations(nodes,2)]
+    uu=[u[k] for k in ids]
+    total=sum(uu)
+    both=(total-t)/2
+    out={}
+    def push(mask,prob):out[mask]=out.get(mask,F(0))+prob
+    full=sum(1<<i for i in nodes)
+    push(0,both);push(full,both)
+    for k,(i,j) in zip(ids,combinations(nodes,2)):
+        mass=(2*u[k]-total+t)/2
+        on=(1<<i)|(1<<j)
+        push(on,mass);push(full^on,mass)
+    assert all(z>=0 for z in out.values())
+    assert sum(out.values())==2*t
+    return out
+
+def central_residual():
+    v01=v02=F(0)
+    out={}
+    for val in (0,1):
+        universe=r[0] if val else h-r[0]
+        s1=v01 if val else r[1]-v01
+        s2=v02 if val else r[2]-v02
+        both=max(F(0),s1+s2-universe)
+        mass={(0,0):universe-s1-s2+both,
+              (1,0):s1-both,(0,1):s2-both,(1,1):both}
+        for (v1,v2),p in mass.items():
+            out[val|(v1<<1)|(v2<<2)]=p
+    assert all(z>=0 for z in out.values())
+    return out
+
+def leaf_residual(i,j,k,shared_v,cap_ik,cap_jk):
+    # Greedy: put X_k=1 first into the 00 cell (free), then into cells
+    # 10 / 01 (one budget each), and finally 11 (both budgets).
+    p={(0,0):h-r[i]-r[j]+shared_v,(1,0):r[i]-shared_v,
+       (0,1):r[j]-shared_v,(1,1):shared_v}
+    assert all(v>=0 for v in p.values())
+    alloc={(0,0):p[0,0]}
+    alloc[1,0]=min(p[1,0],cap_ik)
+    alloc[0,1]=min(p[0,1],cap_jk)
+    alloc[1,1]=min(p[1,1],cap_ik-alloc[1,0],cap_jk-alloc[0,1])
+    assert min(alloc.values())>=0
+    max_mass=sum(alloc.values())
+    assert max_mass>=r[k]
+    fraction=r[k]/max_mass if max_mass else F(0)
+    out={}
+    for (xi,xj),size in p.items():
+        yes=alloc[xi,xj]*fraction
+        base=(xi<<i)|(xj<<j)
+        out[base]=size-yes
+        out[base|(1<<k)]=yes
+    assert all(z>=0 for z in out.values())
+    return out
+
+nu=glue(symmetric_triangle(TRI[0]),TRI[0],
+        symmetric_triangle(TRI[1]),TRI[1])
+nu=glue(nu,[0,1,2,4],symmetric_triangle(TRI[2]),TRI[2])
+rho=glue(central_residual(),TRI[0],
+         leaf_residual(0,1,4,F(0),d[3],d[5]),TRI[1])
+rho=glue(rho,[0,1,2,4],
+         leaf_residual(0,2,3,F(0),d[2],d[6]),TRI[2])
+pi=[nu.get(m,F(0))+rho.get(m,F(0)) for m in range(32)]
+assert all(x>=0 for x in pi)
+assert sum(pi)==1 and sum(nu.values())==2*t
+assert all(nu.get(m,F(0))==nu.get(31-m,F(0)) for m in range(32))
+assert all(sum(pi[m] for m in range(32) if m>>i&1)==q[i] for i in range(5))
+assert all(sum(pi[m] for m in range(32) if m>>i&1 and m>>j&1)<=b[k]
+           for k,(i,j) in enumerate(E))
+cycles=[[0,1,4],[0,3,5],[1,2,6],[2,3,4,5,6]]
+candidate=min([*q,*[sum(b[k] for k in cycle) for cycle in cycles]])
+surplus=max(sum(q[i] for i in tri)-1 for tri in TRI)
+assert candidate==t and t<surplus
+assert sum(q)-3*min(q)<1 and sum(q)>1
+print('RATIONAL THEOREM WITNESS')
+print('q:',[str(z) for z in q])
+print('b:',[str(z) for z in b])
+print('candidate and achieved minimax:',t)
+print('old sufficient-condition RHS:',surplus)
+print('nu mass:',sum(nu.values()),'; full distribution support:',sum(z>0 for z in pi))
+print('ALL 32 STATE PROBABILITIES, MARGINALS AND EDGE CAPS CHECK EXACTLY')
+\end{CodeListing}
+
+\end{document}

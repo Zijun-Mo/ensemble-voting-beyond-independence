@@ -1,0 +1,106 @@
+% ---------- shared preamble ----------
+\usepackage[a4paper,top=26mm,bottom=26mm,left=25mm,right=25mm,headheight=14pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{fontspec}
+\setmainfont{Noto Serif CJK SC}[
+  BoldFont={Noto Serif CJK SC Bold},
+  ItalicFont={Noto Serif CJK SC},ItalicFeatures={FakeSlant=0.15},
+  BoldItalicFont={Noto Serif CJK SC Bold},BoldItalicFeatures={FakeSlant=0.15}]
+\setsansfont{Noto Sans CJK SC}[BoldFont={Noto Sans CJK SC Bold}]
+\newfontfamily\lmr{Latin Modern Roman}
+\newcommand{\apos}{{\lmr\char"2019}}
+\newcommand{\gerlq}{{\lmr\char"201E}}
+\newcommand{\gerrq}{{\lmr\char"201C}}
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip = 0pt plus 1pt
+\linespread{1.32}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.35em}
+\setcounter{tocdepth}{1}
+\emergencystretch=2em
+
+\usepackage{xcolor}
+\definecolor{accent}{HTML}{1F4E79}
+\definecolor{accentlight}{HTML}{EAF1F8}
+\definecolor{warm}{HTML}{8A4B08}
+\definecolor{warmlight}{HTML}{FBF3E6}
+\definecolor{good}{HTML}{2E6B30}
+\definecolor{goodlight}{HTML}{EEF6EE}
+\definecolor{muted}{HTML}{5F6B76}
+
+\usepackage{booktabs,array,multirow,enumitem,float}
+\setlist{itemsep=0.15em,topsep=0.3em,leftmargin=2.2em}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc,positioning,decorations.pathreplacing}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\titleformat{\section}{\sffamily\bfseries\Large\color{accent}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\sffamily\bfseries\large\color{accent}}{\thesubsection}{0.7em}{}
+\titleformat{\subsubsection}{\sffamily\bfseries\normalsize}{\thesubsubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.7em}
+\titlespacing*{\subsection}{0pt}{1.1em}{0.5em}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyfoot[C]{\small\color{muted}\thepage}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=accent,citecolor=accent,urlcolor=accent}
+\usepackage{caption}
+\captionsetup{font=small,labelfont={bf,sf},labelsep=quad}
+\renewcommand{\figurename}{图}
+\renewcommand{\tablename}{表}
+\renewcommand{\contentsname}{目录}
+\renewcommand{\refname}{参考文献}
+\renewcommand{\proofname}{证明}
+
+% theorem styles (upright body; Chinese should not be slanted)
+\newtheoremstyle{zhthm}{0.7em}{0.7em}{\normalfont}{}{\sffamily\bfseries\color{accent}}{}{0.6em}{\thmname{#1}\thmnumber{ #2}\thmnote{（#3）}}
+\newtheoremstyle{zhrem}{0.5em}{0.5em}{\normalfont}{}{\sffamily\bfseries\color{muted}}{}{0.6em}{\thmname{#1}\thmnumber{ #2}\thmnote{（#3）}}
+\theoremstyle{zhthm}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{proposition}[theorem]{命题}
+\newtheorem{corollary}[theorem]{推论}
+\newtheorem{definition}[theorem]{定义}
+\newtheorem{assumption}[theorem]{假设}
+\theoremstyle{zhrem}
+\newtheorem{remark}[theorem]{注}
+\newtheorem{example}[theorem]{例}
+\makeatletter
+\renewenvironment{proof}[1][\proofname]{\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax
+  \trivlist\item[\hskip\labelsep\sffamily\bfseries #1.]\ignorespaces}{\popQED\endtrivlist\@endpefalse}
+\makeatother
+
+% math macros
+\newcommand{\1}{\mathbf{1}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Bin}{\operatorname{Bin}}
+\newcommand{\Corr}{\operatorname{Corr}}
+\newcommand{\Amin}{A_{-}}
+\newcommand{\Aplus}{A_{+}}
+\newcommand{\Aind}{A_{\mathrm{ind}}}
+\newcommand{\pd}[1]{p_{(#1)}}   % descending order
+\newcommand{\pa}[1]{p_{[#1]}}   % ascending order
+
+% boxes
+\newtcolorbox{keybox}[1][]{enhanced,breakable,colback=accentlight,colframe=accent,boxrule=0.6pt,arc=2pt,left=8pt,right=8pt,top=6pt,bottom=6pt,fonttitle=\sffamily\bfseries,#1}
+\newtcolorbox{warnbox}[1][]{enhanced,breakable,colback=warmlight,colframe=warm,boxrule=0.6pt,arc=2pt,left=8pt,right=8pt,top=6pt,bottom=6pt,fonttitle=\sffamily\bfseries,#1}
+\newtcolorbox{goodbox}[1][]{enhanced,breakable,colback=goodlight,colframe=good,boxrule=0.6pt,arc=2pt,left=8pt,right=8pt,top=6pt,bottom=6pt,fonttitle=\sffamily\bfseries,#1}
+
+\newcommand{\doctitle}[3]{%
+  \thispagestyle{empty}
+  \begin{center}
+  {\sffamily\small\color{muted} DSAA2011 Task B \,·\, Project 2 \,·\, Ensemble Voting Beyond Independence}\par\vspace{1.0em}
+  {\sffamily\bfseries\LARGE\color{accent} #1}\par\vspace{0.6em}
+  {\sffamily\large #2}\par\vspace{0.8em}
+  {\small\color{muted} #3}
+  \end{center}
+  \vspace{0.6em}}

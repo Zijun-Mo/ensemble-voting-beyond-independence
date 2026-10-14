@@ -1,0 +1,130 @@
+% !TeX program = xelatex
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Noto Serif CJK SC}
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip = 0pt plus 1pt
+\usepackage{amsmath,amssymb,amsthm,booktabs,array}
+\newtheorem{theorem}{定理}
+\newtheorem{corollary}[theorem]{推论}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{说明}
+\renewcommand{\proofname}{证明}
+\newcommand{\Rdet}{R^*_{\mathrm{det}}}
+\title{$K=5$ 精确闭式 $U_{248}$ 的结构解释}
+\author{选题文档 [S30]（审查方整理，2026-10-14）}
+\date{}
+\begin{document}
+\maketitle
+\sloppy
+
+\noindent\textbf{背景。}选题文档结果 8 证明：对一切可行参数，$\Rdet(q,b)=U_{248}(q,b)=\min_{j\le248}L_{Q_j}(q,b)$，其中 $L_Q=a+\sum_i\beta_iq_i+\sum_{i<k}\gamma_{ik}b_{ik}$。本文说明这 248 项从哪里来、各自何时起作用，供论文 \S6 正文使用。记 $N=\sum_ix_i$ 为出错个数，$\tau=\sum_iq_i-1$ 为"总错误率超出 1 的部分"，$U_0=\min\{q_{\min},c^*\}$ 为 $R_0$ 内的 27 项闭式（结果 3(c)）。
+
+\section{截距分解：每一项都是"图证书减去 $a\tau$"}
+
+\begin{theorem}[截距分解]\label{thm:dec}
+$U_{248}$ 的每个证书都可写成 $Q=Q^0-a(N-1)$，其中 $a\ge0$；$Q^0$ 的截距为零，线性与二次系数全部非负，并且 $Q^0$ 本身就是同一条规则的合法零截距证书。因此每一项都可写成
+\[
+L_Q(q,b)=A_Q(q,b)-a\,\tau,\qquad A_Q:=L_{Q^0}\ \ge\ U_0 .
+\]
+\end{theorem}
+\begin{proof}
+令 $Q^0:=Q+a(N-1)$，则 $Q^0(\mathbf 0)=Q(\mathbf 0)-a=0$；而当 $N(x)\ge1$ 时，$Q^0(x)\ge Q(x)\ge F(x)$。又因为所涉规则都是单调规则，$F(\mathbf 0)=0$，所以 $Q^0\ge F$。$L_{Q^0}\ge U_0$ 由结果 3(a)(c) 得到。系数的非负性对 248 项逐一精确核验（[S9] \texttt{k5\_u248\_structure/decomposition\_check.py}）。
+\end{proof}
+
+\begin{corollary}[两侧显式界]\label{cor:sandwich}
+对一切可行参数，
+\[
+U_0-5\,(\textstyle\sum_iq_i-1)_+\ \le\ \Rdet\ \le\ U_0 .
+\]
+\end{corollary}
+\begin{proof}
+零截距的 27 项给出上界。对正截距项，由定理~\ref{thm:dec}，$L_Q\ge U_0-a\tau$，而 248 项中 $a$ 的最大值为 5（规则 $(3,2,2,1,1)$ 的 $a=5$ 轨道）。
+\end{proof}
+
+由此可以读出三点：
+\begin{itemize}
+\item $\tau\le0$，即 $R_0$ 内，正截距项全部被 $U_0$ 支配，这就是结果 3(b)。
+\item 走出 $R_0$ 后，精确值离 27 项闭式的偏差不超过 $5\tau$。截距 $a$ 就是该项随总错误率超出 1 而下降的斜率。
+\item 正截距项能起作用，需要"总错误率大"（$\tau>0$）与"图证书部分 $A_Q$ 小"（成对共错少）同时成立。
+\end{itemize}
+在 20 万个随机可行点上，比值 $(U_0-\Rdet)/\tau$ 的最大观测值为 2，常数 5 是否可以压低尚未研究。
+
+\section{12 个轨道一览}
+
+表中 $r$ 表示权重最大的成员，$M$、$L$ 分别表示中等权重与轻权重的成员，$z$ 表示权重为 0 的成员；"规则权重"一栏给出该证书对之可行的单调阈值规则；$A_Q$ 的各项系数都非负。前四类正截距证书是平移二项矩证书 $Q=\binom{W-r+2}{2}$（$W=\sum_iw_ix_i$，$r=(\sum_iw_i+1)/2$），其余五个轨道没有现成名称，正文按"规则权重、$a$、交互图"称呼它们。
+
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}l c c c l l@{}}
+\toprule
+类别 & 项数 & 规则权重 & $a$ & 交互图 & $A_Q$（$L_Q=A_Q-a\tau$） \\
+\midrule
+独裁 & 5 & $(1,0,0,0,0)$ & 0 & 无 & $q_i$ \\
+三角形 & 10 & $(1,1,1,0,0)$ & 0 & $K_3$ & 三条边的 $b$ 之和 \\
+五圈 & 12 & 五人多数等 & 0 & $C_5$ & 五条边的 $b$ 之和 \\
+\midrule
+二项矩 & 1 & $(1,1,1,1,1)$ & 1 & $K_5$ & $\sum_{\text{全部 10 对}}b$ \\
+二项矩 & 20 & $(2,1,1,1,0)$ & 1 & $K_4$ & $q_z+2\sum_{L}b_{rl}+\sum_{L}b_{ll'}$ \\
+二项矩 & 10 & $(2,2,1,1,1)$ & 3 & $K_5$ & $\sum_Lq_l+4b_{r_1r_2}+2\sum b_{rl}+\sum b_{ll'}$ \\
+二项矩 & 5 & $(3,1,1,1,1)$ & 3 & $K_5$ & $\sum_{i\ne r}q_i+3\sum_ib_{ri}+\sum b_{ll'}$ \\
+— & 5 & $(3,1,1,1,1)$ & $\tfrac13$ & $K_5$ & $\tfrac43\sum_ib_{ri}+\tfrac13\sum b_{ll'}$ \\
+— & 30 & $(3,2,2,1,1)$ & 5 & $K_5$ & $\sum_Mq_m+2\sum_Lq_l+\cdots$（10 条边） \\
+— & 30 & $(3,2,2,1,1)$ & 1 & $K_5$ 去掉 $r$–$L$ 两边（共端点） & $q_r+\cdots$（8 条边） \\
+— & 60 & $(3,2,2,1,1)$ & 1 & 扇形图（gem） & $q_{m_1}+q_{m_2}+\cdots$（7 条边） \\
+— & 60 & $(3,2,2,1,1)$、$(2,2,1,1,1)$ & 2 & $K_5$ 去掉一边 & $q_{l_1}+q_{l_2}+\cdots$（9 条边） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+表中各轨道的完整系数见 [S26] §1，以及 [S9] 中的 \texttt{orbit\_table.json}。
+
+\section{这些项从哪里来}
+
+\begin{enumerate}
+\item \textbf{零截距 27 项来自 $R_0$。}独裁、三角形（三人多数）、五圈（五人多数），即结果 3(c)。它们只用成对共错的预算，不利用"总错误率超出 1"。
+\item \textbf{锚点项来自 $K=4$。}权重 $(2,1,1,1,0)$ 的 20 项就是结果 7(b) 中 $K=4$ 的锚点项：第五个成员不参与投票。
+\item \textbf{其余 8 个正截距轨道只对应 4 条五人规则。}这 4 条规则的权重是 $(1,1,1,1,1)$、$(2,2,1,1,1)$、$(3,1,1,1,1)$ 与 $(3,2,2,1,1)$，共 201 项。
+  \begin{itemize}
+  \item 权重 $(3,2,2,1,1)$ 一条规则就贡献了 4 个轨道、180 项（$a=5,2,1,1$）。
+  \item 平移二项矩证书（Boros–Prékopa 型）、$(3,1,1,1,1)$ 的 $a=\tfrac13$ 轨道与 $(3,2,2,1,1)$ 的 $a=5$ 轨道构成 $U_{98}$。$(3,2,2,1,1)$ 的另外三个轨道（$a=2$ 与两个 $a=1$）是本项目新发现的。
+  \end{itemize}
+\end{enumerate}
+
+\section{何时起作用}
+
+\paragraph{需要"弱而多样"的成员。}[S26] 为 12 个轨道各给出一个见证点：在该点该项严格小于其余 247 项。正截距项的见证点上，$\sum_iq_i$ 在 1.58 到 2.25 之间：多数成员的错误率在 0.33 到 0.5 之间，只有 $a=\tfrac13$ 轨道的见证点里有一个成员较强（错误率约 0.19）；而 $\Rdet$ 很小，多数接近 0，最大约 0.14。也就是说，成员单独都很弱，但错误互相错开、成对共错少，于是对应的加权多数几乎不出错。
+
+\paragraph{在一般参数下很少起作用。}在约 100 万个随机可行参数点上（独立、稀疏与混合三类联合分布），正截距项成为最小项的比例低于 0.1\%，绝大多数时候最小项是独裁或三角形。所以对普通的评审团，$U_0$ 已经足够准确，推论~\ref{cor:sandwich} 给出了它的误差上界；248 项的完整闭式主要用于刻画"多样化集成"这一区域，以及给出可认证的精确值。
+
+\paragraph{哪些项依赖"松"的成对上界。}把一部分成对上界设为真实二阶矩（即取等号）时，不可约项数如下：
+
+\begin{center}
+\small
+\begin{tabular}{@{}lcl@{}}
+\toprule
+取等号的边 & 不可约项数 & 变成冗余的项 \\
+\midrule
+无 & 248 & 无 \\
+除两条不相邻边外全部 & 186 & 两个 $a=1$ 轨道：18/30、44/60 \\
+除两条相邻边外全部 & 181 & 两个 $a=1$ 轨道：19/30、48/60 \\
+除一条边外全部 & 170 & 两个 $a=1$ 轨道：24/30、54/60 \\
+全部 10 条 & 158 & 两个 $a=1$ 轨道：30/30、60/60 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+只有 $(3,2,2,1,1)$ 规则的两个 $a=1$ 轨道会变成冗余。它们的交互图分别缺 2 条和 3 条边，正是用来利用"某些成对上界很松"这一情形的：证书在这些边上 $\gamma_{ij}=0$，不使用这些边的成对上界。若成对信息是真实二阶矩，精确闭式只需 158 项，即 $U_{98}$ 加上 $a=2$ 轨道。在有限样本认证（结果 10）里，$\hat b$ 只是上界，往往并不紧，所以这两个轨道在实际认证中是有用的。交互图为扇形图的那个 $a=1$ 轨道，也正是扇形约束图闭式的第十项（[S22]）。
+
+\section{可复现}
+\texttt{code/review\_checks/k5\_u248\_structure/} 中有三个脚本，每个运行时间都不超过 5 分钟：
+\begin{itemize}
+\item \texttt{orbit\_table.py}：代表元、规则、交互图与 $Q^0$；
+\item \texttt{decomposition\_check.py}：截距分解的精确核验、推论~\ref{cor:sandwich} 的抽样检验，以及 12 个见证点；
+\item \texttt{activity\_and\_layers.py}：随机参数下哪一项起作用，以及成对上界部分取等时按轨道统计的不可约项数。
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,519 @@
+% !TeX program = xelatex
+% !TeX encoding = UTF-8
+% D1: Complexity and structure of the optimal graph certificate
+% Compile: xelatex D1_Bgraph_complexity_theory_report.tex (twice)
+\documentclass[11pt,a4paper]{ctexart}
+\usepackage[margin=24mm,top=25mm,bottom=24mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{booktabs,tabularx,array,longtable}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr,lastpage}
+\usepackage[most]{tcolorbox}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.2em}
+\setlist{itemsep=.18em,topsep=.3em}
+\definecolor{ink}{HTML}{173047}
+\definecolor{accent}{HTML}{156D80}
+\definecolor{soft}{HTML}{F0F6F8}
+\definecolor{caution}{HTML}{91512B}
+\hypersetup{colorlinks=true,linkcolor=ink,urlcolor=accent,citecolor=accent}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{ink}{D1：最优图证书的复杂度与结构}}
+\fancyhead[R]{\small\textcolor{ink}{理论研究记录}}
+\fancyfoot[C]{\small 第 \thepage\ 页 / 共 \pageref{LastPage} 页}
+\renewcommand{\headrulewidth}{0.3pt}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{proposition}[theorem]{命题}
+\newtheorem{corollary}[theorem]{推论}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{定义}
+\newtheorem{remark}[theorem]{说明}
+\newenvironment{proofcn}{\par\noindent\textbf{证明.}\ }{\hfill$\square$\par}
+\newtcolorbox{resultbox}{breakable,colback=soft,colframe=accent,boxrule=.7pt,arc=1.3mm,left=3mm,right=3mm,top=2mm,bottom=2mm}
+\newcommand{\GraphCert}{\mathsf{GraphCert}}
+\newcommand{\Bin}{\mathsf{Bipartite}}
+\newcommand{\Odd}{\mathcal C_{\rm odd}}
+\newcommand{\NN}{\mathbb N}
+\newcommand{\RR}{\mathbb R}
+\newcommand{\EE}{\mathbb E}
+\newcommand{\1}{\boldsymbol 1}
+\newcommand{\bgraph}{B_{\rm graph}}
+\newcommand{\buncut}{B_{\rm uncut}}
+\newcommand{\ct}{c^*}
+\newcommand{\internal}{\mathsf I}
+\begin{document}
+\begin{center}
+{\color{accent}\rule{\linewidth}{1.4pt}}\\[10mm]
+{\Huge\bfseries D1：最优图证书 $B_{\rm graph}$ 的\\[3mm]计算复杂度与结构定理}\\[6mm]
+{\Large\bfseries 先例核查、精确图类、分解法则与近似松弛}\\[7mm]
+{\large 2026 年 10 月 13 日\quad|\quad 中文 LaTeX 理论报告}
+\end{center}
+\vspace{4mm}
+\begin{resultbox}
+\textbf{摘要.} 在仅知道分类器边际错误率和成对共同出错概率上界的稳健投票中，最优图证书定义为
+\[
+ B_H(b)=\inf_{y\in\RR_+^{E(H)}:\,g_H(y)>0}
+ \frac{\sum_{e\in E(H)}b_ey_e}{g_H(y)},\qquad
+ g_H(y)=\min_{S\subseteq V(H)}\max\{y(E(S)),y(E(V\setminus S))\}.
+\]
+本文整理关于 $B_H$ 的 D1 研究结果：固定 $y$ 的明智二部划分可由 \textsc{Partition} 证明为弱 NP-hard，而\emph{这个结论不能直接推出} $B_H$ 的 NP-hardness；$B_H$ 有精确的无 big-$M$ 混合整数线性规划及自然的 2 倍 LP 松弛；弱二部图上 $B_H$ 等于最小成本奇环，因而包含平面图与无 $K_5$ 子式图的精确可解情形；任意图上的 $B_H$ 可依双连通块分解；在完全图上可以安全剔除超过已有证书值的高成本边。最后证明其有理决策版本属于 $\Sigma_2^P$，并给出标准 LP 松弛至少 $3/2$ 的渐近间隙。
+
+\textbf{研究边界.} 本文\emph{没有}证明一般 $B_H$ 的 NP-hardness 或 $\Sigma_2^P$-完全性。图论领域已有的结论与从这些结论推导的 $B_H$ 命题分别标记，不对新颖性作优先权保证。
+\end{resultbox}
+\vspace{3mm}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}p{.30\linewidth}X p{.19\linewidth}@{}}
+\toprule
+项目 & 结论 & 证明/出处性质 \\
+\midrule
+固定 $y$ 的 $g_H(y)$ & 弱 NP-hard；阈值可行性 coNP-complete & 本文归约；有 1994 年先例 \\
+精确计算 $B_H$ & 指数规模、无 big-$M$ 的 MILP & 本文等价推导 \\
+Min-UnCut 松弛 & $\buncut\le B_H\le 2\buncut$ & 本文证明 \\
+弱二部图 & $B_H=c_H^*$ & 依据 Guenin 的整数性定理 \\
+无 $K_5$ 子式图 & $B_H=c_H^*$，多项式可算 & 上述推论 \\
+双连通块 & $B_H=\min_j B_{H_j}$ & 本文证明 \\
+高成本边 & $b_e>U$ 可删除 & 本文证明 \\
+一般决策复杂度 & $\GraphCert\in\Sigma_2^P$ & 本文证明上界 \\
+一般 NP-hardness & 尚未建立 & 开放研究方向 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\newpage
+\tableofcontents
+\newpage
+
+\section{研究问题与精确定义}
+\subsection{由鲁棒投票到加权图}
+给定 $K$ 个二元分类器，令 $q_i=\Pr(f_i(X)\neq Y)$，$b_{ij}$ 为共同出错概率的有效上界：
+\[
+ \Pr(f_i(X)\neq Y,\ f_j(X)\neq Y)\le b_{ij},\qquad
+ 0\le b_{ij}\le\min\{q_i,q_j\}.
+\]
+取模型集合 $V=[K]$；可以在完全图 $K_K$ 上建立证书，也可以事先指定可用边构成的支撑图 $H=(V,E)$。对任意非负证书边权 $y=(y_e)_{e\in E}$，记
+\[
+ E(S)=\{ij\in E:i,j\in S\},\quad y(F)=\sum_{e\in F}y_e,\quad
+ A_S(y)=y(E(S)),\quad D_S(y)=y(E(V\setminus S)).
+\]
+引入明智二部划分（judicious bipartition）值
+\begin{equation}\label{eq:g}
+ g_H(y)=\min_{S\subseteq V}\max\{A_S(y),D_S(y)\}.
+\end{equation}
+若 $g_H(y)>0$，定义证书比率
+\begin{equation}\label{eq:Bdef}
+ B_H(b)=\inf_{\substack{y\ge0\\g_H(y)>0}}\frac{b^\top y}{g_H(y)};
+\qquad
+ B_H(b):=+\infty\quad\text{若不存在可行的 }y.
+\end{equation}
+当 $H$ 为完全图时简记 $B_{\rm graph}=B_{K_K}$。若 $H$ 为二部图，则存在一个二部染色使两侧内部边权均为零，故 $g_H(y)=0$ 对所有 $y$ 成立，从而 $B_H=+\infty$。若 $H$ 含奇环，在该环上取正权重即可使 $g_H(y)>0$，故 $B_H$ 有限。
+
+令 $\Odd(H)$ 为 $H$ 中所有\emph{简单奇环}的集合，定义
+\begin{equation}\label{eq:cstar}
+ c_H^*(b)=\min_{C\in\Odd(H)}\sum_{e\in C}b_e,
+ \qquad \min\varnothing:=+\infty.
+\end{equation}
+在任何奇环上取单位权重（非环边权重为零），其 $g_H=1$，故
+\begin{equation}\label{eq:cycleupper}
+ B_H(b)\le c_H^*(b).
+\end{equation}
+作为背景，之前的稳健投票分析在更严格的 $\sum_iq_i\le1$ 区域中给出 $R_{\rm det}^*=\min\{q_{\min},B_{\rm graph}\}$。本文的 D1 目标是分析右侧 $B_{\rm graph}$ 的\emph{计算复杂度}和\emph{算法结构}；该目标本身不需要重新讨论投票 minimax 对偶。
+
+\subsection{基本齐次性与最优值存在}
+\begin{lemma}[齐次规范化]\label{lem:normalize}
+对于任意包含奇环的有限图 $H$ 和非负有理成本 $b$，有
+\begin{equation}\label{eq:normalize}
+ B_H(b)=\min\{b^\top y:y\ge0,\ g_H(y)\ge1\}.
+\end{equation}
+其中最小值可达到。
+\end{lemma}
+\begin{proofcn}
+因为 $g_H(ty)=t g_H(y)$ 对每个 $t\ge0$ 成立，每个 $g_H(y)>0$ 的 $y$ 都可按 $1/g_H(y)$ 缩放为 $g_H(y)=1$，目标比率不变。反方向也成立。约束 $g_H(y)\ge1$ 等价于
+\[
+ \bigwedge_{S\subseteq V}\bigl(A_S(y)\ge1\ \lor\ D_S(y)\ge1\bigr),
+\]
+因此可行域是有限个有理闭多面体的并，且每一部分都满足 $y\ge0$。在线性目标非负且可行的情况下，每部分的有限最优值可达到；对有限个部分取最小值亦可达到。
+\end{proofcn}
+
+\section{固定权重的明智二部划分：已有困难性与直接归约}
+固定 $y$ 计算 $g_H(y)$，与同时选择证书权重的 $B_H$ 是两个不同的计算问题。
+
+\subsection{先例核查}
+Shahrokhi--Sz\'ekely（1994）已证明瓶颈图二部划分（bottleneck graph bipartition）的 NP-hardness\cite{ShahrokhiSzekely1994}；Bollob\'as--Scott 的综述收录了这一结果\cite{BollobasScott2002}。因此，\emph{固定图权重的 NP-hardness 不应被表述为全新发现}。但下述简洁归约有助于解释问题本质。
+
+\begin{proposition}[从 \textsc{Partition} 的弱 NP-hard 归约]\label{prop:partition}
+对非负整数边权，精确计算 $g_H(y)$ 即使限制在互不相交的三角形构成的图上，仍是弱 NP-hard 的。判断 $g_H(y)\ge1$（允许非负有理边权）是 coNP-complete 的。
+\end{proposition}
+\begin{proofcn}
+给定 \textsc{Partition} 实例的正整数 $a_1,\ldots,a_n$，构造 $n$ 个互不相交的三角形 $T_i$，每个 $T_i$ 的三条边都赋予权重 $a_i$。任意三角形若完全位于一侧，则其内部总权重为 $3a_i$；若按 $2+1$ 分到两侧，则只有一条内部边，权重为 $a_i$，并可任选这条内部边位于左侧或右侧。
+
+因此，将每个单色三角形改为 $2+1$ 划分不会增加任何一侧的内部边权；最优解总存在于所有三角形都采用 $2+1$ 划分的方案中。于是
+\begin{equation}\label{eq:partition}
+ g_H(y)=\min_{I\subseteq[n]}
+ \max\left\{\sum_{i\in I}a_i,\ \sum_{i\notin I}a_i\right\}.
+\end{equation}
+若 $\sum_i a_i=2T$，则 $g_H(y)\le T$ 当且仅当 \textsc{Partition} 有解。这证明精确求值的弱 NP-hardness。
+
+对于阈值 $g_H(y)\ge1$，将全部权重改为 $a_i/(T+1)$。由于未缩放的 $g_H(y)$ 为整数，
+\[
+ g_H\!\left(\frac y{T+1}\right)\ge1
+ \quad\Longleftrightarrow\quad
+ g_H(y)\ge T+1
+ \quad\Longleftrightarrow\quad
+ \textsc{Partition}\ \text{无解}.
+\]
+该判定属于 coNP，因为其否定可由一个满足 $A_S(y)<1$ 且 $D_S(y)<1$ 的划分 $S$ 在多项式时间核验。因此 coNP-complete。
+\end{proofcn}
+
+\begin{remark}[关键逻辑区分]
+命题~\ref{prop:partition} 不构成 $B_H$ 的 NP-hardness 证明。例如这些互不相交的三角形所形成的图，后文的块分解与弱二部性定理反而给出 $B_H=\min_i \sum_{e\in E(T_i)}b_e$，可线性时间求解。
+\end{remark}
+
+\section{精确混合整数规划与自然的两倍松弛}
+\subsection{无 big-$M$ 的精确 MILP}
+固定每对互补划分 $\{S,V\setminus S\}$ 的一个代表。引入 $z_S\in\{0,1\}$，得到
+\begin{equation}\label{eq:milp}
+\boxed{\begin{aligned}
+ \min\quad &\sum_{e\in E}b_e y_e\\
+ \text{s.t.}\quad &A_S(y)\ge z_S,\\
+ &D_S(y)\ge1-z_S,
+ &&\forall\{S,V\setminus S\},\\
+ &y_e\ge0,\quad z_S\in\{0,1\}.
+\end{aligned}}
+\end{equation}
+若 $z_S=1$，第一侧内部权重至少为 1；若 $z_S=0$，第二侧内部权重至少为 1。因此消去二元变量恰好得到 $g_H(y)\ge1$，由引理~\ref{lem:normalize} 可知 \eqref{eq:milp} 是精确模型。它有指数多个划分变量与约束，但\emph{没有}人为选取的大 $M$ 参数。
+
+\subsection{LP 松弛等于 Min-UnCut 证书}
+将 $z_S\in\{0,1\}$ 放松为 $0\le z_S\le1$。由于 $A_S,D_S\ge0$，存在这样的 $z_S$ 当且仅当 $A_S(y)+D_S(y)\ge1$。定义
+\begin{equation}\label{eq:uncut}
+ u_H(y)=\min_{S\subseteq V}\{A_S(y)+D_S(y)\}
+ =\sum_{e\in E}y_e-\operatorname{MaxCut}_H(y),
+\end{equation}
+\begin{equation}\label{eq:Buncut}
+ B_{\rm uncut}(H;b)=\min\{b^\top y:y\ge0,\ u_H(y)\ge1\}.
+\end{equation}
+\begin{theorem}[自然 LP 松弛的两倍界]\label{thm:two}
+对任意含奇环的有限图和非负边成本，
+\begin{equation}\label{eq:2factor}
+ \boxed{B_{\rm uncut}(H;b)\le B_H(b)\le2B_{\rm uncut}(H;b).}
+\end{equation}
+若可精确求解松弛 \eqref{eq:Buncut}，其最优权重经适当缩放提供有效的 $2$ 倍图证书。
+\end{theorem}
+\begin{proofcn}
+对任意 $S$，记 $A=A_S(y)$、$D=D_S(y)$。总有
+\[
+ \frac{A+D}{2}\le\max\{A,D\}\le A+D.
+\]
+两边分别对划分取最小值，得
+\begin{equation}\label{eq:ug}
+ \frac12 u_H(y)\le g_H(y)\le u_H(y).
+\end{equation}
+对非负 $b$ 除以这些正分母并取下确界，即得 \eqref{eq:2factor}。此外，对松弛最优解 $y^\circ$（令 $u(y^\circ)=1$），有 $g(y^\circ)\ge1/2$，故 $b^\top y^\circ/g(y^\circ)\le2B_{\rm uncut}$。若 $B_{\rm uncut}=0$，则相应结论按零值理解。
+\end{proofcn}
+
+\begin{remark}[算法注意]
+在\emph{一般}图上，检查 $u_H(y)\ge1$ 需要计算加权 Max-Cut，其多项式时间分离并未成立。因此上面的 ``2 倍'' 是\emph{LP 松弛质量保证}，不能不加限制地声称已获得一般图的多项式时间 2 近似。无 $K_5$ 子式图上的高效求解见第~\ref{sec:weak} 节。
+\end{remark}
+
+\section{弱二部图：$B_H$ 精确等于最小成本奇环}\label{sec:weak}
+\subsection{外部使用的图论整数性定理}
+定义奇环覆盖多面体
+\begin{equation}\label{eq:coverpoly}
+ \mathcal Q_H=\left\{x\in\RR_+^{E}:\sum_{e\in C}x_e\ge1
+ \quad(\forall C\in\Odd(H))\right\}.
+\end{equation}
+如果该多面体为整数多面体，则称相应的全负符号图（所有边均视为负边）是\emph{弱二部的}（weakly bipartite）。此术语\emph{不等于}普通意义的二部图。Guenin 的刻画说明，相关符号图不含 odd-$K_5$ 子式当且仅当具有这种整数性\cite{Guenin2001,Schrijver2002}。尤其，一个普通图若不含 $K_5$ 子式，则其全负符号图也不含 odd-$K_5$ 子式，因而 $\mathcal Q_H$ 整数。
+
+\begin{theorem}[弱二部图上的奇环精确性]\label{thm:weak}
+若 $\mathcal Q_H$ 为整数多面体，则对于任意非负边成本 $b$，
+\begin{equation}\label{eq:weakeq}
+ \boxed{B_H(b)=c_H^*(b).}
+\end{equation}
+特别地，平面图及所有无 $K_5$ 子式图均满足此结论。
+\end{theorem}
+\begin{proofcn}
+如果 $H$ 二部，则两侧均为 $+\infty$。以下设 $H$ 含奇环。若 $c_H^*=0$，则把所有权重放在零成本奇环上得到 $B_H=0$，结论成立。于是设 $c=c_H^*>0$。
+
+构造分数奇环覆盖
+\[
+ x_e=\min\{1,b_e/c\}.
+\]
+对任意奇环 $C$，若其上某个 $b_e\ge c$，则 $x(C)\ge1$；否则 $x(C)=b(C)/c\ge1$。故 $x\in\mathcal Q_H$。
+
+给定任意 $y\ge0$，在 $\mathcal Q_H$ 上解 $\min\{y^\top z:z\in\mathcal Q_H\}$。整数性保证存在整数最优解 $z\ge0$，并有
+\[
+ y^\top z\le y^\top x\le\frac{b^\top y}{c}.
+\]
+把整数解截断为 $\widehat z_e=\min\{z_e,1\}$ 不会破坏奇环覆盖条件（任何奇环至少有一条边的 $z_e\ge1$），也不会增加成本。令 $F=\{e:\widehat z_e=1\}$。删去 $F$ 后，$H-F$ 不包含奇环，因此是二部图。对 $H-F$ 进行二染色，所有同侧边都位于 $F$，于是
+\[
+ g_H(y)\le y(F)=y^\top\widehat z
+ \le\frac{b^\top y}{c}.
+\]
+对 $g_H(y)>0$ 的任意 $y$ 取比率，得到 $B_H(b)\ge c$。另一方面，式~\eqref{eq:cycleupper} 给出 $B_H(b)\le c$。故二者相等。
+\end{proofcn}
+
+\begin{corollary}[多项式时间精确求解]\label{cor:minor}
+对于给定的无 $K_5$ 子式支撑图 $H$，可以在多项式时间内计算 $B_H(b)$，只需求出最小成本奇环。更广义地，只要已知 $H$ 为弱二部图，同样可直接用最小成本奇环求值。
+\end{corollary}
+\begin{proofcn}
+由定理~\ref{thm:weak}，$B_H=c_H^*$。非负成本下，最小成本奇环可通过奇偶双层状态图最短路求解：以 $(v,0),(v,1)$ 记录走过边数的奇偶性，对每条原图边 $uv$ 添加从 $(u,\sigma)$ 到 $(v,1-\sigma)$ 的费用为 $b_{uv}$ 的转移，对各起点 $v$ 求 $(v,0)$ 到 $(v,1)$ 的最短路。奇长度闭合游走必包含简单奇环；非负成本保证提取出的最便宜简单奇环不更贵。逐点枚举仍是多项式复杂度。
+\end{proofcn}
+
+\begin{remark}[与 Barahona 的区别]
+Barahona（1983）已给出无 $K_5$ 子式图上的多项式时间 Max-Cut 算法\cite{Barahona1983}，这能解决 $B_{\rm uncut}$ 的分离问题。定理~\ref{thm:weak} 则利用\emph{更强的奇环覆盖整数性}，使原始 $B_H$ 而不仅是松弛精确等于 $c_H^*$。这两条算法路径不应混同。
+\end{remark}
+
+\section{双连通块分解：困难性可缩至双连通图}
+设 $H_1,\dots,H_t$ 为 $H$ 的全部非平凡块（block，即最大无割点子图；桥视为一个两点块）。不同块的边不相交，关联的块--割点图为森林。
+
+\begin{theorem}[块分解恒等式]\label{thm:block}
+对任意非负边成本 $b$，
+\begin{equation}\label{eq:block}
+ \boxed{B_H(b)=\min_{1\le j\le t}B_{H_j}(b|_{E(H_j)}),}
+\end{equation}
+其中 $B_{H_j}=+\infty$ 对二部块成立；若图没有边，也约定 $B_H=+\infty$。
+\end{theorem}
+\begin{proofcn}
+给任意全图边权 $y$，限制到第 $j$ 个块上得到 $y_j$。各块分别取达到 $g_{H_j}(y_j)$ 的划分。沿块--割点森林由根向外逐块处理：一个新块只通过其父割点与已处理部分相交，因此翻转其两侧颜色便能使该割点颜色一致。这产生合法的全局划分。
+
+对该全局划分，同侧内部边权在每个块的贡献都不超过 $g_{H_j}(y_j)$，故
+\begin{equation}\label{eq:blockineq}
+ g_H(y)\le\sum_{j=1}^{t}g_{H_j}(y_j).
+\end{equation}
+令 $\beta=\min_j B_{H_j}$。若 $\beta=+\infty$，全部块为二部图，原图也二部，结论明显。否则 $\beta<+\infty$，且按 $B_{H_j}$ 的定义（即便局部 $g=0$ 时亦成立），
+\[
+ b^\top y=\sum_j b_j^\top y_j
+ \ge \beta\sum_j g_{H_j}(y_j)
+ \ge\beta g_H(y).
+\]
+这里对每个块均有 $b_j^\top y_j\ge\beta g_{H_j}(y_j)$：有限值块由 $B_{H_j}\ge\beta$ 保证，而二部块满足 $g_{H_j}=0$、成本非负。由此 $B_H\ge\beta$。反过来只在某个最优块放置非零边权、其余块置零时，全图 $g_H(y)$ 与该块的 $g_{H_j}(y_j)$ 相等，因此 $B_H\le\beta$。证毕。
+\end{proofcn}
+
+\begin{corollary}[块级奇环精确性]
+如果 $H$ 的每个双连通块均弱二部，则 $B_H=c_H^*$。特别地，仙人掌图、三角形链及任何由弱二部块沿割点拼接而成的图，都可通过求最便宜奇环精确求值。
+\end{corollary}
+\begin{proofcn}
+由定理~\ref{thm:block} 和定理~\ref{thm:weak} 得 $B_H=\min_j c_{H_j}^*$；任意简单环都完全包含在某一个块中，所以 $\min_jc_{H_j}^*=c_H^*$。
+\end{proofcn}
+
+\section{完全图实例的高成本边安全剔除}
+\begin{theorem}[安全删除高成本边]\label{thm:prune}
+假设 $H$ 含奇环且已知某个证书上界 $U<+\infty$，满足 $B_H(b)\le U$。令
+\[
+ H_{\le U}:=(V,\{e\in E(H):b_e\le U\}).
+\]
+则
+\begin{equation}\label{eq:prune}
+ \boxed{B_H(b)=B_{H_{\le U}}(b|_{E(H_{\le U})}).}
+\end{equation}
+并且任意一个最优证书都不需要在成本 $b_e>U$ 的边上放置正权重。
+\end{theorem}
+\begin{proofcn}
+取达到 $B_H=\beta$ 的最优 $y$，归一化与否均可。若某条边 $e$ 满足 $b_e>U\ge\beta$ 且 $y_e=t>0$，令 $y'=y-t\mathbf e_e$，其中 $\mathbf e_e$ 是单位边向量。
+
+对任意划分 $S$，删除一条边的权重 $t$ 只可能使其中一侧的内部边权减少至多 $t$；因此最大值减少至多 $t$。再对 $S$ 取最小，得到 $g_H(y')\ge g_H(y)-t$。另一方面
+\[
+ b^\top y'=b^\top y-b_et=\beta g_H(y)-b_et
+ <\beta(g_H(y)-t)\le\beta g_H(y')
+\]
+在 $\beta>0$ 时，与 $\beta$ 为最小比率矛盾；若 $g_H(y')=0$，上式与 $b^\top y'\ge0$ 直接矛盾。$\beta=0$ 时，由 $b_e>U\ge0$ 可知最优解不可能在该边有正质量，同样成立。
+
+所以任意最优解都不使用成本超过 $U$ 的边。特别地，存在支撑于 $H_{\le U}$ 的最优解，即 \eqref{eq:prune} 成立。
+\end{proofcn}
+
+\begin{corollary}[原完全图的精确判据]\label{cor:cheap}
+在完全图上计算 $U=c^*$，再保留成本 $b_e\le c^*$ 的边，得到便宜边图 $H_{\rm cheap}$。如果 $H_{\rm cheap}$ 为弱二部图（例如平面图或无 $K_5$ 子式图），则
+\begin{equation}\label{eq:cheap}
+ \boxed{B_{\rm graph}=c^*.}
+\end{equation}
+\end{corollary}
+\begin{proofcn}
+最便宜奇环的每条边都满足 $b_e\le c^*$，故它完整保留在 $H_{\rm cheap}$ 中，因此 $c^*_{H_{\rm cheap}}=c^*$。由定理~\ref{thm:prune}，$B_{\rm graph}=B_{H_{\rm cheap}}$；再由定理~\ref{thm:weak} 得所求。
+\end{proofcn}
+
+\begin{algorithm}[htbp]
+\caption{完全图上的奇环证书精确性检测（充分条件）}\label{alg:prune}
+\begin{algorithmic}[1]
+\Require 顶点集 $V=[K]$；非负有理共错上界 $b_{ij}$
+\State $c^*\gets$ 完全图的最小成本奇环
+\State $H_{\rm cheap}\gets(V,\{ij:b_{ij}\le c^*\})$
+\If{$H_{\rm cheap}$ 不含 $K_5$ 子式，或有已验证的弱二部性证书}
+    \State \Return $B_{\rm graph}=c^*$ \Comment{精确结论}
+\Else
+    \State \Return ``未认证等式''；可转用 MILP/松弛/其他界
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+\begin{remark}[适用范围]
+高成本剔除针对\emph{原给定的完整图输入}成立。证明并不要求事先指定稀疏支撑，也不要求分类器的边际错误率相等。不过成本并列 $b_e=U$ 的边\emph{不能}按照此定理安全删除，算法中必须使用严格大于号。
+\end{remark}
+
+\section{标准 LP 松弛的严格间隙：完全图实例}
+\subsection{一个通用三分之一界}
+\begin{lemma}[加权明智二部划分的 $1/3$ 界]\label{lem:third}
+对任意非负边权图 $(H,y)$，令 $Y=\sum_e y_e$。则存在二部划分 $S$，满足
+\[
+ y(E(S))\le Y/3,\qquad y(E(V\setminus S))\le Y/3.
+\]
+因此 $g_H(y)\le Y/3$。
+\end{lemma}
+\begin{proofcn}
+取一个最大权割 $(S,V\setminus S)$，其割边权为 $C$，两侧内部边权分别为 $A,D$，且 $Y=A+C+D$。若某个顶点将其颜色翻转能增加割权，则与最大割最优性矛盾；因此每个顶点跨侧边权不少于本侧边权。分别在两侧对顶点求和，得 $2A\le C$ 与 $2D\le C$。于是
+\[
+ 3A\le A+C\le Y,
+ \qquad3D\le D+C\le Y.
+\]
+证毕。此为经典局部最大割论证\cite{BollobasScott2002,AlonEtAl2003}，在此重述以使后文自包含。
+\end{proofcn}
+
+\begin{proposition}[完全图等成本]\label{prop:homogeneous}
+若 $H=K_n$（$n\ge3$），所有边的成本相同，$b_e=b>0$，则
+\[
+ B_H(b)=3b,
+ \qquad
+ B_{\rm uncut}(H;b)
+ =b\frac{\binom n2}{\binom n2-\lfloor n^2/4\rfloor}.
+\]
+因此松弛的乘法间隙随 $n\to\infty$ 趋近 $3/2$。
+\end{proposition}
+\begin{proofcn}
+对任意 $y$，引理~\ref{lem:third} 给出 $g_H(y)\le Y/3$，故 $bY/g_H(y)\ge3b$；把 $y$ 全部置于一条三角形的三条边上，直接验证 $g_H(y)=Y/3$，得到 $B_H=3b$。
+
+对于 $B_{\rm uncut}$，$u_H(y)$ 是关于 $y$ 的凹函数（有限个线性函数的逐点最小值），且对 $K_n$ 的顶点置换不变。对任意可行权重 $y$，将其在全部顶点置换下平均得到每条边权重相同的 $\overline y$。有 $b^\top\overline y=b^\top y$、$u_H(\overline y)\ge u_H(y)$，故可以无损采用等权证书。若每条边权为 $t$，则
+\[
+ u_H(y)=t\Bigl(\binom n2-\lfloor n^2/4\rfloor\Bigr),\qquad
+ b^\top y=bt\binom n2,
+\]
+代入规范化定义即得闭式。因 $\binom n2\sim n^2/2$、$\lfloor n^2/4\rfloor\sim n^2/4$，后者趋于 $2b$，与 $B_H=3b$ 的比值趋近 $3/2$。
+\end{proofcn}
+
+\begin{center}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+图 & $B_{\rm uncut}/b$ & $B_H/b$ & $B_H/B_{\rm uncut}$\\
+\midrule
+$K_3$ & $3.000$ & $3$ & $1.000$\\
+$K_5$ & $2.500$ & $3$ & $1.200$\\
+$K_7$ & $2.333$ & $3$ & $1.286$\\
+$K_n$，$n\to\infty$ & $2.000$ & $3$ & $1.500$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{有理输入的复杂度上界与仍然开放的问题}
+\subsection{$\Sigma_2^P$ 成员性}
+定义决策语言
+\begin{equation}\label{eq:decision}
+ \GraphCert=\{(H,b,\tau): B_H(b)\le\tau\},
+\end{equation}
+其中 $H$ 为有限简单图、$b\in\mathbb Q_+^{E(H)}$、$\tau\in\mathbb Q_+$，全部按二进制有理数表示。
+
+\begin{theorem}[一般问题的多项式层级上界]\label{thm:sigma2}
+在标准图与有理数编码下，$\GraphCert\in\Sigma_2^P$。
+\end{theorem}
+\begin{proofcn}
+由引理~\ref{lem:normalize}，输入属于该语言当且仅当存在 $y\ge0$ 满足
+\begin{equation}\label{eq:witness}
+ b^\top y\le\tau,
+ \qquad\forall S\subseteq V:
+ \max\{A_S(y),D_S(y)\}\ge1.
+\end{equation}
+固定每一个划分究竟由哪一侧满足阈值约束后，\eqref{eq:witness} 转化成一个有理线性不等式系统。若其中某个系统可行，则存在一个分子分母二进制位数均为输入规模多项式量级的有理解：可由基本可行解的行列式界推出，因为约束系数为 $0,1$、成本向量为有理输入，变量数为 $|E|$。
+
+因此可由非确定性机器猜测多项式长度的 $y$，检查边权非负和 $b^\top y\le\tau$，然后询问 NP oracle：\emph{是否存在}划分 $S$ 同时满足 $A_S(y)<1$、$D_S(y)<1$？后者有多项式可核验的划分证据。若 oracle 回答否，所猜 $y$ 是全称可行的。由 NP 机器调用 NP oracle 的定义，所得语言属于 $\Sigma_2^P$。
+\end{proofcn}
+
+\begin{remark}[不能推出的结论]
+上述定理只是一个上界，而不是 NP-hardness 证明。特别是，固定 $y$ 的可行性验证为 coNP-complete 亦不足以说明允许 $y$ 自由选择的 $\GraphCert$ 是 NP-hard、coNP-hard 或 $\Sigma_2^P$-complete。证明这类下界需要保留外层存在量词的独立多项式归约。
+\end{remark}
+
+\subsection{当前最值得攻克的实例族}
+\begin{enumerate}[label=\textbf{D1.\arabic*},leftmargin=*]
+\item \textbf{双连通非弱二部图的复杂度.} 定理~\ref{thm:block} 已将非平凡困难来源定位于单个双连通块，而定理~\ref{thm:weak} 排除了弱二部块。优先研究多个 odd-$K_5$ 型障碍交织的图。
+\item \textbf{成本取值受限的判定复杂度.} 研究 $b_e\in\{a,b\}$ 两级成本是否已经导致 NP-hard；以及给定稀疏支撑图而所有边成本均为 $1$ 的情形。注意完全图所有边成本相同已由命题~\ref{prop:homogeneous} 精确解决。
+\item \textbf{更强的可计算松弛.} 目前的 $B_{\rm uncut}$ 至多差 2 倍，且完整图上的间隙可趋近 $3/2$。寻找带 odd-$K_5$ 型不等式的强化 LP/SDP 与有证书的舍入算法。
+\item \textbf{识别 $B_H<c_H^*$ 的最小实例.} 不应仅继续生成无结构随机样本；应把双连通且含非弱二部障碍的中小规模图输入精确 MILP，输出最小反例及对偶验证记录。
+\item \textbf{算法复杂度与证书发现的区别.} 即使采用分离 oracle，若固定 $y$ 的划分优化为 NP-hard，也不能把指数级公式直接宣称为多项式算法。应分别量化图类检测、最小奇环、MILP、松弛优化的开销。
+\end{enumerate}
+
+\section{成果与先例的边界总结}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}p{.27\linewidth}X p{.23\linewidth}@{}}
+\toprule
+研究方向 & 核心结果 & 性质\\
+\midrule
+1994 瓶颈划分 & 固定划分优化 NP-hard & 文献先例\cite{ShahrokhiSzekely1994}\\
+1991--2002 多面体理论 & 弱二部图奇环覆盖多面体整数 & 外部定理\cite{Guenin2001,Schrijver2002}\\
+1983 最大割 & 无 $K_5$ 子式图多项式 Max-Cut & 外部定理\cite{Barahona1983}\\
+精确 $B_H$ 表述 & 无 big-$M$ MILP & 本文等价变换\\
+精确图类 & 弱二部 $\Rightarrow B_H=c_H^*$ & 从整数性推出\\
+可分解性 & $B_H=\min_j B_{H_j}$ & 本文证明\\
+稀疏化 & 高成本边安全删除 & 本文证明\\
+松弛界与间隙 & 2 倍夹逼，极限间隙 $\ge3/2$ & 本文证明\\
+多项式层级 & $\GraphCert\in\Sigma_2^P$ & 本文证明上界\\
+一般困难性 & $B_H$ 的 NP-hardness & \textbf{尚未证明}\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{resultbox}
+\textbf{阶段性结论.} D1 已形成一套可以独立检验的理论框架：在已知整数性和图分解结构下，许多看似复杂的实例可直接计算 $c_H^*$ 作为精确的 $B_H$；若完全图中高成本边可剔除至弱二部支撑图，也能快速认证 $B_{\rm graph}=c^*$。对于剩余非弱二部、双连通结构，一般复杂度分类仍是实质开放问题；固定 $g(y)$ 的 NP-hardness 不应取代该目标。
+\end{resultbox}
+
+\section*{致谢与研究诚信说明}
+\addcontentsline{toc}{section}{致谢与研究诚信说明}
+本文为研究工作记录与可编辑的数学证明稿，不将用户先前已有的稳健投票结果重新标记为本文创新，不将已有文献中的图论定理误称为新定理。所有复杂度结论都在明确输入模型与图类限制的前提下陈述。对文中从外部图论定理推得的命题，仍需开展独立的文献新颖性排查；文中引用仅为相关定理的学术出处，不构成该命题从未发表的证明。
+
+\begin{thebibliography}{99}
+\bibitem{ShahrokhiSzekely1994}
+F. Shahrokhi and L. A. Sz\'ekely.
+\newblock The Complexity of the Bottleneck Graph Bipartition Problem.
+\newblock \emph{Journal of Combinatorial Mathematics and Combinatorial Computing}, 15:221--226, 1994.
+\newblock \url{https://combinatorialpress.com/jcmcc-articles/volume-015/the-complexity-of-the-bottleneck-graph-bipartition-problem/}.
+
+\bibitem{BollobasScott2002}
+B. Bollob\'as and A. D. Scott.
+\newblock Problems and Results on Judicious Partitions.
+\newblock \emph{Random Structures \& Algorithms}, 21(3--4):414--430, 2002.
+\newblock \url{https://doi.org/10.1002/rsa.10062}.
+
+\bibitem{Guenin2001}
+B. Guenin.
+\newblock A Characterization of Weakly Bipartite Graphs.
+\newblock \emph{Journal of Combinatorial Theory, Series B}, 83(1):112--168, 2001.
+\newblock \url{https://doi.org/10.1006/jctb.2001.2051}.
+
+\bibitem{Schrijver2002}
+A. Schrijver.
+\newblock A Short Proof of Guenin's Characterization of Weakly Bipartite Graphs.
+\newblock \emph{Journal of Combinatorial Theory, Series B}, 85(2):255--260, 2002.
+\newblock \url{https://doi.org/10.1006/jctb.2001.2101}.
+
+\bibitem{Barahona1983}
+F. Barahona.
+\newblock The Max-Cut Problem on Graphs Not Contractible to $K_5$.
+\newblock \emph{Operations Research Letters}, 2(3):107--111, 1983.
+\newblock \url{https://doi.org/10.1016/0167-6377(83)90016-0}.
+
+\bibitem{GeelenGuenin2002}
+J. F. Geelen and B. Guenin.
+\newblock Packing Odd Circuits in Eulerian Graphs.
+\newblock \emph{Journal of Combinatorial Theory, Series B}, 86(2):280--295, 2002.
+\newblock \url{https://doi.org/10.1006/jctb.2002.2128}.
+
+\bibitem{AlonEtAl2003}
+N. Alon, B. Bollob\'as, M. Krivelevich, and B. Sudakov.
+\newblock Maximum Cuts and Judicious Partitions in Graphs without Short Cycles.
+\newblock \emph{Journal of Combinatorial Theory, Series B}, 88(2):329--346, 2003.
+\newblock \url{https://doi.org/10.1016/S0095-8956(03)00036-4}.
+\end{thebibliography}
+\end{document}

@@ -1,0 +1,5 @@
+4 pw {'n_lp_instances': 2460, 'max_gain': 0.0}
+4 full {'n_lp_instances': 2460, 'max_gain': 0.06667770166703979}
+5 pw {'n_lp_instances': 525, 'max_gain': 0.0}
+5 full {'n_lp_instances': 525, 'max_gain': 0.015151904531041094}
+{'n': 1000, 'frac_exact': 0.336, 'max_gap': 0.014000000000000234, 'min_gap': -1.832008514446315e-06} 40 1849

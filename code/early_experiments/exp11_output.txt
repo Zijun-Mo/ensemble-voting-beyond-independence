@@ -1,0 +1,10 @@
+9 vertices; objective terms:
+   1
+   e12 + e13 + e23
+   e12 + q3
+   e13 + q2
+   e23 + q1
+   q1 + q2
+   q1 + q3
+   q1/2 + q2/2 + q3/2
+   q2 + q3

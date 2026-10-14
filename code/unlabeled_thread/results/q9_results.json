@@ -1,0 +1,51 @@
+{
+ "rate": {
+  "n_l": [
+   3200.0,
+   12800.0,
+   51200.0,
+   204800.0
+  ],
+  "mean_gap": [
+   0.10958199447875303,
+   0.06989424770873892,
+   0.0346842635764519,
+   0.01837925793264446
+  ],
+  "loglog_slope": -0.43692367519327036,
+  "all_valid": true,
+  "all_le_bound": true
+ },
+ "dual_norms": {
+  "3": {
+   "n_lps": 900,
+   "max_lam_l1": 3.0,
+   "max_mu_inf": 2.0,
+   "max_lam_l1_majority": 3.0
+  },
+  "4": {
+   "n_lps": 750,
+   "max_lam_l1": 5.0,
+   "max_mu_inf": 4.0,
+   "max_lam_l1_majority": 0.0
+  },
+  "5": {
+   "n_lps": 900,
+   "max_lam_l1": 7.0,
+   "max_mu_inf": 6.0,
+   "max_lam_l1_majority": 5.0
+  },
+  "6": {
+   "n_lps": 300,
+   "max_lam_l1": 5.0,
+   "max_mu_inf": 4.0,
+   "max_lam_l1_majority": 0.0
+  },
+  "7": {
+   "n_lps": 360,
+   "max_lam_l1": 7.0,
+   "max_mu_inf": 6.0,
+   "max_lam_l1_majority": 7.0
+  }
+ }
+}

@@ -1,0 +1,481 @@
+\documentclass[11pt,a4paper]{ctexart}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,booktabs,tabularx}
+\usepackage{xcolor,hyperref,listings,fancyhdr,lastpage}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.24em}
+\definecolor{dblue}{HTML}{17364B}
+\definecolor{dteal}{HTML}{176F78}
+\definecolor{codebg}{HTML}{F4F6F8}
+\hypersetup{colorlinks=true,linkcolor=dteal,urlcolor=dteal}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small 异质 $K=5$ 稳健投票：候选闭式与完整性证明路线}
+\fancyhead[R]{\small D2 阶段更新}
+\fancyfoot[C]{\small \thepage\ / \pageref{LastPage}}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{proposition}[theorem]{命题}
+\newtheorem{corollary}[theorem]{推论}
+\theoremstyle{definition}
+\newtheorem{remark}[theorem]{说明}
+\newenvironment{proofcn}{\par\noindent\textbf{证明.}\ }{\hfill$\square$\par}
+\lstdefinestyle{pycode}{language=Python,basicstyle=\ttfamily\scriptsize,backgroundcolor=\color{codebg},frame=single,rulecolor=\color{gray!35},columns=fullflexible,breaklines=true,breakatwhitespace=false,showstringspaces=false,keepspaces=true,tabsize=4,numbers=left,numberstyle=\tiny\color{gray},numbersep=5pt}
+\lstset{style=pycode}
+\newcommand{\Risk}{\mathsf R}
+\newcommand{\calP}{\mathcal P}
+\newcommand{\calC}{\mathcal C}
+\newcommand{\ind}{\mathbf 1}
+\newcommand{\EE}{\mathbb E}
+\newcommand{\PP}{\mathbb P}
+\newcommand{\comp}[1]{\overline{#1}}
+\title{\bfseries 异质五分类器稳健投票：\\[-2pt]98 项证书候选的不可删减性与有限完整性判据}
+\author{D2 理论研究工作稿}
+\date{2026 年 10 月 13 日}
+\begin{document}
+\maketitle
+\begin{abstract}
+研究已知边际错误率 $q_i$ 和共同出错概率上界 $b_{ij}$ 的五个二元分类器，目标是在全部确定性标签对称（self-dual）投票规则上最小化最坏错误率。此前的简单候选 $\min\{q_{\min},c^*,B_5\}$ 已被反例否定。本文只保留当前最主要的成果：给出\textbf{98 项、8 类公式结构}组成的显式仿射上界 $U_{98}$；严格证明全部 98 项均为合法的二次矩证书；构造\textbf{9 组精确有理数见证参数}，通过模型置换证明每一项都在区域 $R$ 内不可删除；并给出以参数分区顶点和\textbf{60 类阈值规则}为基础的候选完整性\emph{充要判据}。本文\textbf{尚未证明} $\Risk_{\rm det}^*=U_{98}$，也未宣称 98 项是全体合法证书中的最少项数。附录包含所有用于构造证书、核查不可删减性和核查规则同构数目的完整 Python 代码。
+\end{abstract}
+
+\section{问题与研究状态}
+设 $X_i\in\{0,1\}$ 表示第 $i$ 个二元分类器是否出错，$q_i=\PP(X_i=1)\in(0,1/2)$，已知上界 $\EE[X_iX_j]\le b_{ij}$，其中 $0\le b_{ij}\le\min\{q_i,q_j\}$。令 $x\in\{0,1\}^5$，定义模糊集
+\begin{equation}\label{eq:ambig}
+\calP(q,b)=\left\{\pi\ge0: \sum_x\pi_x=1,\ \sum_xx_i\pi_x=q_i,\ \sum_xx_ix_j\pi_x\le b_{ij}\ \forall i<j\right\}.
+\end{equation}
+始终假定 $\calP(q,b)\ne\emptyset$。标签对称的确定性错误规则 $F$ 满足 $F(x)+F(\mathbf1-x)=1$。其最坏错误率与全局最优值为
+\begin{equation}\label{eq:game}
+\Risk(F;q,b)=\max_{\pi\in\calP(q,b)}\sum_xF(x)\pi_x,\qquad
+\Risk_{\rm det}^*(q,b)=\min_{F\text{ self-dual}}\Risk(F;q,b).
+\end{equation}
+研究域为
+\begin{equation}\label{eq:R}
+R=\left\{(q,b):\sum_iq_i-3q_{\min}\le1,\ \calP(q,b)\ne\varnothing\right\},\qquad q_{\min}=\min_iq_i.
+\end{equation}
+早期三项猜想 $\Risk_{\rm det}^*=\min\{q_{\min},c^*,1-\sum q_i+\sum b_{ij}\}$ 在 $R$ 内\textbf{不成立}。当前 98 项候选为一个已证\emph{上界}，而不是已证闭式：
+\begin{equation}\label{eq:ub}
+\Risk_{\rm det}^*(q,b)\le U_{98}(q,b),\qquad
+\Risk_{\rm det}^*(q,b)\stackrel{?}{=}U_{98}(q,b)\quad((q,b)\in R).
+\end{equation}
+
+\section{98 项显式二次证书}
+\subsection{总公式}
+对任意二次多项式
+\begin{equation}\label{eq:quadratic}
+Q(x)=a+\sum_{i=1}^{5}\beta_ix_i+\sum_{1\le i<j\le5}\gamma_{ij}x_ix_j,\qquad \gamma_{ij}\ge0,
+\end{equation}
+若 $Q(x)\ge F(x)$ 对所有 $x$ 成立，则
+\begin{equation}\label{eq:upper}
+\Risk(F;q,b)\le L_Q(q,b):=a+\sum_i\beta_iq_i+\sum_{i<j}\gamma_{ij}b_{ij}.
+\end{equation}
+这是逐点取期望以及 $\gamma_{ij}\ge0$ 的直接推论。令 $\calC_{98}$ 是下表指定的 98 个二次证书，定义
+\begin{equation}\label{eq:U}
+\boxed{U_{98}(q,b):=\min_{Q\in\calC_{98}}L_Q(q,b).}
+\end{equation}
+表格中的“模板数”表示模型编号重新排列后产生的不同仿射式数量。
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}p{.46\textwidth}Xp{18mm}@{}}
+\toprule
+家族 & 代表性规则或结构 & 项数\\\midrule
+单分类器（独裁） & $w=(1,0,0,0,0)$ & 5\\
+奇环并集证书 & 所有三角形及五环 & 22\\
+加权平移二次矩证书 & $w=(3,1,1,1,1)$ & 5\\
+加权平移二次矩证书 & $w=(2,1,1,1,0)$ & 20\\
+加权平移二次矩证书 & $w=(2,2,1,1,1)$ & 10\\
+加权平移二次矩证书 & $w=(1,1,1,1,1)$ & 1\\
+根节点修正证书 & 一个特殊模型 $i$ & 5\\
+三核心修正证书 & $w=(3,2,2,1,1)$ & 30\\\midrule
+\textbf{合计} & \textbf{8 类代数结构；9 个置换轨道（区分三环、五环）} & \textbf{98}\\\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{权重通用的平移二阶矩证书}
+取非负整数权重 $w$，总和 $\sum_iw_i=2r-1\ge3$。记 $N_w=\sum_iw_iX_i$。取多项式
+\begin{equation}\label{eq:BP}
+H_r(t)=\frac{(t-r+2)(t-r+1)}2.
+\end{equation}
+对任意整数 $t\ge0$，两个因子是连续整数，因此 $H_r(t)\ge0$；当 $t\ge r$ 时 $H_r(t)\ge1$。于是 $H_r(N_w)$ 逐点控制权重 $w$ 的多数失败指示函数。利用 $X_i^2=X_i$ 展开：
+\begin{equation}\label{eq:BPbound}
+\boxed{\begin{aligned}
+B_w={}&\frac{(r-2)(r-1)}2
++\frac12\sum_i w_i(w_i-2r+3)q_i\\
+&+\sum_{i<j}w_iw_jb_{ij}.
+\end{aligned}}
+\end{equation}
+此处的具体逐点证书可独立证明；它与 Boros--Pr\'ekopa 的二项矩概率界属于同一方法脉络\cite{BP1989}，不能据此声称该经典界是本研究原创。
+
+\subsection{根节点与三核心修正}
+取根节点 $i$，对应 $w_i=3$、其他权重为 $1$。令 $T=\sum_{j\ne i}x_j$。根节点二次证书为
+\begin{equation}\label{eq:root}
+Q_{\rm root,i}(x)=\frac13\left(1-\sum_{j=1}^5x_j+\sum_{\substack{j<k\\j,k\ne i}}x_jx_k+4\sum_{j\ne i}x_ix_j\right).
+\end{equation}
+若 $x_i=0$，其值为 $(T-1)(T-2)/6$，在 $T=0,1,2,3,4$ 时非负，且唯一失败状态 $T=4$ 对应值 $1$；若 $x_i=1$，其值为 $T+\binom{T}{2}/3$，对每个失败状态 $T\ge1$ 至少为 $1$。因此~\eqref{eq:root} 为合法证书，给出上界
+\begin{equation}\label{eq:rootbound}
+B_{\rm root}(i)=\frac{1-\sum_jq_j+\sum_{\substack{j<k\\j,k\ne i}}b_{jk}+4\sum_{j\ne i}b_{ij}}3.
+\end{equation}
+对 $w$ 为 $(3,2,2,1,1)$ 的排列，记 $H=\{i:w_i\ge2\}$，$N_w=\sum_iw_ix_i$，$T_H=\sum_{i\in H}x_i$。定义
+\begin{equation}\label{eq:core}
+Q_{\rm core}(x)=\frac{(N_w-3)(N_w-4)}2-\left(1-T_H+\binom{T_H}{2}\right).
+\end{equation}
+当 $T_H=1$ 或 $2$ 时，括号为 $0$，证书仍是原本合法的 $H_5(N_w)$；当 $T_H=0$ 时 $N_w\in\{0,1,2\}$，故 $H_5(N_w)\ge1$，减去 $1$ 后仍非负，而投票不会失败；当 $T_H=3$ 时 $N_w\ge7$，有 $H_5(N_w)\ge6$，减去 $1$ 后仍大于 $1$。所以~\eqref{eq:core} 同样逐点上界失败指示函数。展开它即可得到 30 条显式仿射证书，并且每条二次系数 $\gamma_{ij}$ 非负。
+
+奇环证书取 $Q_C(x)=\sum_{ij\in C}x_ix_j$，因为奇环上的多数错误必包含一对相邻错误顶点。单模型证书取 $Q_i=x_i$。以上逐点论证证明了~\eqref{eq:ub} 的第一个不等式。完整系数生成算法见附录 A。
+
+\section{新证明：98 个仿射项在 $R$ 内不可删减}
+\begin{theorem}[候选族内部的不可删减性；精确有理数认证]\label{thm:irred}
+对每个 $Q\in\calC_{98}$，存在满足 $0<q_i<1/2$、$\calP(q,b)\ne\varnothing$、$(q,b)\in R$ 的参数，使
+\begin{equation}\label{eq:strict}
+L_Q(q,b)<\min_{Q'\in\calC_{98}\setminus\{Q\}}L_{Q'}(q,b).
+\end{equation}
+因而删除 98 项中的任何一项，都将使 $U_{98}$ 在某个可行的 $R$ 内参数处严格变大。
+\end{theorem}
+\begin{proofcn}
+所有证书在对 $5$ 个模型编号同步置换后封闭。按这一群作用，98 项分成 9 个置换轨道，数量依次为
+\[
+5,\;10,\;12,\;5,\;20,\;10,\;1,\;5,\;30,
+\]
+总计 98。只需为每个轨道提供一个见证参数。
+
+附录 B 用精确有理数列出 9 个错误模式联合分布及各对上界的原始见证。为保证 $q_i$ 严格位于 $(0,1/2)$，将原见证以系数 $99/100$ 和五个独立 Bernoulli$(1/5)$ 错误分布以系数 $1/100$ 混合；同时以相同系数混合共同出错上界（参考上界为 $1/25$）。凸组合仍可行，且满足 $R$。脚本对每个见证\emph{逐项}用 \texttt{fractions.Fraction} 检查：联合分布归一化与非负性、五个边际、10 条成对上下界、$R$ 条件，以及所选项相对其他 97 项的\emph{严格}差值。所得到的最小差值见表~\ref{tab:witness}；它们全部为严格正的有理数。因为模型置换不会改变全部约束及严格差值，每个轨道的全部项都存在见证，定理得证。这是可逐行复核的\textbf{有限计算机辅助证明}。
+\end{proofcn}
+\begin{table}[ht]
+\centering\small
+\caption{9 个代表证书与其在精确见证参数下胜过其余 97 项的最小严格差值。}\label{tab:witness}
+\begin{tabular}{@{}llr@{}}
+\toprule
+家族（代表标签） & 代表权重/结构 & 最小差值 $\Delta>0$\\\midrule
+\texttt{dict:0} & 独裁 & $2467/10000$\\
+\texttt{cycle:0} & 三角形 & $33/100$\\
+\texttt{cycle:10} & 五环 & $247/625$\\
+\texttt{bp:11113} & $(3,1,1,1,1)$ & $1389/10000$\\
+\texttt{bp:01112} & $(2,1,1,1,0)$ & $539/2500$\\
+\texttt{bp:11122} & $(2,2,1,1,1)$ & $116/625$\\
+\texttt{bp:11111} & 五人普通多数 & $4399/20000$\\
+\texttt{rooted:0} & 根节点修正 & $1814/24375$\\
+\texttt{corrected:11223} & 三核心修正 & $737/5000$\\
+\bottomrule
+\end{tabular}
+\end{table}
+\begin{remark}[这一定理\emph{没有}证明什么]
+“98 项不可删”只表示\emph{固定的这 98 个仿射式}之间没有冗余；如果引入一个不同的、具有更强上界作用的新证书，仍然可能得到项数更少的另一组公式。更重要的是，该结果绝不意味着所有合法二次证书已经被这 98 项穷尽。
+\end{remark}
+
+\section{推进完整性证明：参数分区顶点充要判据}
+\subsection{固定规则最坏错误率的凹性}
+对固定 self-dual 规则 $F$，其最坏联合分布 LP 的对偶为
+\begin{equation}\label{eq:fixeddual}
+\Risk(F;q,b)=\min_{\substack{a,\beta\text{ 自由},\;\gamma\ge0\\a+\sum_i\beta_ix_i+\sum_{i<j}\gamma_{ij}x_ix_j\ge F(x)\ \forall x}}
+\left(a+\sum_iq_i\beta_i+\sum_{i<j}b_{ij}\gamma_{ij}\right).
+\end{equation}
+LP 强对偶在 $\calP(q,b)$ 非空时成立。因对偶可行域不依赖参数 $(q,b)$，式~\eqref{eq:fixeddual} 是仿射函数族的下确界，故固定规则值函数 $\Risk(F;q,b)$ 关于 $\theta=(q,b)$ 凹。
+
+\begin{lemma}[最优确定性规则可选择线性阈值]
+若 $\calP(q,b)$ 非空，则存在最优确定性 self-dual 规则可由某组实数权重 $w$ 的线性符号投票实现。
+\end{lemma}
+\begin{proofcn}
+取实现全局 minimax 值的规则 $F$，并取其固定规则 LP 的最优二次对偶证书 $Q\ge F$。由 self-dual 性质，每对互补模式 $x,\mathbf1-x$ 至少一侧 $Q\ge1$。将 $Q$ 较大的那侧判为失败，便得到另一条合法 self-dual 规则 $F_Q\le Q$，其最坏错误率不高于原规则。又由于
+\[
+Q(x)-Q(\mathbf1-x)
+=\sum_{i=1}^5\left(\beta_i+\frac12\sum_{j\ne i}\gamma_{ij}\right)(2x_i-1),
+\]
+决定选哪一侧的比较恰是一条带符号线性阈值规则。对双方 $Q$ 值相等的有限个模式，可用任意小的一般位置线性扰动打破平局；原本严格的方向不变，而平局对的两侧都满足 $Q\ge1$，所以仍有 $F_Q\le Q$。这就给出最优线性阈值规则。
+\end{proofcn}
+
+\subsection{证书活跃区域划分}
+令 $\mathcal M$ 为满足 $0\le q_i\le1/2$、$0\le b_{ij}\le\min(q_i,q_j)$ 以及\eqref{eq:ambig} 非空的闭参数多面体。这是由 $32$ 个 $\pi$ 变量与线性约束定义的多面体的有界投影，因此确实是有理多面体。
+
+为处理 $q_{\min}$，对 $i\in\{1,\dots,5\}$ 定义线性分支
+\[
+R_i=\{\theta\in\mathcal M:q_i\le q_j\ \forall j,\;\sum_jq_j-3q_i\le1\}.
+\]
+则闭区域 $\overline R=\bigcup_iR_i$。对每一项 $C\in\calC_{98}$，定义它成为候选最优项的参数区域
+\begin{equation}\label{eq:cell}
+P_{i,C}=R_i\cap\{\theta:L_C(\theta)\le L_D(\theta)\ \forall D\in\calC_{98}\}.
+\end{equation}
+每个非空 $P_{i,C}$ 都是\textbf{有界有理多面体}。在其内部，$U_{98}(\theta)=L_C(\theta)$。
+
+\begin{theorem}[完整性可化为有限个参数顶点上的对手证书]\label{thm:vertex}
+以下两条陈述等价：
+\begin{enumerate}
+\item $\Risk^*_{\rm det}(\theta)=U_{98}(\theta)$ 对所有 $\theta\in\overline R$ 成立；
+\item 对每个确定性 self-dual 阈值规则 $F$、每个非空分区 $P_{i,C}$、每个顶点 $v\in\operatorname{vert}(P_{i,C})$，存在 $\pi^{F,i,C,v}\in\calP(v)$，满足
+\begin{equation}\label{eq:primalproof}
+\sum_x F(x)\pi_x^{F,i,C,v}\ge L_C(v).
+\end{equation}
+\end{enumerate}
+其中只需检查 $1{,}882$ 个不同的带符号阈值规则；按模型置换可进一步归成 $60$ 个同构规则代表，其余分区与见证同步置换。
+\end{theorem}
+\begin{proofcn}
+(1)$\Rightarrow$(2)：在任意分区顶点 $v$，有 $\Risk(F;v)\ge \Risk^*_{\rm det}(v)=U_{98}(v)=L_C(v)$。有限维对手 LP 在 $\calP(v)$ 上取到最大值，故存在满足~\eqref{eq:primalproof} 的 $\pi$。所有参数和 LP 系数均为有理数时，可选有理数基可行解。
+
+(2)$\Rightarrow$(1)：固定任意 $\theta\in P_{i,C}$ 与规则 $F$。因为该分区是有界多面体，可将 $\theta$ 写成顶点的凸组合 $\theta=\sum_v\lambda_vv$，$\lambda_v\ge0$、$\sum_v\lambda_v=1$。由固定规则值函数的凹性与~\eqref{eq:primalproof}，
+\[
+\Risk(F;\theta)\ge\sum_v\lambda_v\Risk(F;v)
+\ge\sum_v\lambda_vL_C(v)=L_C(\theta)=U_{98}(\theta).
+\]
+对全部 self-dual 阈值规则取最小，得到 $\Risk_{\rm det}^*(\theta)\ge U_{98}(\theta)$；反向不等式由~\eqref{eq:ub} 已知，故取等号。原先证明的“二次对偶互补差为线性函数”表明总存在最优的带符号阈值规则，因此无需枚举全部 $65{,}536$ 个 self-dual 规则。最后，整数穷举证明带符号阈值规则只有 $1{,}882$ 个，在 $S_5$ 重标号下只有 $60$ 个轨道，见附录 C。
+\end{proofcn}
+
+\begin{remark}[证明工作的实际边界]
+定理~\ref{thm:vertex} 是\textbf{真正的等价判据}，不是 $U_{98}$ 已经完整的证明。要确立该猜想，仍需生成各分区\emph{全部}顶点，并在全部必要阈值规则上提供满足~\eqref{eq:primalproof} 的有理数分布。此法把\emph{对偶极点穷举}替换为\emph{参数分区顶点及原始对手证书穷举}；哪一种实际更省计算尚待评估。有限随机测试或部分对偶证书测试都不能替代此步。
+\end{remark}
+
+\section{研究状态与下一步}
+目前已完成：$(i)$ 98 个合法且显式的仿射上界，$(ii)$ 9 个有理数见证证明全部 98 项在 $R$ 内不可删减，$(iii)$ 以参数分区顶点与 $60$ 类规则为基础的精确完整性充要判据。\textbf{尚未完成}：所有 $P_{i,C}$ 的顶点生成，以及逐个顶点的完整最坏分布证书审计。因而将 $U_{98}$ 直接写成 $\Risk_{\rm det}^*$ 的等式，仍会超出目前已证明的内容。
+
+下一阶段应先利用 $S_5$ 对称性缩减非空参数分区，比较\emph{原始顶点穷举}与\emph{对偶顶点穷举}的复杂度，再选择其中一条执行精确有理数审计。鉴于 98 项在本族内部全部必要，若以\emph{项数更少}为目标，必须先找到一种具有不同系数结构、能同时替换数个旧证书的新构造；单纯剔除旧项行不通。
+
+\begin{thebibliography}{1}
+\bibitem{BP1989} E.~Boros and A.~Pr\'ekopa, ``Closed Form Two-Sided Bounds for Probabilities that At Least $r$ and Exactly $r$ Out of $n$ Events Occur,'' \emph{Mathematics of Operations Research}, 14(2):317--342, 1989. \href{https://doi.org/10.1287/moor.14.2.317}{doi:10.1287/moor.14.2.317}.
+\end{thebibliography}
+
+\appendix
+\section{98 个证书的完整生成及逐点检查代码}
+\noindent 用法：保存为 \texttt{D2\_K5\_98\_term\_closed\_form\_candidate.py} 并直接运行。只用标准库和 NumPy。每个候选二次证书均在全部 32 个二元错误状态上被精确有理数不等式核查；此步骤证明候选\emph{有效性}，不是\emph{完整性}。
+\begin{lstlisting}
+"""D2, K=5: an explicit 98-affine-term robust voting certificate family.
+
+THIS IS A CANDIDATE FOR AN EXACT MINIMAX CLOSED FORM, NOT A PROVED EQUALITY.
+Each of its 98 terms is rigorously a valid (possibly non-sharp) worst-case
+error upper bound, under feasible marginal / pairwise joint-error caps.
+
+The terms are: 5 dictators + 22 odd cycles + 36 weighted-BP polynomials
++ 5 rooted fractional polynomials + 30 corrected heavy-triplet polynomials.
+
+No LP is required to evaluate this explicit bound. Validity checks evaluate
+every polynomial on all 32 binary error patterns.
+
+Requires only Python and numpy (for checks). Compatible with Python>=3.10.
+"""
+from __future__ import annotations
+import itertools
+from dataclasses import dataclass
+from fractions import Fraction
+import numpy as np
+
+K=5
+EDGES=tuple(itertools.combinations(range(K),2))
+STATES=np.array([[(mask>>i)&1 for i in range(K)] for mask in range(32)],dtype=int)
+PAIR=np.array([STATES[:,i]*STATES[:,j] for i,j in EDGES]).T
+MOMENT=np.column_stack([np.ones(32,dtype=int),STATES,PAIR])
+
+@dataclass(frozen=True)
+class Certificate:
+    label: str
+    a: Fraction
+    beta: tuple[Fraction,...]
+    gamma: tuple[Fraction,...]
+    weights: tuple[int,...]
+
+    def coefficients(self): return (self.a,)+self.beta+self.gamma
+    def bound(self,q,b):
+        return self.a + sum(v*Fraction(str(x)) for v,x in zip(self.beta,q)) + \
+               sum(v*Fraction(str(x)) for v,x in zip(self.gamma,b))
+    def check(self):
+        assert len(self.beta)==5 and len(self.gamma)==10
+        assert all(z>=0 for z in self.gamma)
+        assert sum(self.weights)%2==1 and sum(self.weights)>0
+        for x in STATES:
+            L=self.a + sum(c*int(t) for c,t in zip(self.beta,x)) + \
+                       sum(c*int(x[i])*int(x[j]) for c,(i,j) in zip(self.gamma,EDGES))
+            F=int(2*sum(int(v)*int(t) for v,t in zip(self.weights,x))>sum(self.weights))
+            assert L>=F,(self.label,tuple(x),L,F)
+
+
+def odd_cycles():
+    cc=[]
+    for vertices in itertools.combinations(range(K),3):
+        cc.append(tuple(EDGES.index(e) for e in itertools.combinations(vertices,2)))
+    for rest in itertools.permutations(range(1,K)):
+        cyc=(0,)+rest
+        if cyc[1]>cyc[-1]:continue
+        cc.append(tuple(EDGES.index(tuple(sorted((cyc[i],cyc[(i+1)%K])))) for i in range(K)))
+    assert len(cc)==22
+    return cc
+
+
+def weighted_bp(weights,label):
+    w=tuple(weights);total=sum(w)
+    assert total>=3 and total%2==1
+    r=(total+1)//2
+    a=Fraction((r-2)*(r-1),2)
+    beta=tuple(Fraction(ww*(ww-2*r+3),2) for ww in w)
+    gamma=tuple(Fraction(w[i]*w[j]) for i,j in EDGES)
+    return Certificate(label,a,beta,gamma,w)
+
+
+def rooted(i):
+    w=tuple(3 if j==i else 1 for j in range(K))
+    a=Fraction(1,3)
+    beta=(Fraction(-1,3),)*K
+    gamma=tuple(Fraction(4 if i in (j,k) else 1,3) for j,k in EDGES)
+    return Certificate('rooted:%d'%i,a,beta,gamma,w)
+
+
+def corrected_core(weights):
+    w=tuple(weights)
+    assert sorted(w)==[1,1,2,2,3]
+    root=weighted_bp(w,'unused')
+    H={i for i,wi in enumerate(w) if wi>=2}
+    beta=tuple(root.beta[i]+(1 if i in H else 0) for i in range(K))
+    gamma=tuple(root.gamma[e]-(1 if i in H and j in H else 0)
+                for e,(i,j) in enumerate(EDGES))
+    return Certificate('corrected:%s'%(''.join(map(str,w))),root.a-1,beta,gamma,w)
+
+
+def make_certificates():
+    out=[]
+    for i in range(K):
+        w=tuple(int(j==i) for j in range(K))
+        out.append(Certificate('dict:%d'%i,Fraction(0),tuple(Fraction(v) for v in w),(Fraction(0),)*10,w))
+    for ix,C in enumerate(odd_cycles()):
+        # Odd cycle votes are a committee of 3 or 5, irrespective of which cyclic edges bound its error.
+        vertices={i for e in C for i in EDGES[e]}
+        w=tuple(int(i in vertices) for i in range(K))
+        gamma=tuple(Fraction(int(e in C)) for e in range(10))
+        out.append(Certificate('cycle:%d'%ix,Fraction(0),(Fraction(0),)*5,gamma,w))
+    for canonical in ((3,1,1,1,1),(2,1,1,1,0),(2,2,1,1,1),(1,1,1,1,1)):
+        for w in sorted(set(itertools.permutations(canonical))):
+            out.append(weighted_bp(w,'bp:%s'%(''.join(map(str,w)))))
+    for i in range(K):out.append(rooted(i))
+    for w in sorted(set(itertools.permutations((3,2,2,1,1)))):
+        out.append(corrected_core(w))
+    assert len(out)==98,len(out)
+    assert len(set(c.coefficients() for c in out))==98
+    return out
+
+
+def bound(q,b):
+    candidates=[(c.bound(q,b),c.label) for c in make_certificates()]
+    return min(candidates)
+
+if __name__=='__main__':
+    cert=make_certificates()
+    for c in cert:c.check()
+    print('Verified all 98 polynomial majorants exactly on all 32 patterns.')
+    q=[Fraction(9,26)]*4+[Fraction(5,26)]
+    b=[Fraction(3,26) if 4 not in e else Fraction(0) for e in EDGES]
+    v,label=bound(q,b)
+    assert v==Fraction(1,26)
+    print('Targeted example: bound=',v,'label=',label)
+\end{lstlisting}
+\section{9 组有理数见证：98 项不可删减性验证代码}
+\noindent 保存为 \texttt{D2\_K5\_98\_irredundancy\_exact.py}，与附录 A 的脚本置于同一目录。脚本只用有理数运算逐个检查 9 个代表证书的严格优势，通过模型置换覆盖全部 98 项。
+
+\begin{lstlisting}
+"""Exact rational, self-contained irredundancy witnesses for D2's 98 affine certificates.
+Run in same directory as D2_K5_98_term_closed_form_candidate.py.
+Proves none of these 98 terms can be deleted WITHOUT changing U_98 on
+some feasible high-precision R parameter point. It does NOT prove U_98=R_det.
+"""
+from fractions import Fraction as F
+from D2_K5_98_term_closed_form_candidate import EDGES, STATES, make_certificates
+
+# For each of 9 S_5-orbits: (label, rational mass by binary mask, rational b by
+# the fixed order EDGES=(01,02,03,04,12,13,14,23,24,34)).
+WITNESSES = [
+ ('dict:0', {2:'1/4',4:'1/4',8:'1/4',16:'1/4'},
+  ['0']*4 + ['1/4']*6),
+ ('cycle:0', {2:'1/6',4:'1/6',9:'1/6',10:'1/6',17:'1/6',20:'1/6'},
+  ['0','0','1/6','1/6','0','1/6','1/6','1/6','1/6','0']),
+ ('cycle:10', {5:'1/5',9:'1/5',10:'1/5',18:'1/5',20:'1/5'},
+  ['0','2/5','2/5','0','0','2/5','2/5','0','2/5','0']),
+ ('bp:11113', {7:'3/20',11:'3/20',13:'3/20',14:'3/20',16:'2/5'},
+  ['3/10','3/10','3/10','0','3/10','3/10','0','3/10','0','0']),
+ ('bp:01112', {6:'2/9',10:'2/9',12:'2/9',17:'1/3'},
+  ['0','2/9','0','1/3','2/9','2/9','0','2/9','0','0']),
+ ('bp:11122', {7:'1/5',8:'1/10',9:'1/10',10:'1/10',12:'1/10',16:'1/10',17:'1/10',18:'1/10',20:'1/10'},
+  ['1/5','1/5','1/10','1/10','1/5','1/10','1/10','1/10','1/10','0']),
+ ('bp:11111', {1:'1/20',2:'1/20',3:'3/40',4:'1/20',5:'3/40',6:'3/40',8:'1/20',9:'3/40',10:'3/40',12:'3/40',16:'1/20',17:'3/40',18:'3/40',20:'3/40',24:'3/40'},
+  ['3/40']*10),
+ ('rooted:0', {1:'5/26',6:'3/26',8:'3/26',10:'3/26',12:'3/26',16:'3/26',18:'3/26',20:'3/26'},
+  ['0']*4+['3/26']*6),
+ ('corrected:11223', {7:'1/6',11:'1/6',12:'1/4',16:'1/12',17:'1/6',18:'1/6'},
+  ['1/3','1/6','1/6','1/6','1/6','1/6','1/6','1/4','0','0']),
+]
+
+CERTS = make_certificates()
+assert len(CERTS) == 98
+# Interior reference distribution: five independent Bernoulli(1/5) errors,
+# with pair upper bounds exactly 1/25.
+ref_pi = [F(1,5)**sum(int(t) for t in x)*F(4,5)**(5-sum(int(t) for t in x)) for x in STATES]
+ref_b = [F(1,25)]*10
+alpha=F(1,100)
+
+def evaluate(c,q,b):
+    return c.a+sum(v*t for v,t in zip(c.beta,q))+sum(v*t for v,t in zip(c.gamma,b))
+
+def verify(label, mass, bounds):
+    pi=[F(mass.get(mask, '0')) for mask in range(32)]
+    b=[F(u) for u in bounds]
+    assert sum(pi)==1 and all(v>=0 for v in pi)
+    q0=[sum(pi[mask]*int(STATES[mask,i]) for mask in range(32)) for i in range(5)]
+    assert all(b[e]>=sum(pi[mask]*int(STATES[mask,i])*int(STATES[mask,j]) for mask in range(32)) for e,(i,j) in enumerate(EDGES))
+    assert all(b[e]<=min(q0[i],q0[j]) for e,(i,j) in enumerate(EDGES))
+    pi=[(1-alpha)*a+alpha*t for a,t in zip(pi,ref_pi)]
+    b=[(1-alpha)*a+alpha*t for a,t in zip(b,ref_b)]
+    q=[sum(pi[mask]*int(STATES[mask,i]) for mask in range(32)) for i in range(5)]
+    assert sum(pi)==1 and all(F(0)<t<F(1,2) for t in q)
+    assert sum(q)-3*min(q)<=1
+    for e,(i,j) in enumerate(EDGES):
+        joint=sum(pi[mask]*int(STATES[mask,i])*int(STATES[mask,j]) for mask in range(32))
+        assert joint <= b[e] <= min(q[i],q[j])
+    k=next(i for i,c in enumerate(CERTS) if c.label==label)
+    scores=[evaluate(c,q,b) for c in CERTS]
+    gap=min(v-scores[k] for j,v in enumerate(scores) if j!=k)
+    assert gap>0
+    return gap
+
+if __name__=='__main__':
+    for label,mass,b in WITNESSES:
+        print(label, 'strict margin =', verify(label,mass,b))
+    print('Nine exact rational witnesses + relabeling cover all 98 terms.')
+    print('This proves irredundancy within U98, not minimax completeness.')
+\end{lstlisting}
+\section{1,882 条规则和 60 个置换轨道的整数枚举}
+\noindent 保存为 \texttt{D2\_K5\_orbit\_count\_exact.py} 并执行。该脚本不使用浮点 LP。
+
+\begin{lstlisting}
+"""Integer-only check: 1,882 signed threshold rules and 60 S5-orbits."""
+from itertools import permutations, product
+CANON=[(1,0,0,0,0),(3,1,1,1,1),(2,1,1,1,0),
+       (3,2,2,1,1),(1,1,1,0,0),(2,2,1,1,1),(1,1,1,1,1)]
+REP=[s for s in range(32) if not(s&1)]
+PERMS=list(permutations(range(5)))
+
+def bits_from_w(w):
+    f=[]
+    for s in range(32):
+        dot=sum(w[i]*(1 if s&(1<<i) else -1) for i in range(5))
+        assert dot!=0
+        f.append(int(dot>0))
+    assert all(f[s]+f[s^31]==1 for s in range(32))
+    return sum(f[s]<<j for j,s in enumerate(REP))
+
+def permute_code(code,perm):
+    f=[0]*32
+    for j,s in enumerate(REP):
+        f[s]=(code>>j)&1
+        f[s^31]=1-f[s]
+    out=[0]*32
+    for s in range(32):
+        image=sum(((s>>i)&1)<<perm[i] for i in range(5))
+        out[image]=f[s]
+    return sum(out[s]<<j for j,s in enumerate(REP))
+
+rules=set()
+for w0 in CANON:
+    for w in set(permutations(w0)):
+        for sg in product((-1,1), repeat=5):
+            rules.add(bits_from_w(tuple(w[i]*sg[i] for i in range(5))))
+assert len(rules)==1882
+seen=set(); orbits=0
+for code in rules:
+    if code in seen: continue
+    orb={permute_code(code,p) for p in PERMS}
+    assert orb.issubset(rules)
+    seen|=orb
+    orbits+=1
+assert seen==rules and orbits==60
+print('signed self-dual threshold rules:',len(rules),'S5 orbits:',orbits)
+\end{lstlisting}
+\end{document}

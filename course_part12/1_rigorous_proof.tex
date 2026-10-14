@@ -1,0 +1,540 @@
+\documentclass[11pt]{article}
+\input{common.tex}
+\fancyhead[L]{\small\color{muted}超越独立性的集成投票：严格证明}
+\fancyhead[R]{\small\color{muted}Part I \& Part II}
+\hypersetup{pdftitle={超越独立性的集成投票：Part I 与 Part II 的严格证明}}
+
+\begin{document}
+\doctitle{超越独立性的集成投票}{Part I 与 Part II 的严格数学证明}{2026 年 10 月}
+
+\begin{keybox}[title=摘要]
+本文研究 $K$（奇数）个二分类器的多数投票准确率 $A=\Prob(S\ge m)$，其中 $S$ 为正确分类器个数，$m=(K+1)/2$。
+\begin{enumerate}[leftmargin=1.6em]
+\item \textbf{Part I。}在独立情形下给出 Condorcet 型结论及其精确增量公式；在只知道各分类器准确率、依赖结构任意的情形下，给出多数投票准确率的\emph{紧确}下界与上界：相同准确率时是闭式（定理~\ref{thm:equal}），不同准确率时是关于排序后部分和的闭式（定理~\ref{thm:unequal}），并显式构造达到界的联合分布。
+\item \textbf{Part II。}证明“边缘准确率 + 全部两两相关系数”一般不能唯一确定多数投票准确率。$K=3$ 时给出准确率可行区间的完整闭式解（定理~\ref{thm:k3general}、推论~\ref{cor:k3sym}）以及参数相容的充要条件；一般 $K$ 时将问题写成线性规划，并证明对称情形可约化为 $K+1$ 个变量，且存在至多 3 个非零分量的最优解（命题~\ref{prop:reduce}）。
+\end{enumerate}
+定理~\ref{thm:equal}、\ref{thm:unequal}、\ref{thm:k3general}、推论~\ref{cor:k3sym} 和命题~\ref{prop:reduce} 都在随机参数下与穷举 $\{0,1\}^K$ 的线性规划做过数值核对，差值不超过 $10^{-11}$。第~\ref{sec:lit} 节说明各结论与已有文献的关系：Part I 的结论均为已知结论，本文给出自包含的证明。
+\end{keybox}
+
+\tableofcontents
+
+%=====================================================================
+\section{问题设定与记号}
+%=====================================================================
+
+\begin{definition}[基本设定]\label{def:setup}
+设标签 $Y\in\{0,1\}$，输入为 $X$，有 $K$ 个分类器 $f_1,\dots,f_K$，其中 $K\ge1$ 为奇数。记
+\[
+Z_i=\1\{f_i(X)=Y\}\in\{0,1\},\qquad p_i=\Prob(Z_i=1),\qquad S=\sum_{i=1}^K Z_i,\qquad m=\frac{K+1}{2}.
+\]
+多数投票分类器 $\mathrm{MV}(X)$ 输出得票数至少为 $m$ 的那个标签。由于 $K$ 为奇数且只有两个标签，该标签唯一。
+\end{definition}
+
+\begin{lemma}\label{lem:mv}
+$\mathrm{MV}(X)=Y$ 当且仅当 $S\ge m$。因此集成准确率为
+\[
+A=\Prob(\mathrm{MV}(X)=Y)=\Prob(S\ge m).
+\]
+\end{lemma}
+\begin{proof}
+正确的分类器投给 $Y$，错误的分类器投给 $1-Y$。所以 $Y$ 得 $S$ 票，$1-Y$ 得 $K-S$ 票。$K$ 为奇数，不会平票。$Y$ 胜出当且仅当 $S>K-S$，即 $S\ge (K+1)/2=m$。
+\end{proof}
+
+因此 $A$ 只依赖于随机向量 $Z=(Z_1,\dots,Z_K)$ 在 $\{0,1\}^K$ 上的分布 $\pi$。记
+\begin{align*}
+\mathcal P(p)&=\bigl\{\pi \text{ 为 } \{0,1\}^K \text{ 上的概率分布}:\ \Prob_\pi(Z_i=1)=p_i,\ i=1,\dots,K\bigr\},\\
+\Amin(p)&=\inf_{\pi\in\mathcal P(p)}\Prob_\pi(S\ge m),\qquad \Aplus(p)=\sup_{\pi\in\mathcal P(p)}\Prob_\pi(S\ge m).
+\end{align*}
+$\mathcal P(p)$ 是 $\R^{2^K}$ 中的非空紧凸多面体（独立分布总在其中），目标函数线性，所以上下确界都能取到。下文每个界都会给出显式的取到它的分布。
+
+\begin{remark}[可实现性]\label{rem:realize}
+上面的极值是在 $\{0,1\}^K$ 上\emph{所有}分布中取的。要说“极值分布可以由真实的确定性分类器实现”，需要数据分布足够丰富。一个充分条件是：$Y=g(X)$ 几乎处处成立（无标签噪声），且 $X$ 的分布无原子。此时由无原子测度的介值性质（Sierpiński 定理），对任意 $\pi$ 可以把输入空间划分为可测集 $\{B_z\}_{z\in\{0,1\}^K}$，使 $\Prob(X\in B_z)=\pi(z)$。令 $x\in B_z$ 时 $f_i(x)=g(x)$（若 $z_i=1$）或 $1-g(x)$（若 $z_i=0$），即得 $Z=z$ 当且仅当 $X\in B_z$。若数据分布不满足这一条件，本文给出的界仍然成立，只是未必能取到。
+\end{remark}
+
+%=====================================================================
+\section{Part I(a)：独立情形}
+%=====================================================================
+
+\begin{theorem}\label{thm:indformula}
+若 $Z_1,\dots,Z_K$ 独立同分布于 $\mathrm{Bernoulli}(p)$，则 $S\sim\Bin(K,p)$，且
+\[
+\Aind(K,p)=\sum_{j=m}^{K}\binom{K}{j}p^j(1-p)^{K-j}.
+\]
+\end{theorem}
+\begin{proof}由独立性和引理~\ref{lem:mv} 直接得到。\end{proof}
+
+\begin{theorem}[Condorcet 陪审团定理]\label{thm:condorcet}
+记 $q=1-p$，$K=2r+1$。
+\begin{enumerate}[label=(\roman*)]
+\item 增量公式：
+\[
+\Aind(K+2,p)-\Aind(K,p)=\binom{2r+1}{r}\,p^{r+1}q^{r+1}\,(2p-1).
+\]
+因此当 $1/2<p<1$ 时 $\Aind(K,p)$ 关于奇数 $K$ 严格递增；当 $0<p<1/2$ 时严格递减；当 $p\in\{0,1/2,1\}$ 时不随 $K$ 改变。
+\item 极限：
+\[
+\lim_{K\to\infty}\Aind(K,p)=\begin{cases}1,&p>1/2,\\ 1/2,&p=1/2,\\ 0,&p<1/2,\end{cases}
+\]
+更精确地，
+\[
+1-\Aind(K,p)\le e^{-2K(p-1/2)^2}\ \ (p>1/2),\qquad \Aind(K,p)\le e^{-2K(1/2-p)^2}\ \ (p<1/2).
+\]
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 设 $S_K\sim\Bin(K,p)$，$W=Z_{K+1}+Z_{K+2}\sim\Bin(2,p)$，二者独立。$K+2$ 个分类器的多数阈值为 $m+1$，所以
+\[
+\Aind(K+2,p)-\Aind(K,p)=\Prob(S_K+W\ge m+1)-\Prob(S_K\ge m).
+\]
+按 $S_K$ 的取值分情况：
+\begin{itemize}
+\item $S_K\le m-2$ 时两个事件都不发生；
+\item $S_K\ge m+1$ 时两个事件都发生；
+\item $S_K=m-1$ 时旧事件不发生，新事件发生当且仅当 $W=2$；
+\item $S_K=m$ 时旧事件发生，新事件不发生当且仅当 $W=0$。
+\end{itemize}
+所以差值等于
+\[
+\Prob(S_K=m-1)\,p^2-\Prob(S_K=m)\,q^2
+=\binom{K}{r}p^{r}q^{r+1}p^2-\binom{K}{r+1}p^{r+1}q^{r}q^2,
+\]
+这里用了 $m-1=r$。由 $\binom{2r+1}{r}=\binom{2r+1}{r+1}$，上式等于 $\binom{2r+1}{r}p^{r+1}q^{r+1}(p-q)$，而 $p-q=2p-1$。单调性结论由 $(2p-1)$ 的符号得到。
+
+(ii) Hoeffding 不等式 \cite{hoeffding} 给出：对 $t>0$，$\Prob(S/K-p\le -t)\le e^{-2Kt^2}$，$\Prob(S/K-p\ge t)\le e^{-2Kt^2}$。
+
+当 $p>1/2$ 时，$\{S\le m-1\}\subseteq\{S/K<1/2\}=\{S/K-p<-(p-\tfrac12)\}$，于是 $1-\Aind=\Prob(S\le m-1)\le e^{-2K(p-1/2)^2}$。
+
+当 $p<1/2$ 时，$\{S\ge m\}\subseteq\{S/K-p>\tfrac12-p\}$，于是 $\Aind\le e^{-2K(1/2-p)^2}$。
+
+当 $p=1/2$ 时，$K-S$ 与 $S$ 同分布，且 $\{S\ge m\}$ 与 $\{K-S\ge m\}=\{S\le m-1\}$ 构成 $\Omega$ 的划分，所以两者的概率都是 $1/2$。
+\end{proof}
+
+%=====================================================================
+\section{Part I(b)：相同准确率、依赖任意}
+%=====================================================================
+
+本节设 $p_1=\dots=p_K=p$，记 $\Amin(K,p)$、$\Aplus(K,p)$。
+
+\begin{definition}[均匀 $s$-子集分布]\label{def:mus}
+对 $s\in\{0,1,\dots,K\}$，令 $\mu_s$ 为在 $\binom{K}{s}$ 个恰含 $s$ 个 1 的向量上的均匀分布。在 $\mu_s$ 下 $S\equiv s$，且由对称性
+\[
+\Prob_{\mu_s}(Z_i=1)=\frac{s}{K},\qquad \Prob_{\mu_s}(Z_i=Z_j=1)=\frac{s(s-1)}{K(K-1)}\quad(i\ne j).
+\]
+\end{definition}
+对权重 $w_s\ge0$，$\sum_s w_s=1$，混合分布 $\sum_s w_s\mu_s$ 满足：$\Prob(Z_i=1)=\E[S]/K$ 对每个 $i$ 相同，且 $\Prob(S\ge m)=\sum_{s\ge m}w_s$。这类分布称为\emph{可交换}分布。
+
+\begin{lemma}[数票不等式]\label{lem:count}
+对任意 $\pi$（不要求边缘相同），记 $B=\{S\ge m\}$，$A=\Prob(B)$，则
+\[
+m\,A\ \le\ \E[S]\ \le\ (m-1)+(K-m+1)\,A .
+\]
+\end{lemma}
+\begin{proof}
+在 $B$ 上 $m\le S\le K$，在 $B^c$ 上 $0\le S\le m-1$，所以逐点地有 $m\1_B\le S\le K\1_B+(m-1)\1_{B^c}$。取期望，并利用 $\Prob(B^c)=1-A$ 即得。
+\end{proof}
+
+\begin{theorem}[相同准确率的紧确界]\label{thm:equal}
+对任意奇数 $K$ 和 $p\in[0,1]$，
+\[
+\boxed{\ \Amin(K,p)=\max\Bigl\{0,\ \frac{2Kp-K+1}{K+1}\Bigr\},\qquad \Aplus(K,p)=\min\Bigl\{1,\ \frac{2Kp}{K+1}\Bigr\}.\ }
+\]
+两个界都能由可交换分布取到。
+\end{theorem}
+
+\begin{proof}
+\emph{界的成立。}由期望的线性性（不需要独立性），$\E[S]=Kp$。代入引理~\ref{lem:count}，
+\[
+A\ \ge\ \frac{Kp-(m-1)}{K-m+1}=\frac{2Kp-K+1}{K+1},\qquad A\ \le\ \frac{Kp}{m}=\frac{2Kp}{K+1},
+\]
+这里用了 $m-1=(K-1)/2$ 和 $K-m+1=m=(K+1)/2$。再结合 $0\le A\le1$ 即得两个界。
+
+\emph{可达性。}$K=1$ 时 $m=1$，$A=p$，而两个公式也都等于 $p$。下设 $K\ge3$，此时 $m-1\ge1$，$K-m=m-1\ge1$。
+\begin{itemize}
+\item 下界，情形 $Kp\le m-1$：取 $w_{m-1}=Kp/(m-1)\in[0,1]$，$w_0=1-w_{m-1}$。则 $\E[S]=Kp$，且 $S\le m-1$ 恒成立，故 $A=0$。
+\item 下界，情形 $Kp>m-1$：令 $a=\frac{Kp-(m-1)}{K-m+1}$。由 $p\le1$ 得 $a\in(0,1]$。取 $w_K=a$，$w_{m-1}=1-a$，则 $\E[S]=aK+(1-a)(m-1)=Kp$，且 $A=w_K=a$。
+\item 上界，情形 $Kp\le m$：取 $w_m=Kp/m$，$w_0=1-Kp/m$，则 $\E[S]=Kp$，$A=Kp/m$。
+\item 上界，情形 $Kp>m$：令 $\theta=\frac{Kp-m}{K-m}\in(0,1]$，取 $w_K=\theta$，$w_m=1-\theta$，则 $\E[S]=\theta K+(1-\theta)m=Kp$，且 $S\ge m$ 恒成立，故 $A=1$。
+\end{itemize}
+在每种情形下，由定义~\ref{def:mus} 后的说明，各分类器的准确率都是 $\E[S]/K=p$。
+\end{proof}
+
+\begin{corollary}\label{cor:Kdecrease}
+设 $1/2<p<1$。则 $\Amin(K,p)=(2p-1)+\dfrac{2(1-p)}{K+1}$ 关于奇数 $K$ 严格递减，且
+\[
+\lim_{K\to\infty}\Amin(K,p)=2p-1<p .
+\]
+另一方面，当 $K\ge 1/(2p-1)$ 时 $\Aplus(K,p)=1$。
+\end{corollary}
+\begin{proof}
+$\frac{2Kp-K+1}{K+1}=\frac{(2p-1)(K+1)+2-2p}{K+1}$，且当 $p>1/2$ 时该值为正。$\Aplus$ 的结论由 $2Kp\ge K+1\iff K(2p-1)\ge1$ 得到。
+\end{proof}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=0.86\linewidth,height=6.4cm,xlabel={分类器个数 $K$（奇数）},ylabel={多数投票准确率},
+  xmin=0,xmax=22,ymin=0.38,ymax=1.03,xtick={1,3,5,7,9,11,13,15,17,19,21},grid=major,grid style={gray!20},
+  legend style={at={(0.98,0.42)},anchor=east,font=\small,draw=gray!40,fill=white},tick label style={font=\small},label style={font=\small}]
+\addplot[accent,very thick,mark=*,mark size=1.6pt] coordinates {(1,0.7000)(3,0.7840)(5,0.8369)(7,0.8740)(9,0.9012)(11,0.9218)(13,0.9376)(15,0.9500)(17,0.9597)(19,0.9674)(21,0.9736)};
+\addlegendentry{独立 $\Aind(K,0.7)$}
+\addplot[warm,very thick,mark=square*,mark size=1.6pt] coordinates {(1,0.7000)(3,0.5500)(5,0.5000)(7,0.4750)(9,0.4600)(11,0.4500)(13,0.4429)(15,0.4375)(17,0.4333)(19,0.4300)(21,0.4273)};
+\addlegendentry{最坏依赖 $\Amin(K,0.7)$}
+\addplot[good,very thick,dashed,mark=triangle*,mark size=1.8pt] coordinates {(1,0.7000)(3,1)(5,1)(7,1)(9,1)(11,1)(13,1)(15,1)(17,1)(19,1)(21,1)};
+\addlegendentry{最好依赖 $\Aplus(K,0.7)$}
+\addplot[gray,thin,dotted] coordinates {(0,0.4)(22,0.4)};
+\node[font=\scriptsize,gray,anchor=south west] at (axis cs:1.3,0.40) {$2p-1=0.4$};
+\end{axis}
+\end{tikzpicture}
+\caption{$p=0.7$ 时三种情形下多数投票准确率随 $K$ 的变化。独立时趋于 1；依赖结构任意时，最坏情况随 $K$ 单调下降并趋于 $2p-1$。}
+\label{fig:partI}
+\end{figure}
+
+\begin{remark}[最坏情况的结构]
+定理~\ref{thm:equal} 的极值分布说明：当 $0<\Amin<1$ 时，最坏情况下正确票要么集中在“全体都对”的样本上，要么分散为“恰好差一票”（$S=m-1$）的样本。前者在多出的 $K-m$ 票上被浪费，后者恰好全部失败。当 $\Aplus<1$ 时，最好情况则相反：成功样本恰好以 $m$ 票通过，不浪费任何正确票。截断的情形（$\Amin=0$ 或 $\Aplus=1$）见证明中的对应构造。
+\end{remark}
+
+%=====================================================================
+\section{Part I(c)：不同准确率、依赖任意}
+%=====================================================================
+
+记 $\pd1\ge\pd2\ge\dots\ge\pd K$ 为准确率的降序排列，$\pa1\le\pa2\le\dots\le\pa K$ 为升序排列。
+
+\begin{theorem}[任意边缘准确率的紧确界]\label{thm:unequal}
+对任意奇数 $K$ 和 $p\in[0,1]^K$，
+\[
+\boxed{\ \Amin(p)=\max\Bigl\{0,\ \max_{m\le j\le K}\frac{\sum_{i=1}^{j}\pd i-(m-1)}{j-m+1}\Bigr\},\qquad
+\Aplus(p)=\min\Bigl\{1,\ \min_{m\le j\le K}\frac{\sum_{i=1}^{j}\pa i}{j-m+1}\Bigr\}.\ }
+\]
+两个界都能取到。当 $p_i\equiv p$ 时，下界中的最大值在 $j=K$ 处取到，上界中的最小值也在 $j=K$ 处取到，从而退化为定理~\ref{thm:equal}。
+\end{theorem}
+
+证明需要一个构造性引理。
+
+\begin{lemma}[系统抽样引理]\label{lem:systematic}
+设 $x\in[0,1]^K$，$s=\sum_i x_i$。则存在随机向量 $Z\in\{0,1\}^K$ 使得 $\E[Z_i]=x_i$ 对所有 $i$ 成立，且几乎必然有 $\sum_iZ_i\in\{\lfloor s\rfloor,\lceil s\rceil\}$。特别地，对整数 $c$：若 $s\le c$，则 $\sum_iZ_i\le c$；若 $s\ge c$，则 $\sum_iZ_i\ge c$。
+\end{lemma}
+\begin{proof}
+令 $c_0=0$，$c_i=x_1+\dots+x_i$，$U\sim\mathrm{Unif}[0,1)$。对 $a\le b$ 定义 $N(a,b)$ 为随机格点集 $U+\mathbb Z$ 落入半开区间 $[a,b)$ 的点数。由于 $U+n\ge a\iff n\ge a-U$，有
+\[
+N(a,b)=\lceil b-U\rceil-\lceil a-U\rceil .
+\]
+令 $Z_i=N(c_{i-1},c_i)$。下面验证三点。
+\begin{enumerate}[label=(\alph*)]
+\item $Z_i\in\{0,1\}$：区间 $[c_{i-1},c_i)$ 是半开的，长度为 $x_i\le1$，而格点间距为 1，所以区间内至多有一个格点。
+\item $\E[Z_i]=x_i$：对任意实数 $t=k+f$（$k\in\mathbb Z$，$f\in[0,1)$），若 $U<f$ 则 $\lceil t-U\rceil=k+1$，否则为 $k$。因此 $\E\lceil t-U\rceil=k+f=t$，从而 $\E N(a,b)=b-a$。
+\item 总和：$\sum_iZ_i=N(0,s)=\lceil s-U\rceil-\lceil -U\rceil=\lceil s-U\rceil$。因为 $s-U\in(s-1,s]$，所以 $\lceil s-U\rceil\in\{\lfloor s\rfloor,\lceil s\rceil\}$。
+\end{enumerate}
+最后一句结论由 $\lceil s\rceil\le c$（当 $s\le c$）和 $\lfloor s\rfloor\ge c$（当 $s\ge c$）得到。
+\end{proof}
+
+\begin{lemma}[下界条件的等价形式]\label{lem:equiv}
+对 $a\in[0,1]$，下列两条等价：
+\begin{enumerate}[label=(\alph*)]
+\item 对所有 $m\le j\le K$，$\sum_{i=1}^{j}\pd i\le(m-1)+(j-m+1)a$；
+\item $\sum_{i=1}^K(p_i-a)_+\le(m-1)(1-a)$，其中 $(x)_+=\max\{x,0\}$。
+\end{enumerate}
+并且满足 (a) 的 $a\in[0,1]$ 恰好构成区间 $[a^\ast,1]$，其中 $a^\ast$ 为定理~\ref{thm:unequal} 中下界的右端。
+\end{lemma}
+\begin{proof}
+对任意 $T\subseteq[K]$，记条件 $C_T$：$\sum_{i\in T}(p_i-a)\le(m-1)(1-a)$。当 $|T|=j\ge m$ 时，$C_T$ 等价于 $\sum_{i\in T}p_i\le(m-1)+(j-m+1)a$；在所有大小为 $j$ 的 $T$ 中，左边在前 $j$ 大处最大。所以 (a) 等价于“$C_T$ 对所有 $|T|\ge m$ 成立”。当 $|T|\le m-1$ 时，$C_T$ 总成立，因为每项 $p_i-a\le1-a$。所以 (a) 等价于“$C_T$ 对所有 $T$ 成立”，即 $\max_T\sum_{i\in T}(p_i-a)\le(m-1)(1-a)$。而左边的最大值在 $T=\{i:p_i>a\}$ 处取到，等于 $\sum_i(p_i-a)_+$，这就是 (b)。
+
+(a) 中第 $j$ 个条件等价于 $a\ge c_j:=\frac{\sum_{i\le j}\pd i-(m-1)}{j-m+1}$。又 $c_j\le\frac{j-(m-1)}{j-m+1}=1$，所以 $[0,1]$ 中满足 (a) 的 $a$ 恰为 $[\max\{0,\max_jc_j\},1]=[a^\ast,1]$。
+\end{proof}
+
+\begin{lemma}\label{lem:apm}
+$a^\ast\le\pd m$。
+\end{lemma}
+\begin{proof}
+取 $a=\pd m$ 检验条件 (b)：满足 $p_i>\pd m$ 的指标至多有 $m-1$ 个，且每个 $(p_i-\pd m)_+\le1-\pd m$，所以 (b) 成立。由引理~\ref{lem:equiv}，$\pd m\in[a^\ast,1]$。
+\end{proof}
+
+\begin{proof}[定理~\ref{thm:unequal} 的证明]
+\emph{下界成立。}任取 $|T|=j\ge m$，令 $S_T=\sum_{i\in T}Z_i$。在 $B=\{S\ge m\}$ 上 $S_T\le j$；在 $B^c$ 上 $S_T\le S\le m-1$。所以 $S_T\le j\1_B+(m-1)\1_{B^c}$，取期望得
+\[
+\sum_{i\in T}p_i\le(m-1)+(j-m+1)A .
+\]
+取 $T$ 为前 $j$ 大的分类器，再对 $j$ 取最大，即得 $A\ge a^\ast$。
+
+\emph{下界可达。}令 $a=a^\ast$。由引理~\ref{lem:equiv}，(b) 在 $a$ 处成立。
+\begin{itemize}
+\item 若 $a=0$：(b) 给出 $\sum_ip_i\le m-1$。对 $x=p$ 用引理~\ref{lem:systematic}，得到边缘为 $p$ 且 $S\le m-1$ 几乎必然成立的 $Z$，于是 $A=0$。
+\item 若 $a=1$：存在 $j\ge m$ 使 $\sum_{i\le j}\pd i=j$，从而 $\sum_ip_i\ge m$。用引理~\ref{lem:systematic} 得 $S\ge m$ 几乎必然成立，于是 $A=1$。
+\item 若 $0<a<1$：令
+\[
+u_i=\frac{(p_i-a)_+}{1-a},\qquad v_i=\frac{\min\{p_i,a\}}{a}.
+\]
+由 $p_i\le1$ 知 $u_i,v_i\in[0,1]$。由 (b) 得 $\sum_iu_i\le m-1$。由引理~\ref{lem:apm}，至少有 $m$ 个指标满足 $p_i\ge a$，对这些指标 $v_i=1$，故 $\sum_iv_i\ge m$。由引理~\ref{lem:systematic}，存在 $Z^{(0)}$ 使其边缘为 $u$ 且 $\sum_iZ^{(0)}_i\le m-1$，也存在 $Z^{(1)}$ 使其边缘为 $v$ 且 $\sum_iZ^{(1)}_i\ge m$。取与它们独立的 $\xi\sim\mathrm{Bernoulli}(a)$，令 $Z=\xi Z^{(1)}+(1-\xi)Z^{(0)}$。则
+\[
+\Prob(Z_i=1)=(1-a)u_i+a v_i=(p_i-a)_++\min\{p_i,a\}=p_i,\qquad \Prob(S\ge m)=\Prob(\xi=1)=a .
+\]
+\end{itemize}
+
+\emph{上界。}令 $W_i=1-Z_i$，其边缘为 $1-p_i$。由于 $K-S\ge m\iff S\le K-m=m-1$，事件 $\{S\ge m\}$ 与 $\{\sum_iW_i\ge m\}$ 互补。所以
+\[
+\Aplus(p)=1-\Amin(1-p_1,\dots,1-p_K).
+\]
+$1-p$ 的前 $j$ 大之和等于 $j-\sum_{i\le j}\pa i$。代入下界公式化简：
+\[
+1-\frac{j-\sum_{i\le j}\pa i-(m-1)}{j-m+1}=\frac{\sum_{i\le j}\pa i}{j-m+1},
+\]
+即得上界公式，其可达性由下界的可达性得到。
+
+\emph{退化到相同准确率。}$p_i\equiv p$ 时，
+\[
+c_j=\frac{jp-(m-1)}{j-m+1}=p-\frac{(m-1)(1-p)}{j-m+1},\qquad \frac{jp}{j-m+1}=p+\frac{(m-1)p}{j-m+1}.
+\]
+前者关于 $j$ 不减，后者关于 $j$ 不增，所以两者的最值都在 $j=K$ 处取到。
+\end{proof}
+
+\begin{example}
+设 $K=3$，$p=(0.95,0.95,0.3)$。则 $j=2$ 项为 $0.95+0.95-1=0.9$，$j=3$ 项为 $(2.2-1)/2=0.6$，所以 $\Amin=0.9$。直观解释：两个强分类器同时正确的概率至少为 $0.9$（Bonferroni 不等式），而只要它们同时正确，多数投票就一定正确。可见“最强的 $j$ 个分类器”这一项确实可能主导下界。
+\end{example}
+
+\begin{remark}
+引理~\ref{lem:systematic} 的构造就是抽样调查中的系统抽样。它比用“多面体 $\{x\in[0,1]^K:\sum_ix_i\le c\}$ 是整数多面体”来论证更直接，而且给出了可以实际采样的极值分布。
+\end{remark}
+
+%=====================================================================
+\section{Part II：给定两两相关系数}
+%=====================================================================
+
+\subsection{从相关系数到两两联合概率}
+
+设 $0<p_i<1$（否则相关系数无定义）。对 Bernoulli 变量有 $\E[Z_iZ_j]=\Prob(Z_i=Z_j=1)$，所以
+\[
+r_{ij}:=\Prob(Z_i=Z_j=1)=p_ip_j+\rho_{ij}\sqrt{p_i(1-p_i)p_j(1-p_j)} .
+\]
+给定 $(p,\rho)$ 等价于给定 $(p,r)$。记 $\mathcal P(p,r)$ 为满足这些一阶与二阶约束的分布全体，$A_{\min}=\min_{\pi\in\mathcal P(p,r)}\Prob_\pi(S\ge m)$，$A_{\max}$ 类似。
+
+\subsection{三个分类器：完整闭式解}
+
+\begin{lemma}[指示函数恒等式]\label{lem:indicator}
+当 $K=3$ 时，
+\[
+\1\{S\ge2\}=Z_1Z_2+Z_1Z_3+Z_2Z_3-2Z_1Z_2Z_3 .
+\]
+因此，记 $R=r_{12}+r_{13}+r_{23}$，$t=\Prob(Z_1=Z_2=Z_3=1)$，有 $A=R-2t$。
+\end{lemma}
+\begin{proof}
+逐一检查：$S\le1$ 时两边都为 0；$S=2$ 时右边恰有一项乘积为 1，等于 1；$S=3$ 时右边为 $3-2=1$。取期望即得 $A=R-2t$。
+\end{proof}
+
+\begin{theorem}[$K=3$ 的一般闭式解]\label{thm:k3general}
+设 $K=3$，给定 $p\in(0,1)^3$ 和 $r_{12},r_{13},r_{23}$。令
+\begin{align*}
+L&=\max\{0,\ r_{12}+r_{13}-p_1,\ r_{12}+r_{23}-p_2,\ r_{13}+r_{23}-p_3\},\\
+U&=\min\{r_{12},\ r_{13},\ r_{23},\ 1-p_1-p_2-p_3+R\}.
+\end{align*}
+则：
+\begin{enumerate}[label=(\roman*)]
+\item $\mathcal P(p,r)\neq\emptyset$ 当且仅当 $L\le U$；
+\item 当 $\mathcal P(p,r)\neq\emptyset$ 时，$t$ 的可能取值恰为 $[L,U]$，多数投票准确率的可能取值恰为整个区间
+\[
+\boxed{\ A\in[\,R-2U,\ R-2L\,].\ }
+\]
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+任一分布 $\pi\in\mathcal P(p,r)$ 的 8 个格点概率由 $t$ 唯一决定（容斥 / Möbius 反演）：
+\begin{align*}
+\pi(111)&=t, & \pi(000)&=1-p_1-p_2-p_3+R-t,\\
+\pi(110)&=r_{12}-t, & \pi(100)&=p_1-r_{12}-r_{13}+t,\\
+\pi(101)&=r_{13}-t, & \pi(010)&=p_2-r_{12}-r_{23}+t,\\
+\pi(011)&=r_{23}-t, & \pi(001)&=p_3-r_{13}-r_{23}+t.
+\end{align*}
+例如 $\pi(110)=\Prob(Z_1=Z_2=1)-\Prob(Z_1=Z_2=Z_3=1)$。反过来，对任意实数 $t$，这 8 个数之和恒等于 1，且其一阶、二阶边缘恰为 $p$ 与 $r$。所以它们构成 $\mathcal P(p,r)$ 中的分布，当且仅当它们全部非负，即 $L\le t\le U$。这证明了 (i) 以及 $t$ 的可行范围。由引理~\ref{lem:indicator}，$A=R-2t$ 是 $t$ 的严格递减仿射函数，从而 (ii) 成立。
+\end{proof}
+
+\begin{corollary}[对称情形]\label{cor:k3sym}
+设 $p_i\equiv p\in(0,1)$，$\rho_{ij}\equiv\rho$，$r=p^2+\rho p(1-p)$。则：
+\begin{enumerate}[label=(\roman*)]
+\item 参数相容当且仅当
+\begin{equation}\label{eq:feas}
+\max\{0,\ p-\tfrac13,\ 2p-1\}\ \le\ r\ \le\ p .
+\end{equation}
+用 $\rho$ 表示，$\rho\le1$ 总成立，下限为
+\[
+\rho\ \ge\ \rho_{\min}(p)=\begin{cases}-\dfrac{p}{1-p}, & 0<p\le\frac13,\\[2mm] \dfrac{p-\frac13-p^2}{p(1-p)}, & \frac13\le p\le\frac23,\\[2mm] -\dfrac{1-p}{p}, & \frac23\le p<1 .\end{cases}
+\]
+\item 多数投票准确率的精确范围为
+\[
+\boxed{\ A_{\min}(p,\rho)=\max\{r,\ 6p-3r-2\},\qquad A_{\max}(p,\rho)=\min\{3r,\ 2p-r\}.\ }
+\]
+\item 取到界的分布可以选为可交换分布 $\sum_s q_s\mu_s$，其中
+\[
+q_0=1-3p+3r-t,\quad q_1=3p-6r+3t,\quad q_2=3r-3t,\quad q_3=t,
+\]
+下界取 $t=U=\min\{r,1-3p+3r\}$，上界取 $t=L=\max\{0,2r-p\}$。
+\end{enumerate}
+\end{corollary}
+\begin{proof}
+代入定理~\ref{thm:k3general}：$L=\max\{0,2r-p\}$，$U=\min\{r,1-3p+3r\}$。
+
+(i) $L\le U$ 等价于以下四个不等式同时成立：$0\le r$；$0\le1-3p+3r$（即 $r\ge p-\frac13$）；$2r-p\le r$（即 $r\le p$）；$2r-p\le1-3p+3r$（即 $r\ge2p-1$）。$\rho$ 的形式由 $r=p^2+\rho p(1-p)$ 得到：$r\le p\iff\rho\le1$；下限中的三项分别在 $p\le\frac13$、$\frac13\le p\le\frac23$、$p\ge\frac23$ 时最大。
+
+(ii) $A_{\min}=3r-2U=\max\{r,\ 3r-2(1-3p+3r)\}=\max\{r,6p-3r-2\}$；$A_{\max}=3r-2L=\min\{3r,\ 2p-r\}$。
+
+(iii) 对可交换分布，$\E S=q_1+2q_2+3q_3=3p$，$\E\binom S2=q_2+3q_3=3r$，再由 $\sum q_s=1$ 和 $q_3=t$ 解出 $q$。由定义~\ref{def:mus}，其边缘为 $\E S/3=p$，两两联合概率为 $\E[S(S-1)]/6=\E\binom S2/3=r$。
+\end{proof}
+
+\begin{remark}
+等相关矩阵半正定只要求 $\rho\ge-\frac12$。推论~\ref{cor:k3sym}(i) 表明，Bernoulli 变量还受离散取值的约束：除 $p\in\{\frac13,\frac23\}$ 外，可行的 $\rho$ 下限都严格大于 $-\frac12$。例如 $p=\frac12$ 时 $\rho\ge-\frac13$。
+\end{remark}
+
+\begin{example}[相同准确率、两两不相关，但集成准确率不同]\label{ex:counter}
+取 $p=0.6$，$\rho=0$，则 $r=0.36$，$R=1.08$。推论~\ref{cor:k3sym} 给出
+\[
+A_{\min}=\max\{0.36,\ 0.52\}=0.52,\qquad A_{\max}=\min\{1.08,\ 0.84\}=0.84 .
+\]
+三个具体分布如下（均为可交换分布 $\sum_sq_s\mu_s$，即给定 $S=s$ 时均匀随机选出 $s$ 个正确的分类器）：
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+情形 & $q_0$ & $q_1$ & $q_2$ & $q_3=t$ & $A=q_2+q_3$\\
+\midrule
+最差（$t=U=0.28$） & 0 & 0.48 & 0.24 & 0.28 & 0.52\\
+独立 & 0.064 & 0.288 & 0.432 & 0.216 & 0.648\\
+最好（$t=L=0.12$） & 0.16 & 0 & 0.72 & 0.12 & 0.84\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+三者都满足 $\E S=1.8$、$\E\binom S2=1.08$。由于取的是可交换分布，每个分类器的准确率都是 $0.6$，任意两个分类器都不相关。需要强调的是：只给出 $q_s$ 并不够，必须指明“均匀选取”这一构造。例如 $S=1$ 时若总让分类器 1 正确，各分类器的边缘就不再相等。
+\end{example}
+
+\begin{proposition}[与 Part I 的一致性]\label{prop:consistent}
+$K=3$ 时，
+\begin{align*}
+\min_{\rho\ \text{可行}}A_{\min}(p,\rho)&=\Amin(3,p)=\max\Bigl\{0,\frac{3p-1}{2}\Bigr\},\\
+\max_{\rho\ \text{可行}}A_{\max}(p,\rho)&=\Aplus(3,p)=\min\Bigl\{1,\frac{3p}{2}\Bigr\}.
+\end{align*}
+\end{proposition}
+\begin{proof}
+\emph{最小值。}$\max\{r,6p-3r-2\}$ 关于 $r$ 先降后升，两段在 $r^\ast=(3p-1)/2$ 处相交，交点值为 $(3p-1)/2$。若 $p\ge\frac13$，可以验证 $r^\ast$ 满足~\eqref{eq:feas}：$r^\ast\ge p-\frac13\iff p\ge\frac13$，$r^\ast\ge2p-1\iff p\le1$，$r^\ast\le p\iff p\le1$。故最小值为 $(3p-1)/2$。若 $p<\frac13$，取 $r=0$（可行），得 $\max\{0,6p-2\}=0$。
+
+\emph{最大值。}$\min\{3r,2p-r\}$ 在 $r=p/2$ 处取到峰值 $3p/2$。若 $p\le\frac23$，$r=p/2$ 可行，最大值为 $3p/2$。若 $p>\frac23$，可行下限为 $r_0=2p-1>p/2$，此处 $\min\{3r_0,2p-r_0\}=2p-r_0=1$。
+
+两种情形都与定理~\ref{thm:equal} 在 $K=3$ 时的值一致。
+\end{proof}
+
+\subsection{一般 $K$：线性规划}
+
+\begin{theorem}[线性规划表述]\label{thm:lp}
+对任意奇数 $K$，令 $x_z=\pi(z)$（$z\in\{0,1\}^K$），$c_z=\1\{\sum_iz_i\ge m\}$。则
+\[
+A_{\min}=\min_x\sum_zc_zx_z,\qquad A_{\max}=\max_x\sum_zc_zx_z,
+\]
+约束为 $\sum_zx_z=1$；$\sum_zz_ix_z=p_i$（$\forall i$）；$\sum_zz_iz_jx_z=r_{ij}$（$\forall i<j$）；$x_z\ge0$。可行域是有界多面体，若非空则两个最优值都能取到；可行域非空当且仅当 $(p,r)$ 能由某个 Bernoulli 联合分布实现。
+\end{theorem}
+\begin{proof}
+目标函数与约束都是 $x$ 的线性函数，可行域含于概率单纯形，因而是紧的。线性函数在非空紧集上取到最值。
+\end{proof}
+
+\begin{proposition}[对称情形的约化]\label{prop:reduce}
+设 $p_i\equiv p$，$r_{ij}\equiv r$。则 $A_{\min},A_{\max}$ 分别等于下面关于 $q=(q_0,\dots,q_K)$ 的线性规划的最优值：
+\[
+\min / \max\ \sum_{s\ge m}q_s\quad\text{s.t.}\quad \sum_sq_s=1,\quad \sum_s s\,q_s=Kp,\quad \sum_s\binom s2q_s=\binom K2r,\quad q\ge0 .
+\]
+最优值可在至多 3 个分量非零的 $q$ 处取到。
+\end{proposition}
+\begin{proof}
+任一 $\pi\in\mathcal P(p,r)$ 诱导出 $S$ 的分布 $q$，且 $\E S=Kp$，$\E\binom S2=\sum_{i<j}r_{ij}=\binom K2r$，$A=\sum_{s\ge m}q_s$，所以 $q$ 可行且目标值相同。反之，任一可行 $q$ 给出可交换分布 $\sum_sq_s\mu_s$。由定义~\ref{def:mus}，它的边缘为 $\E S/K=p$，两两联合概率为 $\E[S(S-1)]/(K(K-1))=r$，因而属于 $\mathcal P(p,r)$，并且目标值相同。所以两个问题的可达值集合相同。约化后的问题是只有 3 个等式约束的标准型线性规划，其基本最优解至多有 3 个非零分量。
+\end{proof}
+
+表~\ref{tab:generalK} 给出了用命题~\ref{prop:reduce} 计算的结果。$K\le11$ 的各项已与完整的 $2^K$ 变量线性规划逐一对照，差值小于 $10^{-11}$。
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{c|ccc|cc}
+\toprule
+ & \multicolumn{3}{c|}{$p=0.6,\ \rho=0$} & \multicolumn{2}{c}{$p=0.6,\ \rho=0.2$}\\
+$K$ & $A_{\min}$ & 独立 & $A_{\max}$ & $A_{\min}$ & $A_{\max}$\\
+\midrule
+3 & 0.5200 & 0.6480 & 0.8400 & 0.4080 & 0.7920\\
+5 & 0.4667 & 0.6826 & 0.9200 & 0.3440 & 0.8560\\
+7 & 0.4800 & 0.7102 & 0.9600 & 0.3120 & 0.8880\\
+9 & 0.4800 & 0.7334 & 0.9840 & 0.2928 & 0.9072\\
+11 & 0.5000 & 0.7535 & 1.0000 & 0.2800 & 0.9200\\
+21 & 0.5800 & 0.8256 & 1.0000 & 0.2509 & 0.9491\\
+\bottomrule
+\end{tabular}
+\caption{对称情形下给定 $(p,\rho)$ 时多数投票准确率的精确范围（数值解，保留 4 位小数）。即使所有两两相关系数都为 0，$K=5$ 时的最坏准确率 $0.4667$ 仍低于单个分类器的 $0.6$。}
+\label{tab:generalK}
+\end{table}
+
+%=====================================================================
+\section{与已有文献的关系}\label{sec:lit}
+%=====================================================================
+
+本节说明哪些结论属于已知结果。表~\ref{tab:lit} 中“一致”的含义是：已将文献中的公式或数值与本文公式做过数值比对。
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.27\linewidth}>{\raggedright\arraybackslash}p{0.43\linewidth}>{\raggedright\arraybackslash}p{0.20\linewidth}}
+\toprule
+本文结论 & 已有文献 & 关系\\
+\midrule
+定理~\ref{thm:condorcet} & Condorcet 陪审团定理 \cite{condorcet}；增量公式见 \cite{shteingart}（式 7） & 经典结论\\
+定理~\ref{thm:equal} & Kuncheva 等 \cite{kuncheva2003} 的 pattern of failure / success；Zaigraev 与 Kaniovski \cite{zk2012}（定理 1） & 已知，公式一致\\
+定理~\ref{thm:unequal} & Matan \cite{matan} 的上下界（证明见 \cite{kunchevabook} 附录 4.A.1）；取补集后为 Rüger \cite{ruger} 的“$n$ 个事件中至少 $k$ 个发生”的最大概率 & 已知，与 Matan 公式在随机数据上逐一相等\\
+定理~\ref{thm:k3general}、推论~\ref{cor:k3sym} & Kaniovski \cite{kaniovski2010} 用线性规划数值求出同一问题 $n=3$ 时的上下界（其表 2） & 问题已知；闭式解与其全部 6 组数值一致\\
+推论~\ref{cor:k3sym}(i) & Bernoulli 相关矩阵相容性的一般理论 \cite{chaganty} & 一般框架已知\\
+定理~\ref{thm:lp} & Narasimhamurthy \cite{nara2003,nara2005}；Kaniovski \cite{kaniovski2010} 第 6 节（约束与本文逐条相同） & 已知\\
+命题~\ref{prop:reduce} & Prékopa 的二项矩问题 \cite{prekopa1988,prekopa1990}；闭式界见 Boros 与 Prékopa \cite{borosprekopa} & 已知框架的特例\\
+\bottomrule
+\end{tabular}
+\caption{本文结论与已有文献的对应关系。}
+\label{tab:lit}
+\end{table}
+
+据此，本文在数学上的新意有限，比较合理的定位是：(1) 对已知结论给出统一、自包含、构造性的证明（如引理~\ref{lem:systematic} 的系统抽样构造）；(2) 对 Kaniovski \cite{kaniovski2010} 用线性规划数值计算的 $K=3$ 问题给出显式闭式解、相容性条件和极值分布。其中对称情形很可能是 Boros 与 Prékopa \cite{borosprekopa} 二项矩闭式界的特例（未能逐项比对原文），一般参数的定理~\ref{thm:k3general} 则超出了二项矩框架；(3) 把分类器集成、陪审团定理和概率界三条文献线联系起来。
+
+\paragraph{核查的局限。}Rüger \cite{ruger}、Boros 与 Prékopa \cite{borosprekopa}、Narasimhamurthy \cite{nara2005} 只核对了摘要；Matan \cite{matan} 的公式来自 Kuncheva 的教材 \cite{kunchevabook} 及课程讲义转述；\cite{kaniovski2010,zk2012} 的定理与表格编号依据作者主页上的预印本，正式发表版本的编号可能不同。
+
+%=====================================================================
+\section{结论汇总}
+%=====================================================================
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.30\linewidth}>{\raggedright\arraybackslash}p{0.44\linewidth}>{\raggedright\arraybackslash}p{0.16\linewidth}}
+\toprule
+问题 & 结果 & 位置\\
+\midrule
+独立、相同 $p$ & 二项公式；增量 $\binom{2r+1}{r}p^{r+1}q^{r+1}(2p-1)$；极限 1, $\frac12$, 0 & 定理 \ref{thm:indformula}, \ref{thm:condorcet}\\
+依赖任意、相同 $p$ & $\Amin=\max\{0,\frac{2Kp-K+1}{K+1}\}$，$\Aplus=\min\{1,\frac{2Kp}{K+1}\}$，紧确 & 定理 \ref{thm:equal}\\
+$K$ 增大时的最坏情况 & $\frac12<p<1$ 时严格递减，极限 $2p-1$ & 推论 \ref{cor:Kdecrease}\\
+依赖任意、不同 $p_i$ & 排序部分和公式，紧确，可构造 & 定理 \ref{thm:unequal}\\
+两两相关是否足够 & 不足够；$p=0.6,\rho=0$ 时 $A\in[0.52,0.84]$ & 例 \ref{ex:counter}\\
+$K=3$、一般参数 & $A\in[R-2U,\,R-2L]$，相容 $\iff L\le U$ & 定理 \ref{thm:k3general}\\
+$K=3$、对称参数 & $[\max\{r,6p-3r-2\},\ \min\{3r,2p-r\}]$ & 推论 \ref{cor:k3sym}\\
+一般 $K$ & $2^K$ 变量线性规划；对称时降为 $K+1$ 变量 & 定理 \ref{thm:lp}，命题 \ref{prop:reduce}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{thebibliography}{99}\small
+\bibitem{condorcet} M.~de Condorcet. \emph{Essai sur l\apos application de l\apos analyse à la probabilité des décisions rendues à la pluralité des voix}. Paris, 1785.
+\bibitem{shteingart} H.~Shteingart et al. Majority voting and the Condorcet\apos s jury theorem. arXiv:2002.03153, 2020.
+\bibitem{hoeffding} W.~Hoeffding. Probability inequalities for sums of bounded random variables. \emph{Journal of the American Statistical Association}, 58(301):13--30, 1963.
+\bibitem{kuncheva2003} L.~I. Kuncheva, C.~J. Whitaker, C.~A. Shipp, R.~P.~W. Duin. Limits on the majority vote accuracy in classifier fusion. \emph{Pattern Analysis and Applications}, 6(1):22--31, 2003.
+\bibitem{kunchevabook} L.~I. Kuncheva. \emph{Combining Pattern Classifiers: Methods and Algorithms}, 2nd ed. Wiley, 2014.
+\bibitem{matan} O.~Matan. On voting ensembles of classifiers (extended abstract). AAAI-96 Workshop on Integrating Multiple Learned Models, 1996.
+\bibitem{ruger} B.~Rüger. Das maximale Signifikanzniveau des Tests \gerlq Lehne $H_0$ ab, wenn $k$ unter $n$ gegebenen Tests zur Ablehnung führen\gerrq. \emph{Metrika}, 25:171--178, 1978.
+\bibitem{zk2012} A.~Zaigraev, S.~Kaniovski. Bounds on the competence of a homogeneous jury. \emph{Theory and Decision}, 72(1):89--112, 2012.
+\bibitem{kaniovski2010} S.~Kaniovski. Aggregation of correlated votes and Condorcet\apos s jury theorem. \emph{Theory and Decision}, 69(3):453--468, 2010.
+\bibitem{nara2003} A.~M. Narasimhamurthy. A framework for the analysis of majority voting. In \emph{Lecture Notes in Computer Science}, vol.~2749. Springer, 2003.
+\bibitem{nara2005} A.~Narasimhamurthy. Theoretical bounds of majority voting performance for a binary classification problem. \emph{IEEE Transactions on Pattern Analysis and Machine Intelligence}, 27(12):1988--1995, 2005.
+\bibitem{prekopa1988} A.~Prékopa. Boolean--Bonferroni inequalities and linear programming. \emph{Operations Research}, 36(1):145--162, 1988.
+\bibitem{prekopa1990} A.~Prékopa. Sharp bounds on probabilities using linear programming. \emph{Operations Research}, 38(2):227--239, 1990.
+\bibitem{borosprekopa} E.~Boros, A.~Prékopa. Closed form two-sided bounds for probabilities that at least $r$ and exactly $r$ out of $n$ events occur. \emph{Mathematics of Operations Research}, 14(2):317--342, 1989.
+\bibitem{chaganty} N.~R. Chaganty, H.~Joe. Range of correlation matrices for dependent Bernoulli random variables. \emph{Biometrika}, 93(1):197--206, 2006.
+\end{thebibliography}
+
+\end{document}

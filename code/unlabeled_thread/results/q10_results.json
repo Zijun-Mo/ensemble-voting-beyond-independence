@@ -1,0 +1,18 @@
+{
+ "K5_pairwise_maxmin_subset_formula": {
+  "n": 300,
+  "max_abs_err": 1.1102230246251565e-15
+ },
+ "K7_pw": {
+  "n": 40,
+  "frac_weighted_beats_subset": 0.0,
+  "max_gain": 2.19824158875781e-14,
+  "mean_gain": -0.0011456362074399318
+ },
+ "K7_full": {
+  "n": 25,
+  "frac_weighted_beats_subset": 0.0,
+  "max_gain": 0.0,
+  "mean_gain": -0.0010290934072143144
+ }
+}

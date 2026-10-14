@@ -1,0 +1,512 @@
+\documentclass[11pt,a4paper]{ctexart}
+\usepackage[margin=23mm,top=24mm,bottom=23mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{booktabs,tabularx,array,longtable}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fancyhdr,lastpage}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.25em}
+\setlist{itemsep=0.23em,topsep=0.35em}
+\definecolor{ink}{HTML}{173047}
+\definecolor{accent}{HTML}{166E81}
+\definecolor{lightbox}{HTML}{F2F6F8}
+\definecolor{warn}{HTML}{9C4C25}
+\hypersetup{colorlinks=true,urlcolor=accent,linkcolor=ink}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{ink}{稳健集成投票：图证书的精确性边界}}
+\fancyhead[R]{\small\textcolor{ink}{补充理论报告}}
+\fancyfoot[C]{\small 第 \thepage\ 页 / 共 \pageref{LastPage} 页}
+\renewcommand{\headrulewidth}{0.3pt}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{proposition}[theorem]{命题}
+\newtheorem{corollary}[theorem]{推论}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{定义}
+\newtheorem{remark}[theorem]{说明}
+\newenvironment{proofcn}{\par\noindent\textbf{证明.}\ }{\hfill $\square$\par}
+\newtcolorbox{resultbox}{breakable,colback=lightbox,colframe=accent,boxrule=0.65pt,arc=1.5mm,left=3mm,right=3mm,top=2.5mm,bottom=2.5mm}
+\newcommand{\PP}{\mathcal P}
+\newcommand{\one}{\mathbf 1}
+\newcommand{\Risk}{\mathsf R}
+\newcommand{\I}{\mathbf 1}
+\newcommand{\comp}[1]{\overline{#1}}
+\newcommand{\calQ}{\mathcal Q}
+\newcommand{\E}{\mathbb E}
+\newcommand{\Prb}{\mathbb P}
+\begin{document}
+\thispagestyle{empty}
+\vspace*{1.5cm}
+\noindent{\color{accent}\rule{\textwidth}{1.7pt}}\par
+\vspace{0.8cm}
+{\Huge\bfseries 依赖不确定下的稳健集成投票}\par
+\vspace{0.38cm}
+{\LARGE\bfseries 图证书猜想：精确子区域、\par\vspace{0.12cm}五分类器反例与对偶解释}\par
+\vspace{0.8cm}
+{\Large 第二份理论研究报告（LaTeX 自包含证明稿）}\par
+\vspace{0.8cm}
+\noindent\begin{tabularx}{\textwidth}{@{}p{29mm}X@{}}
+\textbf{日期} & 2026 年 10 月 13 日 \\
+\textbf{研究对象} & 已知边际错误率与成对共同出错概率上界的投票问题；\newline 确定性 self-dual minimax 框架 \\
+\textbf{核心进展} & 图证书在 $\sum_iq_i\le1$ 内精确；\newline 在完整区域 $R$ 中给出 $K=5$ 解析反例及稳定反例族 \\
+\textbf{证明性质} & 定理与反例均在正文中给出自包含推导；不把此前的计算实验当作证明 \\
+\end{tabularx}
+\vfill
+\begin{resultbox}
+\textbf{本报告的精确结论。} 记
+\[
+B_{\rm graph}=\inf_{y\ge0:\,g(y)>0}\frac{\sum_{i<j}b_{ij}y_{ij}}{g(y)},\qquad
+ g(y)=\min_{S\subseteq[K]}\max\{y(E(S)),y(E(S^c))\}.
+\]
+若误差分布模糊集非空，则
+\[
+\boxed{\sum_iq_i\le1\quad\Longrightarrow\quad
+\Risk^*_{\rm det}=\min\{q_{\min},B_{\rm graph}\}.}
+\]
+但该等式\textbf{不适用于整个} $R=\{\sum_iq_i-(K-2)q_{\min}\le1\}$。在 $K=5$、$q_i=0.3$、$b_{ij}=0.05$ 时，$\Risk^*_{\rm det}=0$，而 $0.125\le B_{\rm graph}\le0.15$。该失败并非孤立参数点。
+\end{resultbox}
+\vspace{0.4cm}
+{\small\color{gray} 研究诚信说明：本报告是对既有项目内部推导的整理与校核，未进行独立的文献优先权认证。文中“证明”仅指所展示的数学推导，并不声称相应结果在学术史上首次出现。}
+\newpage
+\tableofcontents
+\newpage
+
+\section{摘要、符号与研究结论}
+原有工作发现，低共同出错概率形成的奇环可以提供稳健多数投票保证；随后通过一般加权图定义了更强的证书 $B_{\rm graph}$。新的候选等式是：在高精度区域 $R$ 内，最优确定性 self-dual 投票的最坏错误率恰为 $\min\{q_{\min},B_{\rm graph}\}$。
+
+本报告完整检验这一候选等式，得到两项相辅相成的发现。\textbf{正面结论}是：只要所有模型的边际错误率之和不超过 $1$，图证书是精确的，这可从最坏联合分布的线性规划对偶推出。\textbf{反面结论}是：原始区域 $R$ 比上述子区域大；当错误率之和超过 $1$ 时，对偶中的常数项以及可能为负的线性系数具有实质作用，纯图证书会遗漏这一信息。$K=5$ 的对称实例已经足以否定完整的 $R$ 版本，甚至产生一族非退化的反例。
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{@{}p{0.26\textwidth}X p{0.2\textwidth}@{}}
+\toprule
+\textbf{研究命题} & \textbf{陈述或新认识} & \textbf{状态}\\
+\midrule
+图证书上界 & $\Risk^*_{\rm det}\le\min(q_{\min},B_{\rm graph})$ & 证明 / 复述 \\
+精确性子区域 & $\sum_iq_i\le1$ 时上界取等号 & \textbf{本报告严格证明}\\
+完整 $R$ 内的等式 & $\Risk^*_{\rm det}=\min(q_{\min},B_{\rm graph})$ & \textbf{$K=5$ 严格证伪}\\
+五模型反例族 & 一段正长度的 $b$ 区间内存在严格间隙 & \textbf{本报告严格证明}\\
+阈值结构定理 & 最优确定性 self-dual 规则可选线性阈值 & 推导并复核\\
+完整表征 & 含常数、顶点及边项的二次对偶证书 & 精确等价表述\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{问题的数学设定}
+\subsection{错误模式与可行联合分布}
+设 $K\ge3$，二元分类器 $f_i$ 的正确率为 $p_i>1/2$。定义错误指标
+\[
+X_i=\I\{f_i(X)\ne Y\}\in\{0,1\},\qquad q_i=\Prb(X_i=1)=1-p_i\in(0,1/2).
+\]
+令 $q_{\min}=\min_iq_i$。我们只知道共同出错概率的上界
+\[
+\Prb(X_i=X_j=1)\le b_{ij},\qquad b_{ij}=\min\{\bar e_{ij},q_i,q_j\}.
+\]
+对任意错误向量 $x\in\{0,1\}^K$ 令 $\pi_x=\Prb(X=x)$，允许的联合分布集合为
+\begin{equation}\label{eq:ambiguity}
+\PP(q,b)=\left\{\pi\ge0:\ \sum_x\pi_x=1,\quad
+\sum_xx_i\pi_x=q_i,\quad
+\sum_xx_ix_j\pi_x\le b_{ij}\ \forall i<j\right\}.
+\end{equation}
+\textbf{基础假设：} 在所有定理中 $\PP(q,b)\ne\varnothing$。如果用户给定的上下界彼此矛盾，则 minimax 优化本身没有所讨论的含义。
+
+\subsection{self-dual 规则与 minimax 错误率}
+用 $F:\{0,1\}^K\to\{0,1\}$ 表示集成投票在错误模式 $x$ 下是否失败；要求标签对称（self-dual）：
+\begin{equation}\label{eq:selfdual}
+F(x)+F(\one-x)=1\quad(\forall x).
+\end{equation}
+这个要求对应把全部二元模型输出及真实标签同时翻转时，投票行为也一同翻转。定义
+\begin{equation}\label{eq:minimax}
+\Risk(F)=\max_{\pi\in\PP(q,b)}\sum_xF(x)\pi_x,\qquad
+\Risk^*_{\rm det}=\min_{F\text{ 满足 }\eqref{eq:selfdual}}\Risk(F).
+\end{equation}
+对手是在规则选定\emph{之后}选择最不利的联合分布；规则类覆盖非单调、非阈值的所有确定性 self-dual 规则。
+
+原研究的高精度区域为
+\begin{equation}\label{eq:R}
+R:\qquad \sum_iq_i-(K-2)q_{\min}\le1.
+\end{equation}
+本报告得到精确等式的子区域则是
+\begin{equation}\label{eq:R0}
+R_0:\qquad\sum_iq_i\le1.
+\end{equation}
+显然 $R_0\subseteq R$，但包含关系通常严格。
+
+\section{最优图证书的定义与普适上界}
+对完全图 $K_K$ 的边赋予非负数 $y_{ij}\ge0$，并记
+\[
+y(E(S))=\sum_{\{i,j\}\subseteq S}y_{ij},\qquad
+Y_y=\sum_{i<j}y_{ij}.
+\]
+\begin{definition}[内部边的最小不可避重量]\label{def:g}
+定义
+\begin{equation}\label{eq:g}
+g(y)=\min_{S\subseteq[K]}\max\left\{y(E(S)),\,y(E(S^c))\right\}.
+\end{equation}
+若 $g(y)>0$，定义图证书的代价及其最优值
+\begin{equation}\label{eq:Bgraph}
+B(y)=\frac{\sum_{i<j}b_{ij}y_{ij}}{g(y)},\qquad
+B_{\rm graph}=\inf_{\substack{y\ge0\\g(y)>0}}B(y).
+\end{equation}
+\end{definition}
+在 $K\ge3$ 时这一可行集合非空：给任意三角形的三条边赋权 $1$，其余边赋权 $0$，则 $g(y)=1$。
+
+\begin{lemma}[加权度数恒等式]\label{lem:degree}
+设 $d_i(y)=\sum_{j\ne i}y_{ij}$，则对任意 $S\subseteq[K]$，
+\begin{equation}\label{eq:degree}
+\sum_{i\in S}d_i(y)-Y_y=y(E(S))-y(E(S^c)).
+\end{equation}
+\end{lemma}
+\begin{proofcn}
+$\sum_{i\in S}d_i(y)=2y(E(S))+y(\partial S)$，而 $Y_y=y(E(S))+y(E(S^c))+y(\partial S)$。相减即得。
+\end{proofcn}
+
+\begin{proposition}[图证书保证]\label{prop:graph}
+对任意 $y\ge0$ 且 $g(y)>0$，存在一个确定性 self-dual 的非负加权线性投票规则，其最坏错误率不超过 $B(y)$。因此
+\begin{equation}\label{eq:ub}
+\Risk^*_{\rm det}\le\min\{q_{\min},B_{\rm graph}\}.
+\end{equation}
+\end{proposition}
+\begin{proofcn}
+令 $x_i=1$ 表示第 $i$ 个模型出错，$S=\{i:x_i=1\}$。按 $d_i(y)$ 赋权；若错误模型所得权重超过总权重的一半，则投票失败。由式 \eqref{eq:degree}，严格失败蕴含 $y(E(S))>y(E(S^c))$，从而 $y(E(S))\ge g(y)$。平局时可用一个任意小、严格正且使所有 $\{0,1\}^K$ 模式都不平局的权重扰动确定输出；扰动取足够小后不改变原有非平局状态，平局状态两侧内部边权相同，结论同样成立。
+
+于是
+\[
+\I\{\text{投票失败}\}\le\frac{y(E(S))}{g(y)}
+=\frac{\sum_{i<j}y_{ij}X_iX_j}{g(y)}.
+\]
+对任意可行联合分布取期望，利用 $\E[X_iX_j]\le b_{ij}$ 得 $\Risk(F_y)\le B(y)$。对 $y$ 取下确界即得 $B_{\rm graph}$。另可只使用边际错误率最小的单个分类器，得到 $q_{\min}$。
+\end{proofcn}
+
+\begin{remark}[奇环只是图证书的特例]
+令 $y$ 是某条简单奇环的边指示向量（环边为 $1$，其他为 $0$），则 $g(y)=1$：任意二分染色至少产生一条单色环边，且存在恰好一条单色环边的划分。因此 $B(y)$ 等于该奇环上共错上界的和。一般 $y$ 允许很多环及非环边协同工作，因此比单个奇环更灵活。
+\end{remark}
+
+\section{LP 对偶：为什么图证书可能是精确的}
+\subsection{固定规则的最坏分布线性规划}
+对给定 $F$，式 \eqref{eq:minimax} 的内层是有限维 LP：
+\[
+\begin{aligned}
+\text{maximize}_{\pi\ge0}\quad &\sum_xF(x)\pi_x\\
+\text{subject to}\quad &\sum_x\pi_x=1,\\
+&\sum_xx_i\pi_x=q_i,\\
+&\sum_xx_ix_j\pi_x\le b_{ij}\quad(i<j).
+\end{aligned}
+\]
+令常数乘子 $a$ 和一阶乘子 $\beta_i$ 自由取实数，共错上界的乘子 $\gamma_{ij}\ge0$。其 LP 对偶为
+\begin{equation}\label{eq:dualf}
+\begin{aligned}
+\text{minimize}\quad &a+\sum_iq_i\beta_i+\sum_{i<j}b_{ij}\gamma_{ij},\\
+\text{subject to}\quad &Q(x):=a+\sum_i\beta_ix_i+\sum_{i<j}\gamma_{ij}x_ix_j\ge F(x)\quad(\forall x),\\
+&\gamma_{ij}\ge0.
+\end{aligned}
+\end{equation}
+由 $\PP(q,b)$ 非空及概率单纯形的有界性，内层 primal 与 dual 都有最优解且无对偶间隙。
+
+\subsection{消去 self-dual 规则}
+\begin{lemma}[精确二次证书形式]\label{lem:Q}
+$\Risk^*_{\rm det}$ 等于下列非凸有限维优化的最优值：
+\begin{equation}\label{eq:exactQ}
+\begin{aligned}
+\underset{a,\beta,\gamma}{\operatorname{minimize}}\quad &a+\sum_iq_i\beta_i+\sum_{i<j}b_{ij}\gamma_{ij}\\
+\text{subject to}\quad &\gamma_{ij}\ge0,\\
+&Q(x)\ge0\quad\forall x\in\{0,1\}^K,\\
+&\max\{Q(x),Q(\one-x)\}\ge1\quad\forall x\in\{0,1\}^K.
+\end{aligned}
+\end{equation}
+\end{lemma}
+\begin{proofcn}
+对于任意 self-dual $F$ 和满足 $Q\ge F$ 的对偶证书，$Q$ 必非负，且在互补的一对 $x,\one-x$ 中有一个 $F$ 值为 $1$，所以 $\max(Q(x),Q(\one-x))\ge1$。
+
+反过来，如果 $Q$ 满足式 \eqref{eq:exactQ}，则每对互补模式中至少一方的 $Q$ 值达到 $1$。将该侧设为 $F=1$，另一侧设为 $F=0$，即可构造 self-dual $F$ 且 $Q\ge F$。对每个 $F$ 使用 \eqref{eq:dualf} 的强对偶，再对全部有限个 $F$ 取最小，得到等价式 \eqref{eq:exactQ}。
+\end{proofcn}
+
+\begin{theorem}[最优规则的线性阈值结构]\label{thm:linear}
+在上述一般设定下，存在一个 minimax 最优的确定性 self-dual 线性阈值规则；允许权重带符号，且可选择权重使任何输入模式都不平局。
+\end{theorem}
+\begin{proofcn}
+给定最优证书 $Q$，比较互补模式的差：
+\begin{equation}\label{eq:linearidentity}
+Q(x)-Q(\one-x)=\sum_{i=1}^K\left(\beta_i+\frac12\sum_{j\ne i}\gamma_{ij}\right)(2x_i-1).
+\end{equation}
+在每个互补对中令 $Q$ 较大的模式对应 $F=1$，若相等则按极小通用线性扰动打破平局。这一规则仍被 $Q$ 上界控制，并且由式 \eqref{eq:linearidentity} 可知它是一个线性阈值规则。由于 $Q$ 的目标值是全局最优对偶值，该规则的最坏错误率不可能更大，故同样最优。对有限个输入模式，取足够小且一般位置的扰动可同时避免所有平局。
+\end{proofcn}
+
+\section{核心定理：当 $\sum_iq_i\le1$ 时图证书精确}
+先证明对偶证书可以去掉常数项，并且使一阶系数非负。这是本报告正面结论的核心。
+
+\begin{lemma}[零常数、非负系数归一化]\label{lem:normalization}
+若 $\sum_iq_i\le1$，则式 \eqref{eq:exactQ} 存在最优解，可写成
+\begin{equation}\label{eq:Q0}
+Q_0(x)=\sum_i s_ix_i+\sum_{i<j}\gamma_{ij}x_ix_j,
+\qquad s_i,\gamma_{ij}\ge0.
+\end{equation}
+\end{lemma}
+\begin{proofcn}
+取任意可行 $Q$。由于 $Q(0)\ge0$，必有 $a\ge0$；又因 $Q(e_i)\ge0$，令 $s_i=a+\beta_i\ge0$。定义
+\[
+Q_0(x)=\sum_is_ix_i+\sum_{i<j}\gamma_{ij}x_ix_j
+=Q(x)+a\bigl(|x|-1\bigr),
+\]
+其中 $|x|=\sum_ix_i$。
+
+若 $1\le|x|\le K-1$，则 $Q_0(x)\ge Q(x)$，因此这些互补对的约束均被保留。对于唯一特殊的互补对 $0,\one$，有 $Q_0(0)=0$。当 $0\le a<1$ 时，原来 $\max\{Q(0),Q(\one)\}\ge1$ 强制 $Q(\one)\ge1$，故 $Q_0(\one)\ge1$；当 $a\ge1$ 时，$Q(\one)\ge0$ 给出
+\[
+Q_0(\one)=Q(\one)+(K-1)a\ge(K-1)a\ge1.
+\]
+所以 $Q_0$ 对所有互补对可行，且其所有系数非负。两个证书的目标之差恰为
+\[
+\operatorname{Obj}(Q_0)-\operatorname{Obj}(Q)
+=a\left(\sum_iq_i-1\right)\le0.
+\]
+因此从任意最优证书出发，可得到同样最优的 $Q_0$。
+\end{proofcn}
+
+\begin{theorem}[图证书的精确子区域]\label{thm:sharp}
+设 $K\ge3$、$\PP(q,b)\ne\varnothing$。如果
+\[
+\boxed{\sum_iq_i\le1,}
+\]
+则在所有确定性 self-dual 规则中，
+\begin{equation}\label{eq:sharp}
+\boxed{\Risk^*_{\rm det}=\min\{q_{\min},B_{\rm graph}\}.}
+\end{equation}
+此外，结合引理 \ref{lem:normalization} 与定理 \ref{thm:linear}，总存在达到最优值的非负加权线性阈值规则。单独通过图权重序列构造时，也可对任意 $\varepsilon>0$ 实现错误率不超过右侧 $+\varepsilon$；图证书下确界是否由某一个 $y$ 取到，不影响最优投票规则的存在性。
+\end{theorem}
+\begin{proofcn}
+式 \eqref{eq:ub} 已证明
+\(
+\Risk^*_{\rm det}\le\min\{q_{\min},B_{\rm graph}\}.
+\)
+
+现反向证明。由引理 \ref{lem:normalization}，设一个最优证书形如 $Q_0$，并记 $s=\sum_i s_i$、$C=\sum_iq_is_i+\sum_{i<j}b_{ij}\gamma_{ij}$。
+
+若 $s\ge1$，因 $q_i\ge q_{\min}$、所有系数非负，
+\[
+C\ge\sum_iq_is_i\ge q_{\min}s\ge q_{\min}.
+\]
+
+若 $s<1$，任意 $S\subseteq[K]$ 的互补对必须有一方 $Q_0$ 值达到 $1$。每一侧的顶点项最多为 $s$，因此
+\[
+\max\{\gamma(E(S)),\gamma(E(S^c))\}\ge1-s.
+\]
+对所有 $S$ 取最小，得到 $g(\gamma)\ge1-s>0$。按 $B_{\rm graph}$ 的定义，
+\[
+\sum_{i<j}b_{ij}\gamma_{ij}\ge B_{\rm graph}\,g(\gamma)
+\ge B_{\rm graph}(1-s).
+\]
+于是
+\[
+C\ge q_{\min}s+B_{\rm graph}(1-s)
+\ge\min\{q_{\min},B_{\rm graph}\}.
+\]
+结合两种情况及对偶的精确性，得到式 \eqref{eq:sharp}。图规则取权重 $d_i(y)\ge0$，只用最佳单模型时权重也非负；近似下确界由图规则序列实现。
+\end{proofcn}
+
+\begin{remark}[证明真正覆盖的区域]
+本定理\textbf{只使用} $\sum_iq_i\le1$，不需要全部 $q_i$ 相同，不需要各对上界相同，也不需要独立性。若 $\sum_iq_i>1$，引理 \ref{lem:normalization} 的目标差可能为正；因此不能据此断言常数项 $a$ 无关紧要。
+\end{remark}
+
+\section{$K=5$ 对称解析反例：完整 $R$ 内不精确}
+\subsection{参数与可行性}
+取 $K=5$，所有模型的边际错误率与共同出错上界为
+\begin{equation}\label{eq:counterdata}
+q_i=0.3\quad(i=1,\ldots,5),\qquad b_{ij}=0.05\quad(i<j).
+\end{equation}
+于是 $p_i=0.7>1/2$、$q_{\min}=0.3$。而且
+\[
+\sum_iq_i-(K-2)q_{\min}=1.5-0.9=0.6\le1,
+\]
+故\textbf{处于}完整的 $R$ \textbf{内部}。但 $\sum_iq_i=1.5>1$，不在定理 \ref{thm:sharp} 的子区域内。
+
+下表给出一个明确可行的联合分布；每个同样大小的错误集合概率相同：
+\begin{center}
+\begin{tabular}{@{}c c c c@{}}
+\toprule
+错误集合 $S$ 的大小 & 具有该大小的集合数 & \textbf{每个具体集合的概率} & 总概率\\
+\midrule
+$|S|=1$ & $5$ & $0.10$ & $0.50$\\
+$|S|=2$ & $10$ & $0.05$ & $0.50$\\
+其他大小 & -- & $0$ & $0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+对任意顶点 $i$，单个错误模式 $\{i\}$ 贡献 $0.10$，包含 $i$ 的四个二元集合各贡献 $0.05$，因此 $q_i=0.10+4(0.05)=0.30$。而任意一对 $i,j$ 仅在错误集合恰好为 $\{i,j\}$ 时共同出错，所以 $e_{ij}=0.05$。约束集确实非空。
+
+\subsection{二阶矩证书使五人多数投票完全正确}
+令 $N=\sum_{i=1}^5X_i$ 为同时出错的模型个数。普通五人多数投票失败当且仅当 $N\ge3$。定义
+\begin{equation}\label{eq:hk}
+h(N)=\frac{(N-1)(N-2)}2=1-N+\binom N2.
+\end{equation}
+\begin{center}
+\begin{tabular}{@{}c r r r r r r@{}}
+\toprule
+$N$ &0&1&2&3&4&5\\
+\midrule
+$h(N)$ &1&0&0&1&3&6\\
+$\I\{N\ge3\}$ &0&0&0&1&1&1\\
+\bottomrule
+\end{tabular}
+\end{center}
+由表可见，对每一个可能的整数 $N$，$h(N)\ge\I\{N\ge3\}\ge0$。故
+\begin{align}\label{eq:momentbound}
+\Prb(N\ge3)
+&\le\E[h(N)]\\
+&=1-\sum_i\E[X_i]+\sum_{i<j}\E[X_iX_j]\notag\\
+&\le1-\sum_iq_i+\sum_{i<j}b_{ij}\notag\\
+&=1-5(0.3)+10(0.05)=0.\notag
+\end{align}
+概率不能为负，所以对\emph{每一个}可行联合分布均有 $\Prb(N\ge3)=0$。因此
+\begin{equation}\label{eq:zero}
+\boxed{\Risk^*_{\rm det}=0.}
+\end{equation}
+这不仅说明给定分布中五人多数正确，更说明该准确率是对整个模糊集的\textbf{最坏情形保证}。
+
+\subsection{纯图证书却严格大于零}
+对任意非负边权 $y$，记 $Y_y=\sum_{i<j}y_{ij}$。在五个顶点中等概率选一个二元子集 $S$（共 $10$ 种）。对任意固定边，其两端同属 $S$ 的概率为 $1/10$，同属 $S^c$ 的概率为 $3/10$。因而
+\[
+\E_S[y(E(S))+y(E(S^c))]=\frac{2}{5}Y_y.
+\]
+所以存在某个 $S$，使两侧内部边权之和不超过 $\frac25Y_y$，从而
+\begin{equation}\label{eq:gK5}
+g(y)=\min_S\max\{y(E(S)),y(E(S^c))\}\le\frac25Y_y.
+\end{equation}
+在式 \eqref{eq:counterdata} 的对称共错上界下，对一切 $g(y)>0$，
+\[
+B(y)=\frac{0.05Y_y}{g(y)}\ge\frac{0.05}{2/5}=0.125.
+\]
+反之，取一个三角形的三个边权为 $1$，其余为 $0$，就有 $g(y)=1$、$B(y)=3(0.05)=0.15$。故
+\begin{equation}\label{eq:Binterval}
+\boxed{0.125\le B_{\rm graph}\le0.15.}
+\end{equation}
+结合 \eqref{eq:zero} 和 \eqref{eq:Binterval}：
+\begin{resultbox}
+\begin{equation}\label{eq:contradiction}
+\boxed{\Risk^*_{\rm det}=0\;<\;\min\{q_{\min},B_{\rm graph}\},\quad
+(q_{\min}=0.3,\ B_{\rm graph}\ge0.125).}
+\end{equation}
+\textbf{结论：}“在区域 $R$ 内图证书必为等式”的新主猜想已经被 $K=5$、完全对称、约束可行的解析实例严格否定。
+\end{resultbox}
+
+\subsection{它还直接修正了原奇环猜想的适用范围}
+在该例中完全图的所有边权均为 $0.05$，最便宜的奇环是三角形，故
+\[
+c^*=3(0.05)=0.15.
+\]
+原奇环等式若成立，则会预言最优错误率为 $0.15$，然而真实值为 $0$。所以这个例子也说明：此前的奇环等式并不是只在很大的 $K$ 才可能失效。单纯增加随机数值样本并不能代替检查这种位于矩约束边界的实例。
+
+\section{非孤立现象：一族有正宽度的反例}
+前一节给出零错误率的尖锐边界点。本节证明：即使把成对上界适当放宽，图证书也依旧不能达到最优保证。
+
+\begin{theorem}[对称五模型的反例族]\label{thm:family}
+令 $K=5$，取任意
+\begin{equation}\label{eq:familyrange}
+\frac15<q<\frac25,\qquad
+\frac{5q-1}{10}\le b<\frac{2(5q-1)}{15},
+\end{equation}
+并令 $q_i=q$、$b_{ij}=b$。则 $\PP(q,b)\ne\varnothing$、全部模型正确率 $1-q>1/2$、实例满足 $R$，而且
+\begin{equation}\label{eq:familygap}
+\Risk^*_{\rm det}\le1-5q+10b
+<\frac52b\le B_{\rm graph}.
+\end{equation}
+因此图证书等式在这一非零宽度的参数区间内恒不成立。
+\end{theorem}
+\begin{proofcn}
+记 $b_0=(5q-1)/10$。令随机错误集合大小 $N$ 只取 $1$ 与 $2$：
+\[
+\Prb(N=1)=2-5q,\qquad\Prb(N=2)=5q-1.
+\]
+给定 $N$ 后，在五个顶点中均匀选择一个大小为 $N$ 的集合。由 $1/5<q<2/5$，上述两个概率均严格处于 $(0,1)$。该分布满足
+\[
+\Prb(X_i=1)=\frac{2-5q}{5}+\frac{2(5q-1)}{5}=q,
+\]
+且对每对 $i,j$，
+\[
+\Prb(X_iX_j=1)=\frac{5q-1}{\binom52}=b_0\le b.
+\]
+故模糊集非空。五人简单多数的二阶矩上界与式 \eqref{eq:momentbound} 相同，得 $\Risk^*_{\rm det}\le1-5q+10b$。而 \eqref{eq:gK5} 对任意五顶点边权成立，故 $B_{\rm graph}\ge\tfrac52b$。由式 \eqref{eq:familyrange} 的严格右不等式，
+\[
+1-5q+10b<\tfrac52b.
+\]
+最后，高精度条件 $R$ 在五模型对称情形下等于 $5q-3q=2q\le1$，这里显然满足。
+\end{proofcn}
+
+\begin{remark}[可直接使用的数值区间]
+固定 $q=0.3$ 时，整段
+\[
+\boxed{0.05\le b<\frac1{15}\approx0.06667}
+\]
+都给出严格反例。例如 $b=0.051$ 时，简单多数的可认证最坏错误率至多 $0.01$，而 $B_{\rm graph}\ge0.1275$，间隙至少为 $0.1175$。由于 $b=0.051$ 严格大于可行性构造中的 $0.05$，失败不依赖共错上界必须精确取等号。
+\end{remark}
+
+\section{为什么图证书会失败：常数项不能被丢弃}
+反例揭示了图证书的精确性取决于\emph{边际错误量是否能吸收到非负顶点项}。考虑式 \eqref{eq:hk} 对应的二次证书
+\begin{equation}\label{eq:Qmoment}
+Q_{\rm moment}(x)=1-\sum_{i=1}^5x_i+\sum_{i<j}x_ix_j.
+\end{equation}
+对于五人多数失败指示函数 $F_{\rm maj}(x)=\I\{\sum_i x_i\ge3\}$，已有逐点不等式 $Q_{\rm moment}(x)\ge F_{\rm maj}(x)\ge0$。所以它是式 \eqref{eq:dualf} 的合法对偶上界：
+\[
+a=1,\qquad \beta_i=-1,\qquad\gamma_{ij}=1.
+\]
+其目标恰为
+\begin{equation}\label{eq:objective0}
+1-\sum_iq_i+\sum_{i<j}b_{ij}=0
+\end{equation}
+（在 $q=0.3,b=0.05$ 时）。这给出了无需猜测最坏分布的\textbf{最优性对偶证书}，并与多数投票的零错误上界构成完整闭环。
+
+若机械地应用零常数归一化，令 $s_i=a+\beta_i=0$，得到
+\[
+Q_0(x)=\sum_{i<j}x_ix_j.
+\]
+它依然是可行的 self-dual 二次证书，但对偶目标变成
+\[
+\operatorname{Obj}(Q_0)=\sum_{i<j}b_{ij}=0.5,
+\]
+恰好比原来的零目标多出
+\[
+a\left(\sum_iq_i-1\right)=1(1.5-1)=0.5.
+\]
+这说明：\textbf{当 $\sum_iq_i>1$ 时，删除常数项可能付出严格且巨大的代价。} 而图证书恰是基于这种非负二次结构得到的保证，因此无法捕获上述零错误现象。
+
+\section{可保留的精确结论与下一步目标}
+\subsection{不应继续作为全称猜想的命题}
+已被否定的命题是
+\[
+R:\qquad \Risk^*_{\rm det}=\min\{q_{\min},B_{\rm graph}\}.
+\]
+正确的精确版本目前只覆盖 $R_0=\{\sum_iq_i\le1\}$，且证明依赖 self-dual 规则和 LP 约束可行性。这并不与更广泛的加权图证书价值相冲突：当错误率总和很小时，图证书不仅有意义，而且是\emph{精确的}。
+
+\subsection{可以立即使用的统一上界}
+对 $K=5$，可以把最佳单模型、任意图规则以及五人多数的二阶矩证书并列使用，得到严格有效的保证
+\begin{equation}\label{eq:hybrid}
+\boxed{
+\Risk^*_{\rm det}\le
+\min\left\{q_{\min},\ B_{\rm graph},\ 1-\sum_{i=1}^5q_i+\sum_{1\le i<j\le5}b_{ij}\right\}.
+}
+\end{equation}
+注意式 \eqref{eq:hybrid} 只是\emph{已证上界}，\textbf{不声称其在所有五模型实例中取等号}。最后一项来自 $Q_{\rm moment}$，前两项来自独裁与加权图投票，其证书类型不同。
+
+\subsection{建议的后续工作}
+\begin{enumerate}[leftmargin=2.3em]
+\item \textbf{围绕完整二次对偶建模。} 把式 \eqref{eq:exactQ} 作为精确的理论参照，而非单独追求图证书。重点研究使常数项、负顶点系数与非负边系数共同发挥作用的结构归约。
+\item \textbf{划定 $R_0$ 以外的精确性边界。} 分析是否存在比 $\sum_iq_i\le1$ 更大的充分条件，同时给出具体可验证的必要条件或反例族。
+\item \textbf{区分表达力与可计算性。} 线性阈值规则存在性不自动推出最优权重可在多项式时间求得；$g(y)$ 本身涉及组合划分，求 $B_{\rm graph}$ 的效率须单独证明。
+\item \textbf{重审旧实验覆盖。} 把 $q_i=0.3,b_{ij}\approx0.05$ 及式 \eqref{eq:familyrange} 的实例加入回归测试。先前 $K=5$ 的随机采样吻合并非全称证明，若与解析反例矛盾，需要检查随机采样的参数分布与目标实现。
+\end{enumerate}
+
+\section{结论}
+本报告给出一条\textbf{被严格证明的精确性边界}和一组\textbf{严格反例}。当 $\sum_iq_i\le1$ 时，任何确定性 self-dual 投票规则的最优最坏错误率，恰是最佳单分类器与最优图证书二者的较小值。这个结果来自有限维 LP 的强对偶、对 self-dual 规则的精确消元，以及零常数的非负系数归一化。
+
+然而，更大的高精度区域 $R$ 并不能保留同一结论。五个准确率均为 $70\%$ 的分类器、所有两两共同出错概率至多 $5\%$，已经足以使简单多数投票对所有允许的联合分布\emph{零错误}，而图证书仍至少为 $12.5\%$；并且这不是单个偶然参数点。真正缺失的信息是可以利用负一阶系数和正的常数项的\emph{整体二阶矩约束}。
+
+因此，下一阶段最合理的主线是\textbf{统一图证书与边际--成对矩证书的结构理论}。式 \eqref{eq:exactQ} 是目前最直接、最严谨的起点。
+
+\vspace{0.7em}
+\noindent\textbf{独立性与局限说明：} 本文证明均作为数学陈述给出，不依赖先前提供的随机 LP/MILP 实验；未完成系统文献新颖性认证，也没有声称 $R_0$ 之外的任意统一闭式解。\par
+\end{document}

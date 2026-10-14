@@ -1,0 +1,441 @@
+\documentclass[11pt,a4paper]{ctexart}
+\usepackage[margin=24mm,top=25mm,bottom=25mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{booktabs,longtable,tabularx,array,multirow}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.22em}
+\setlist{itemsep=0.18em,topsep=0.4em}
+\definecolor{darkblue}{HTML}{18354F}
+\definecolor{accent}{HTML}{246A80}
+\definecolor{softgray}{HTML}{F3F6F7}
+\hypersetup{colorlinks=true,urlcolor=accent,linkcolor=darkblue}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small \textcolor{darkblue}{依赖不确定下的稳健集成投票}}
+\fancyhead[R]{\small \textcolor{darkblue}{数学研究报告}}
+\fancyfoot[C]{\small 第 \thepage\ 页 / 共 \pageref{LastPage} 页}
+\renewcommand{\headrulewidth}{0.3pt}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{proposition}[theorem]{命题}
+\newtheorem{corollary}[theorem]{推论}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{定义}
+\newtheorem{remark}[theorem]{说明}
+\newenvironment{proofcn}{\par\noindent\textbf{证明.}\ }{\hfill $\square$\par}
+\newtcolorbox{resultbox}{breakable,colback=softgray,colframe=accent,boxrule=0.7pt,arc=1.5mm,left=3mm,right=3mm,top=2.5mm,bottom=2.5mm}
+\newcommand{\calP}{\mathcal P}
+\newcommand{\calF}{\mathcal F}
+\newcommand{\one}{\mathbf 1}
+\newcommand{\barx}{\overline x}
+\newcommand{\Risk}{\mathsf R}
+\newcommand{\Acc}{\mathsf A}
+\newcommand{\MaxCut}{\operatorname{MaxCut}}
+\newcommand{\err}{\mathrm{err}}
+\begin{document}
+\thispagestyle{empty}
+\vspace*{1.8cm}
+\noindent{\color{accent}\rule{\textwidth}{1.6pt}}\par
+\vspace{0.7cm}
+{\Huge\bfseries 依赖不确定下的稳健集成投票}\par
+\vspace{0.4cm}
+{\LARGE\bfseries 奇环猜想的反例与最优阈值规则的结构定理}\par
+\vspace{0.9cm}
+{\Large 理论研究报告（自包含证明稿）}\par
+\vspace{1.2cm}
+\begin{tabular}{@{}ll@{}}
+\textbf{形成日期：}& 2026 年 10 月 13 日\\
+\textbf{研究对象：}& 已知边际错误率和成对共同出错概率上界的 max--min 投票\\
+\textbf{报告范围：}& 本轮独立推导的反例、对偶消元、阈值归约与图证书\\
+\textbf{关键限制：}& 反例为概率方法给出的存在性构造，未定位最小 $K$\\
+\end{tabular}
+\vfill
+\begin{resultbox}
+\textbf{核心结论。} 在原定义的高精度区间 $R$ 内，\emph{最优确定性错误率等于}\nobreakspace$\min\{q_{\min},c^*\}$ \emph{的猜想不成立}；它的“严格增益必须有低成本奇环”的必要性也不成立。反例甚至位于更强的 $\sum_iq_i\le1$ 内，并可由\textbf{严格正权重线性多数投票}实现。与此同时，任何边际与成对上界下，\textbf{最优确定性 self-dual 规则可以选为线性阈值规则}；若 $\sum_iq_i\le1$，权重还可以选为非负。
+\end{resultbox}
+\vspace{0.5cm}
+{\small\color{gray} 术语约定：本报告的“证明”指文中提供可逐步核对的推导；“数值证据”仅指研究者先前提供、此处未重新运行的实验。没有经过独立文献优先权认证的结果不声明为首创。}
+\newpage
+\tableofcontents
+\newpage
+
+\section{摘要与证明状态}
+考虑 $K$ 个二元分类器，其边际正确率 $p_i>\tfrac12$ 已知，共同出错概率只受上界约束。前期工作的核心猜想是：在一定高精度区域内，最佳确定性 self-dual 投票的最坏错误率正好等于最佳单分类器与最便宜奇环多数投票之间较小者。前期 $K=5,7$ 的计算与此一致，但并未构成证明。
+
+本报告给出三个自包含的理论贡献：（i）用\emph{无三角形、最大割比例严格小于 $3/5$} 的图构造出原猜想与其确定性增益必要条件的严格反例；（ii）借助固定规则最坏分布 LP 的对偶，将对所有 self-dual 布尔规则的搜索消元为二次多项式证书，并证明总存在最优线性阈值规则；（iii）在 $\sum_iq_i\le1$ 时证明非负权重足够，并提出严格推广奇环并集界的加权图证书。
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{@{}p{0.13\textwidth}X p{0.26\textwidth}@{}}
+\toprule
+\textbf{项目} & \textbf{准确陈述} & \textbf{状态}\\
+\midrule
+T1 & 奇环多数保证准确率至少 $\max\{p_{\max},1-c^*\}$ & 用户此前已证\\
+T2 & 在 $R$ 内，最优错误率 $=\min\{q_{\min},c^*\}$ & \textbf{本报告严格证伪}\\
+T3 必要性 & 确定性增益 $\Rightarrow c^*<q_{\min}$ & \textbf{本报告严格证伪}\\
+图论引理 & $g_H(y)\le\nu^*_{\rm odd}(y)$ 对所有图成立 & \textbf{本报告严格证伪}\\
+阈值归约 & 最优 self-dual 规则可选为有符号线性阈值 & \textbf{本报告证明}\\
+非负归约 & $\sum_iq_i\le1$ 时最优规则可选非负加权阈值 & \textbf{本报告证明}\\
+图证书 & $\Risk(w_y)\le(\sum_e b_e y_e)/g_H(y)$ & \textbf{本报告证明}\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{精确定义与原猜想}
+\subsection{错误模式、模糊集和投票规则}
+令 $X_i=\one\{f_i(X)\ne Y\}\in\{0,1\}$，因此
+\begin{equation}
+q_i=\mathbb P(X_i=1)=1-p_i,\qquad 0<q_i<\tfrac12,\qquad q_{\min}=\min_iq_i.
+\end{equation}
+记 $b_{ij}=\min\{\bar e_{ij},q_i,q_j\}$，其中 $\bar e_{ij}$ 是成对共同出错概率 $\mathbb P(X_i=X_j=1)$ 的上界。允许的错误模式联合分布的集合为
+\begin{equation}\label{eq:P}
+\calP(q,b)=\left\{\pi\in\mathbb R_+^{2^K}:\ \sum_x\pi_x=1,\quad
+\sum_xx_i\pi_x=q_i,\quad\sum_xx_ix_j\pi_x\le b_{ij}\ (i<j)\right\}.
+\end{equation}
+始终假定 $\calP(q,b)\ne\emptyset$。这与分类器 $f_i$ 固定的设定并不冲突：任何错误模式分布都可在适当的离散特征空间及固定二元标签上实现。
+
+以错误模式为输入，确定性 self-dual 投票用布尔函数 $f:\{0,1\}^K\to\{0,1\}$ 描述，其中 $f(x)=1$ 表示集成预测错误，要求
+\begin{equation}\label{eq:sd}
+f(x)+f(\one-x)=1,\qquad x\in\{0,1\}^K.
+\end{equation}
+这正是投票对分类标签互换保持对称性的条件。其最坏错误率和 minimax 错误率分别为
+\begin{equation}\label{eq:game}
+\Risk(f)=\max_{\pi\in\calP(q,b)}\sum_x\pi_x f(x),\qquad
+\Risk^*_{\rm det}=\min_{f\text{ 满足 }\eqref{eq:sd}}\Risk(f).
+\end{equation}
+对应准确率 $\Acc^*_{\rm det}=1-\Risk^*_{\rm det}$。这里先固定规则、再由对手选择最不利的联合分布，不能把该博弈偷换为同一联合分布下的最佳规则。本文不讨论随机化规则的 minimax 价值是否等于确定性价值。
+
+\subsection{最小奇环和高精度区间}
+在顶点为 $[K]$ 的完全图上，为边 $ij$ 赋权 $b_{ij}$，定义
+\begin{equation}
+c^*=\min_{\substack{C\text{ 为简单奇环}\\ |C|\ge3}}\ \sum_{ij\in E(C)}b_{ij},\qquad
+p_{\max}=1-q_{\min}.
+\end{equation}
+原有奇环并集界给出
+\begin{equation}\label{eq:lower}
+\Risk^*_{\rm det}\le \min\{q_{\min},c^*\}.
+\end{equation}
+原猜想 T2 主张，在
+\begin{equation}\label{eq:R}
+R:\qquad \sum_{i=1}^Kq_i-(K-2)q_{\min}\le1
+\end{equation}
+时，\eqref{eq:lower} 为\emph{等式}；T3 的必要性主张，严格优于单分类器必须有 $c^*<q_{\min}$。以下构造同时否定这两条全称陈述。
+
+\section{反例的图论基础}
+\begin{definition}[内部边与最大割]
+给定有限简单图 $H=(V,E)$，记 $m=|E|$，$e_H(S)=|\{ij\in E:i,j\in S\}|$，$\partial_HS=\{ij\in E:i\in S,j\notin S\}$，以及 $M=\MaxCut(H)=\max_{S\subseteq V}|\partial_HS|$。
+\end{definition}
+
+\begin{lemma}[关键的内部边不等式]\label{lem:internal}
+对任意 $S\subseteq V$，
+\begin{equation}\label{eq:internal}
+e_H(S)+e_H(V\setminus S)=m-|\partial_HS|\ge m-M.
+\end{equation}
+又若 $d_i=\deg_H(i)$，则
+\begin{equation}\label{eq:degree}
+\sum_{i\in S}d_i-m=e_H(S)-e_H(V\setminus S).
+\end{equation}
+\end{lemma}
+\begin{proofcn}
+每条边恰好属于 $S$ 内部、补集内部或割边之一，得第一式。第二式由 $\sum_{i\in S}d_i=2e_H(S)+|\partial_HS|$ 与 $m=e_H(S)+e_H(V\setminus S)+|\partial_HS|$ 相减得到。
+\end{proofcn}
+
+\begin{theorem}[存在最大割比例小于 $3/5$ 的无三角形奇数阶图]\label{thm:exists}
+存在有限\emph{奇数阶}、无三角形、非二部图 $H$，使
+\begin{equation}\label{eq:ratio}
+\frac{\MaxCut(H)}{|E(H)|}<\frac35.
+\end{equation}
+实际上，存在任意大的这样的图。
+\end{theorem}
+\begin{proofcn}
+取充分大的奇数 $n$，令 $G\sim G(n,p)$，$p=n^{-2/3}$。令 $\mu=\binom n2p=\Theta(n^{4/3})$，记 $E_G$ 为随机边数、$T_G$ 为三角形数。Chernoff 下尾界保证
+\(\mathbb P(E_G<0.99\mu)\to0\)。
+
+任意固定割 $S$ 的随机跨边数是 $\operatorname{Bin}(|S|(n-|S|),p)$，其均值不超过 $pn^2/4=(\tfrac12+o(1))\mu$。对阈值 $0.52\mu$ 应用 Chernoff 上尾界，得到对某一常数 $c>0$、所有足够大的 $n$，
+\[
+\mathbb P\bigl(|\partial_GS|>0.52\mu\bigr)\le e^{-c\mu}.
+\]
+对最多 $2^n$ 个割取并集界，$2^ne^{-c\mu}\to0$，因此 $\mathbb P(\MaxCut(G)>0.52\mu)\to0$。
+
+另一方面，$\mathbb ET_G=\binom n3p^3=O(n)=o(\mu)$，由 Markov 不等式，$\mathbb P(T_G>0.01\mu)\to0$。故存在奇数阶图 $G$ 同时满足
+\[
+|E(G)|\ge0.99\mu,\quad \MaxCut(G)\le0.52\mu,\quad T_G\le0.01\mu.
+\]
+逐个破坏原图的三角形，至多删去 $T_G$ 条边，得到无三角形图 $H$。删边不能增加最大割，因此
+\[
+|E(H)|\ge0.98\mu,\quad \MaxCut(H)\le0.52\mu,
+\quad \frac{\MaxCut(H)}{|E(H)|}\le\frac{0.52}{0.98}<0.6.
+\]
+若 $H$ 是二部图，则 $\MaxCut(H)=|E(H)|$，矛盾；故 $H$ 非二部。此构造可对任意充分大的奇数 $n$ 实行。
+\end{proofcn}
+
+\begin{remark}
+这是\textbf{严格的概率方法存在性证明}，不是已给出邻接表的显式小图。它足以反驳“对每个 $K$ 都成立”的猜想，但不能告诉我们最小反例的 $K$。$0.52,0.99,0.01$ 仅用于获得严格的 $3/5$ 裕量，可以改用其他适当常数。
+\end{remark}
+
+\section{T2 和 T3 的严格反例}
+\begin{theorem}[原猜想的反例]\label{thm:counter}
+存在奇数 $K$、边际错误率 $q_i<1/2$ 与可行的共同出错概率上界 $b_{ij}$，满足
+\[
+\sum_iq_i<1,\qquad c^*\ge q_{\min},
+\]
+但某个\textbf{严格正权重、无平局的确定性线性多数投票}的最坏错误率严格小于 $q_{\min}$。因而原猜想 T2 和 T3 的必要性均不成立，即使限制在高精度区域 $R$ 内也是如此。
+\end{theorem}
+\begin{proofcn}
+取定理~\ref{thm:exists} 的图 $H=(V,E)$，令 $K=|V|$ 为奇数、$m=|E|$、$M=\MaxCut(H)<3m/5$。设
+\begin{equation}\label{eq:construction}
+q_i=q=\frac1{2K},\qquad
+b_{ij}=\begin{cases}
+q/5,&ij\in E,\\
+q,&ij\notin E.
+\end{cases}
+\end{equation}
+这些约束\emph{可行}：令每个单点错误集合 $\{i\}$ 的概率为 $q$，令空错误集合的概率为 $1-Kq=1/2$，其余错误集合概率为零。于是每个边际为 $q$，所有成对共同出错概率均为零。
+
+由 $H$ 无三角形可知：完全图中的每个简单奇环，若包含某条非 $H$ 边，则其成本至少为 $q$；否则该奇环全由 $H$ 边组成，长度至少五，成本至少 $5(q/5)=q$。因此 $c^*\ge q=q_{\min}$，而 $\sum_iq_i=1/2<1$，显然落入 $R$。
+
+现在令加权多数的权重为 $w_i=d_i=\deg_H(i)$。某次预测的错误集合为 $S$。总权重是 $2m$；若这次加权多数错误（暂且包含任意可能的平局处理），则该侧得到至少一半权重，即 $\sum_{i\in S}d_i\ge m$。结合引理~\ref{lem:internal}，
+\[
+e_H(S)\ge e_H(V\setminus S),\qquad
+e_H(S)\ge\frac{m-M}{2}.
+\]
+因此在任意 $\pi\in\calP(q,b)$ 下，记 $X=\{i:X_i=1\}$，有
+\begin{align}
+\mathbb P_\pi(\text{加权多数失败})
+&\le\mathbb P_\pi\Bigl(e_H(X)\ge\frac{m-M}{2}\Bigr)\\
+&\le \frac{2\,\mathbb E_\pi[e_H(X)]}{m-M}
+\le\frac{2\sum_{ij\in E}b_{ij}}{m-M}\\
+&=\frac{2mq}{5(m-M)}<q,\label{eq:gain}
+\end{align}
+其中第二步是 Markov 不等式，最后一步用 $M/m<3/5$。
+
+如某些状态满足 $\sum_{i\in S}d_i=m$，选择充分小的通用扰动 $\varepsilon_i>0$，使 $w_i'=d_i+\varepsilon_i>0$ 且每对互补状态的总权重严格不相等。由于状态空间有限、原度数和为整数，可以确保所有原本严格的投票方向不变；原本平局的状态在扰动后无论被分到哪一侧，都有 $e_H(S)=e_H(V\setminus S)$，故上面的失败事件蕴含关系仍成立。这样得到严格正权重、无平局的 self-dual 线性多数规则，依然满足~\eqref{eq:gain}。
+
+综合以上结果，
+\[
+\Risk^*_{\rm det}\le\Risk(w')<q=\min\{q_{\min},c^*\}.
+\]
+于是 T2 的等式为假；同时 $c^*\ge q_{\min}$ 却存在确定性严格增益，T3 的必要性也为假。
+\end{proofcn}
+
+\begin{remark}[较强的数值分离，但不是必需的]
+如果将~\eqref{eq:construction} 中的 $q/5$ 改为 $q/10$，则所有奇环成本至少 $q/2$，且相同规则满足
+\[
+\Risk(w')\le\frac{mq}{5(m-M)}<\frac q2\le c^*.
+\]
+这再次反驳 T2；上一条定理中使用 $q/5$ 的版本更强，因为它还否定了 T3 的必要性。
+\end{remark}
+
+\subsection{为何先前 $K=5,7$ 的精确实验没有发现反例？}
+定理~\ref{thm:counter} 仅证明\emph{存在某个充分大的奇数 $K$}。它既不与此前 $K=5$ 的 400 例及 $K=7$ 的 40 例数值一致性矛盾，也不说明 T2 在所有小规模 $K$ 上为假。前期实验数据为研究者提供、本文没有复现；因而严格可得的结论是：\textbf{T2 作为对任意 $K$ 的全称命题被推翻，小规模或特定结构下的等式仍可能成立。}
+
+\section{原图论路线为何失效}
+对带非负边容量 $y=(y_e)_{e\in E}$ 的图 $H$，定义
+\begin{equation}\label{eq:g}
+g_H(y)=\min_{S\subseteq V}\max\{y(E_H(S)),y(E_H(V\setminus S))\}.
+\end{equation}
+记 $\nu^*_{\mathrm{odd}}(y)$ 为线性规划
+\begin{equation}\label{eq:packing}
+\max_{\lambda\ge0}\Bigl\{\sum_{C\text{ 奇环}}\lambda_C:\quad
+\sum_{C\ni e}\lambda_C\le y_e\ \forall e\in E\Bigr\}
+\end{equation}
+的最优值。前一阶段曾尝试证明 $g_H(y)\le\nu^*_{\mathrm{odd}}(y)$；下面给出相同图 $H$ 上的严格反例。
+
+\begin{theorem}[分数奇环打包不控制该二分目标]
+存在有限图与非负边容量使下式严格成立：\[g_H(y)>\nu^*_{\mathrm{odd}}(y).\]
+\end{theorem}
+\begin{proofcn}
+取定理~\ref{thm:exists} 的无三角形图 $H$，并设全部边的容量 $y_e=1$。任意顶点划分都有
+\[
+\max\{e_H(S),e_H(V\setminus S)\}
+\ge\frac{m-|\partial_HS|}{2}\ge\frac{m-M}{2}>\frac m5.
+\]
+故 $g_H(y)>m/5$。另一方面 $H$ 无三角形，每个奇环至少有五条边。对任何满足~\eqref{eq:packing} 的分数打包，
+\[
+5\sum_C\lambda_C\le\sum_C|C|\lambda_C
+=\sum_{e\in E}\sum_{C\ni e}\lambda_C
+\le\sum_{e\in E}y_e=m.
+\]
+所以 $\nu^*_{\mathrm{odd}}(y)\le m/5<g_H(y)$。
+\end{proofcn}
+
+该反例说明：上一轮期待的\emph{“以奇环 packing 统一全部 self-dual 规则”} 的图论桥梁并不存在；不能继续依赖它证明 T2。
+
+\section{LP 对偶与最优阈值规则的严格结构定理}
+\subsection{固定规则的最坏分布 LP}
+给定满足~\eqref{eq:sd} 的 $f$，求 $\Risk(f)$ 的原始 LP 正是~\eqref{eq:game}。给边际等式配任意实数乘子 $\beta_i$，给成对上界配非负乘子 $\gamma_{ij}$，给归一化等式配乘子 $\alpha$。线性规划强对偶给出
+\begin{align}\label{eq:dual}
+\Risk(f)=\min_{\alpha,\beta,\gamma}\quad&
+L(\alpha,\beta,\gamma)
+:=\alpha+\sum_i\beta_iq_i+\sum_{i<j}\gamma_{ij}b_{ij}\\
+\text{s.t.}\quad&
+Q(x):=\alpha+\sum_i\beta_ix_i+\sum_{i<j}\gamma_{ij}x_ix_j\ge f(x)\quad\forall x,\notag\\
+&\gamma_{ij}\ge0,\quad\alpha,\beta_i\in\mathbb R.\notag
+\end{align}
+因为 $\calP(q,b)$ 非空，且目标有界，有限维 LP 满足强对偶，并存在最优对偶解。
+
+把外层对 self-dual $f$ 的最小化也消去，可得一个虽非凸、但精确的证书优化：
+\begin{equation}\label{eq:disj}
+\Risk^*_{\rm det}=\min L(\alpha,\beta,\gamma)
+\quad\text{s.t.}\quad
+Q(x),Q(\one-x)\ge0,\quad
+\max\{Q(x),Q(\one-x)\}\ge1\quad\forall x,
+\end{equation}
+以及 $\gamma\ge0$。等价性源于：每个互补状态对必须且只需选择一个错误状态；当两侧 $Q$ 均非负且至少一侧 $Q\ge1$，便能作出合法选择。\eqref{eq:disj} 中的 $\max$ 是析取约束，不能误认为其本身是一个普通凸 LP。
+
+\subsection{二次项相消：最优规则可由线性阈值实现}
+\begin{theorem}[任意可行边际与共错上界下的阈值充分性]\label{thm:threshold}
+只要 $\calP(q,b)\ne\emptyset$，在所有确定性 self-dual 布尔规则中，存在一个 minimax 最优规则，其形式为
+\begin{equation}\label{eq:threshold}
+f_w(x)=\one\Bigl\{\sum_iw_i(2x_i-1)>0\Bigr\},\qquad w_i\in\mathbb R,
+\end{equation}
+其中可以选取使所有输入状态均无平局的实数权重 $w$。等价地，最佳确定性 self-dual 规则可以选为\textbf{有符号线性加权多数规则}，无需一般非线性布尔决策规则。
+\end{theorem}
+\begin{proofcn}
+取~\eqref{eq:disj} 的一个最优二次证书 $Q$。对每对互补状态 $x,\one-x$，选择 $Q$ 值较大的状态判为聚合失败：
+\[
+f_Q(x)=\one\{Q(x)>Q(\one-x)\},
+\]
+对相等状态进行互补一致的打破平局。由于二者均非负且 $\max\{Q(x),Q(\one-x)\}\ge1$，选中的状态必满足 $Q(x)\ge1$，未选中的状态满足 $Q(x)\ge0$，故 $Q\ge f_Q$。所以 $\Risk(f_Q)\le L(Q)=\Risk^*_{\rm det}$，又最优性的定义给出反向不等式，于是取等号。
+
+最关键的是对于二元 $x_i$，
+\begin{align*}
+Q(x)-Q(\one-x)
+&=\sum_i\beta_i(2x_i-1)
++\sum_{i<j}\gamma_{ij}\bigl(x_i+x_j-1\bigr)\\
+&=\sum_i\left(\beta_i+\frac12\sum_{j\ne i}\gamma_{ij}\right)(2x_i-1).
+\end{align*}
+故比较 $Q(x)$ 和 $Q(\one-x)$ 等同于一个\emph{无偏置}的线性阈值。若部分状态刚好平局，因为状态有限，可以在权重向量上施加足够小的通用扰动，使所有非平局状态符号不变、原平局状态严格分开；所有原平局状态均有两侧 $Q\ge1$，故扰动不影响 $Q\ge f_Q$。得证。
+\end{proofcn}
+
+\begin{remark}[适用范围]
+这里的权重\emph{允许为负}，也不要求所得到的规则关于单个错误坐标单调。该定理\textbf{不等于}“最优规则是某个奇数子集上的简单多数”；后者已被第~\ref{thm:counter} 条定理的反例破坏。也不意味着允许随机化之后仍可由单个确定性阈值规则实现。
+\end{remark}
+
+\section{高精度子区域中的非负权重充分性}
+\begin{theorem}[当 $\sum_iq_i\le1$ 时可选非负权重]\label{thm:positive}
+若 $K\ge2$、$\calP(q,b)\ne\emptyset$，并且 $\sum_iq_i\le1$，则最优确定性 self-dual 规则可以选为 $w_i\ge0$ 的无偏置线性多数投票。必要时可通过微小正扰动消除全部平局。
+\end{theorem}
+\begin{proofcn}
+取~\eqref{eq:disj} 的一个最优证书 $Q$。记
+\[
+a=Q(\mathbf0)=\alpha\ge0,\qquad
+s_i=Q(\mathbf e_i)=a+\beta_i\ge0.
+\]
+于是 $Q$ 可写为
+\begin{equation}\label{eq:Qform}
+Q(x)=a(1-|x|)+\sum_i s_ix_i+\sum_{i<j}\gamma_{ij}x_ix_j.
+\end{equation}
+定义新证书
+\[
+Q'(x)=\sum_i s_ix_i+\sum_{i<j}\gamma_{ij}x_ix_j
+=Q(x)+a(|x|-1).
+\]
+对一切 $x\ne\mathbf0$，$Q'(x)\ge Q(x)\ge0$；而 $Q'(\mathbf0)=0$，因此全局非负性不变。对于 $x\ne\mathbf0,\one$ 的互补状态对，两侧均非零，且 $Q'$ 不小于 $Q$，故仍至少有一侧达到 $1$。对特殊互补对 $\{\mathbf0,\one\}$，原约束保证 $\max\{a,Q(\one)\}\ge1$。若 $a<1$，则 $Q(\one)\ge1$，因而 $Q'(\one)\ge1$；若 $a\ge1$，因 $K\ge2$ 且 $Q(\one)\ge0$，
+\[
+Q'(\one)=Q(\one)+(K-1)a\ge1.
+\]
+故 $Q'$ 依然满足~\eqref{eq:disj} 的所有条件。
+
+目标值的变化为
+\[
+L(Q')-L(Q)=a\left(\sum_iq_i-1\right)\le0.
+\]
+由 $Q$ 的最优性，$Q'$ 亦为最优证书。按定理~\ref{thm:threshold}，它对应的线性阈值权重为
+\[
+w_i=s_i+\frac12\sum_{j\ne i}\gamma_{ij}\ge0.
+\]
+在有平局时，用足够小的正通用扰动保证无平局；所有非平局方向保持，原平局两侧均有 $Q'\ge1$，故仍为最优。
+\end{proofcn}
+
+\subsection{原高精度区间 $R$ 的对偶解释与边界}
+从~\eqref{eq:Qform} 出发，定义 $t=\sum_i s_i-(K-2)a$，则
+\begin{align}\label{eq:Rdual}
+L(Q)&=a\left(1-\sum_iq_i+(K-2)q_{\min}\right)+q_{\min}t\\
+&\quad+\sum_i(q_i-q_{\min})s_i+\sum_{i<j}\gamma_{ij}b_{ij}.\notag
+\end{align}
+因此 $R$ 恰是~\eqref{eq:Rdual} 中 $a$ 的\emph{显式系数非负}的区域。这是一个准确的代数解释，但\textbf{不能仅由系数非负推出}整个 $R$ 都允许把 $a$ 归零，因为 $t$ 与 $a$ 及可行性条件耦合。本报告只在更强的 $\sum_iq_i\le1$ 下证明了归一化。原区域 $R$ 的剩余部分中，非负权重是否总足够，仍待独立证明。
+
+\section{替代奇环证书：一般加权图}
+\begin{theorem}[加权图的稳健错误率证书]\label{thm:certificate}
+任选顶点集 $[K]$ 上的无向简单图 $H=(V,E)$，给其边赋非负权 $y_e\ge0$，并设
+\[
+Y=\sum_{e\in E}y_e,\quad w_i=\sum_{e\ni i}y_e,
+\quad g_H(y)=\min_{S\subseteq V}\max\{y(E(S)),y(E(V\setminus S))\}.
+\]
+若 $g_H(y)>0$，则按 $w_i$ 投票并以自对偶方式处理平局的确定性规则满足
+\begin{equation}\label{eq:cert}
+\boxed{\quad\Risk(w)\le\min\left\{1,\frac{\sum_{e=ij\in E}b_{ij}y_e}{g_H(y)}\right\}.\quad}
+\end{equation}
+平局时也可使用足够小的正扰动。
+\end{theorem}
+\begin{proofcn}
+任意错误顶点集 $S$ 的票数减去总票数的一半，等于
+\[
+\sum_{i\in S}w_i-Y
+=y(E(S))-y(E(V\setminus S)).
+\]
+因此，错误侧一旦获得至少一半票数，其内部边权至少等于另一侧的内部边权。根据 $g_H$ 的定义，\[\max\{y(E(S)),y(E(V\setminus S))\}\ge g_H(y).\]记随机错误集合为 $X$，则
+\[
+\begin{aligned}
+\mathbb P(\text{投票失败})
+&\le\mathbb P\{y(E(X))\ge g_H(y)\}\\
+&\le\frac{\mathbb E[y(E(X))]}{g_H(y)}
+=\frac{\sum_{e=ij\in E}y_e\,\mathbb P(X_i=X_j=1)}{g_H(y)}
+\le\frac{\sum_{e=ij\in E}b_{ij}y_e}{g_H(y)}.
+\end{aligned}
+\]
+最后取与 $1$ 的较小者。
+\end{proofcn}
+
+\begin{corollary}[奇环并集界是图证书的特例]
+若 $H$ 是一个奇环且每条边 $y_e=1$，则 $g_H(y)=1$，故~\eqref{eq:cert} 退化为
+\[
+\Risk(\text{该环的简单多数})\le\sum_{e\in E(H)}b_e.
+\]
+\end{corollary}
+\begin{proofcn}
+奇环不能被二染色，故每个划分至少有一条同侧边，$g_H(y)\ge1$。沿奇环交替着色，只保留一条同侧边，可使 $\max\{e_H(S),e_H(V\setminus S)\}=1$，得 $g_H(y)=1$。顶点度数均为 $2$，故度数加权投票即简单多数。
+\end{proofcn}
+
+\begin{remark}[图证书的意义]
+定义最优图证书值
+\[
+B_{\rm graph}:=\inf_{H,y:\,g_H(y)>0}\frac{\sum_{e\in E(H)}b_e y_e}{g_H(y)}.
+\]
+则 $\Risk^*_{\rm det}\le\min\{q_{\min},1,B_{\rm graph}\}$。它包含全部奇环证书，却可能严格更强：定理~\ref{thm:counter} 即取 $y_e=1$ 于反例图 $H$ 得到的例子。计算 $g_H(y)$ 涉及组合划分；本文\textbf{没有证明}该最优化可以多项式时间完成，也没有证明该证书对于所有实例都是精确的。
+\end{remark}
+
+\section{与已有结果的关系、局限及下一步}
+\subsection{哪些结果应归于前期工作？}
+前期研究已经建立奇环多数并集下界 T1、部分识别和有限样本证书，并报告了多个 $K=5,7$ LP/MILP 网格实验。本文不将这些工作重写为新贡献；尤其不能把原先计算一致的 T2 作为“数值验证的定理”。本报告只对其\emph{全称有效性}作了数学检验，并给出证明或反证。
+
+课程 Task B 的 Project 2 明确鼓励从简单多数扩展到加权投票，同时强调严格数学结果比数值实验更重要。该背景与本报告从猜想检验转向形式证明的路径相符，但\emph{课程设定本身不构成对本文结论的外部学术新颖性认证}。
+
+\subsection{适用边界与尚未解决的问题}
+\begin{enumerate}[label=\arabic*.]
+\item \textbf{最小反例规模未知。} 概率构造证明存在任意大的奇数阶反例，却没有给出最小 $K$ 或可直接展示的有限邻接矩阵。前期 $K=5,7$ 的全部数值吻合仍可成立。
+\item \textbf{只对确定性 self-dual 规则证明阈值充分性。} 对允许随机化或弃权的博弈没有得出相应结论；若允许非 self-dual 规则，证明的互补状态结构不再直接适用。
+\item \textbf{阈值权重的非负性只在 $\sum_iq_i\le1$ 已证。} 对整个 $R$，不能把代数系数条件直接当作归一化证明。
+\item \textbf{一般图证书未证最优。} $B_{\rm graph}$ 是有效的可认证上界，不是已证明的完整 minimax 闭式。
+\item \textbf{尚缺文献优先权核验。} 本报告提供自包含数学证明，但未据此断言所用对偶技巧、阈值充分性或图证书在既有文献中首次出现。需继续核对依赖投票、极值矩问题、割多面体及相关论文全文。
+\end{enumerate}
+
+建议后续优先：（a）寻找最小可显式展示的无三角形低最大割图及其对应最小反例；（b）在固定 $K$ 或特定相关结构下重新刻画 $B_{\rm graph}$ 的紧性；（c）研究 $\sum_iq_i>1$ 时负权重是否有本质必要性；（d）用精确算术核查小规模的规则对偶与图证书；（e）完成文献先例审计。研究目标应从“证明 T2”改为“\emph{求刻画真正最优的稳健阈值规则及其可计算证书}”。
+
+\section*{结论}
+\addcontentsline{toc}{section}{结论}
+本轮推导所得的严格数学结果是：\textbf{奇环不是认证稳健确定性增益的必要结构阈值}。局部奇环的并集界可以被整个图的全局不可二分性（低最大割比例）严格改进，因此最小奇环成本并不总刻画最优的 worst-case 错误率。与此同时，对偶中的互补状态相减使二次项退化为线性形式，因而 self-dual minimax 最优投票总能选为线性阈值；在 $\sum_iq_i\le1$ 时还可选为非负加权多数。二者合在一起，解释了\emph{为什么权重在稳健集成中确实可能是本质的}，并为新的图结构优化问题提供了精确起点。
+
+\vspace{0.3cm}
+\noindent\textbf{材料来源与说明。} 研究问题与此前 T0--T8 状态、实验数量由研究者在本次对话中给定；本报告的关键新结论均给出了自包含证明，不依赖未提供的 exp3--exp35 脚本。课程背景见《DSAA2011 2026 Fall Challenge Projects (Task B)》，第 6 页 Project 2。概率方法使用标准的 Chernoff、Markov 与并集界，不预设外部论文的定理。正式投稿前仍应补全、逐条核查相关工作的文献条目。
+
+\end{document}

@@ -1,0 +1,301 @@
+\documentclass[11pt,a4paper]{ctexart}
+\usepackage[margin=23mm,top=25mm,bottom=24mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,booktabs,tabularx}
+\usepackage{enumitem,xcolor,hyperref,listings}
+\usepackage{fancyhdr,lastpage}
+\hypersetup{colorlinks=true,urlcolor=blue,linkcolor=blue}
+\definecolor{dblue}{HTML}{17374D}
+\definecolor{bg}{HTML}{F3F6F8}
+\lstdefinestyle{python}{language=Python,basicstyle=\ttfamily\scriptsize,
+  backgroundcolor=\color{bg},frame=single,breaklines=true,showstringspaces=false,
+  columns=fullflexible,keepspaces=true,tabsize=4,rulecolor=\color{gray}}
+\lstset{style=python}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.25em}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{corollary}[theorem]{推论}
+\newtheorem{proposition}[theorem]{命题}
+\theoremstyle{definition}
+\newtheorem{remark}[theorem]{说明}
+\newenvironment{proofcn}{\par\noindent\textbf{证明.} }{\hfill$\square$\par}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small D2：异质 $K=5$ 完整二次证书的有限覆盖}
+\fancyhead[R]{\small 主要成果与后续压缩}
+\fancyfoot[C]{\small 第 \thepage\ 页 / 共 \pageref{LastPage} 页}
+\newcommand{\calP}{\mathcal P}
+\newcommand{\calD}{\mathcal D}
+\newcommand{\calV}{\mathcal V}
+\newcommand{\calM}{\mathcal M}
+\newcommand{\one}{\mathbf1}
+\newcommand{\Risk}{\mathsf R}
+\newcommand{\Obj}{\operatorname{Obj}}
+\begin{document}
+\begin{center}
+{\Large\bfseries D2：异质五分类器稳健投票的有限证书全集}\\[0.35em]
+{\large\bfseries 零截距的精确求解、正截距极点覆盖与压缩判据}\\[0.7em]
+2026 年 10 月 13 日\quad |\quad 数学研究备忘录\\
+\end{center}
+\noindent\textcolor{dblue}{\rule{\textwidth}{1.1pt}}
+\noindent\textbf{范围及证明状态。}本文仅保留本阶段的主要、独立结果：零截距证书的精确值；任意实系数正截距证书的可构造有限覆盖；及将完整性压缩为有限支配性测试的方法。另外证明了 $K=5$ 的图证书可用一个无 big-$M$ 的小规模混合整数线性规划精确求解。\textbf{不主张}已得到包含几十或几百项的简洁完整闭式；此前的 $U_{98},U_{128},U_{188}$ 只是合法上界，均不得未经证明当成完整公式。
+
+\section{问题与二次对偶}
+错误模式为 $x\in\{0,1\}^5$，边际错误率 $q_i\in(0,1/2)$，成对共同错误率的上界 $b_{ij}\ge0$。允许的联合分布为
+\[
+\calP(q,b)=\left\{\pi\ge0:\sum_x\pi_x=1,\ \sum_x\pi_xx_i=q_i,\ \sum_x\pi_xx_ix_j\le b_{ij}\right\};
+\]
+假定 $\calP(q,b)\ne\varnothing$，并使用确定性 self-dual 规则 $F(x)+F(\one-x)=1$。其 minimax 错误率记为 $\Risk^*_{\rm det}$。
+
+固定 $F$ 的最坏分布线性规划的对偶为
+\begin{align}\label{eq:dual}
+\Risk(F)=\min_{z\in\calD_F}L_z(q,b),\quad
+L_z(q,b)&=a+\sum_iq_i\beta_i+\sum_{i<j}b_{ij}\gamma_{ij},\\
+\calD_F&=\left\{z=(a,\beta,\gamma):\gamma\ge0,\ 
+Q_z(x)\ge F(x)\quad\forall x\in\{0,1\}^5\right\},\notag\\[-0.3em]
+Q_z(x)&=a+\sum_i\beta_ix_i+\sum_{i<j}\gamma_{ij}x_ix_j.\notag
+\end{align}
+强对偶成立且最优值可取到。消去 $F$ 得
+\begin{equation}\label{eq:Qfeas}
+Q_z(x)\ge0,\qquad
+\max\{Q_z(x),Q_z(\one-x)\}\ge1\quad(\forall x),\qquad\gamma\ge0.
+\end{equation}
+对任意满足式 \eqref{eq:Qfeas} 的 $Q_z$，以 $Q_z(x)-Q_z(\one-x)$ 的符号选择失败侧，就可产生被 $Q_z$ 逐点上界的 self-dual 线性阈值规则，因为
+\[
+Q_z(x)-Q_z(\one-x)
+=\sum_i\left(\beta_i+\frac12\sum_{j\ne i}\gamma_{ij}\right)(2x_i-1).
+\]
+平局可以用一般位置的小扰动打破。因此最优确定性规则可在有限的有符号线性阈值规则集合 $\mathcal W_5$ 中选取。现有精确整数规则枚举确认 $|\mathcal W_5|=1882$，按模型置换为 60 种类型；下述有限性证明实际上不依赖具体的 1882 计数。
+
+\section{新主定理：零截距完全解决，正截距有限覆盖}
+\subsection{零截距证书的精确值}
+令非负边权 $y=(y_{ij})$ 的图划分函数为
+\[
+ g(y)=\min_{S\subseteq[5]}
+ \max\left\{\sum_{\{i,j\}\subseteq S}y_{ij},
+ \sum_{\{i,j\}\subseteq S^c}y_{ij}\right\},
+\qquad
+B_{\rm graph}(b)=\inf_{y\ge0:g(y)>0}\frac{\sum_{i<j}b_{ij}y_{ij}}{g(y)}.
+\]
+\begin{theorem}[零截距面的最优值]\label{thm:zero}
+在任意可行边际与成对上界下，所有满足式 \eqref{eq:Qfeas} 且 $Q(0)=a=0$ 的二次证书中，最小对偶目标值恰为
+\begin{equation}\label{eq:zero}
+\boxed{\inf_{Q:\,a=0} L_Q(q,b)=\min\{q_{\min},B_{\rm graph}(b)\}.}
+\end{equation}
+无须假定 $\sum_iq_i\le1$，也无须假定系数有理或为整数。
+\end{theorem}
+\begin{proofcn}
+当 $a=0$，由 $Q(e_i)\ge0$ 得 $\beta_i\ge0$。设 $s=\sum_i\beta_i$。若 $s\ge1$，有 $L_Q\ge q_{\min}s\ge q_{\min}$。若 $s<1$，互补模式两侧的一阶项均不超过 $s$，所以对所有 $S$ 都有
+\[
+\max\{\gamma(E(S)),\gamma(E(S^c))\}\ge1-s,
+\quad\Longrightarrow\quad g(\gamma)\ge1-s>0.
+\]
+因此 $L_Q\ge q_{\min}s+B_{\rm graph}(1-s)\ge\min\{q_{\min},B_{\rm graph}\}$。
+反向由两类可行证书达到下确界：独裁证书 $Q(x)=x_i$；以及任何 $g(y)>0$ 所对应的 $Q_y(x)=\sum_{i<j}y_{ij}x_ix_j/g(y)$。后者的互补覆盖性正是 $g(y)$ 的定义。\end{proofcn}
+
+\subsection{所有正截距实系数证书的显式有理全集}
+定义 $16$ 维系数向量 $z=(a,\beta_1,\dots,\beta_5,\gamma_{12},\dots,\gamma_{45})$，令 $A\in\{0,1\}^{42\times16}$：前 $32$ 行为
+\[
+A_x=(1,x_1,\ldots,x_5,x_1x_2,\ldots,x_4x_5),
+\]
+后 $10$ 行为选取各 $\gamma_{ij}$ 的单位行。对固定规则 $F$，右端 $h_F$ 是 $32$ 个 $F(x)$ 与后 $10$ 个零的拼接，因此 $\calD_F=\{z:Az\ge h_F\}$。
+
+\begin{theorem}[参数无关的有限有理证书全集]\label{thm:atlas}
+对 $F\in\mathcal W_5$，定义
+\begin{equation}\label{eq:vertices}
+\calV_F=\left\{
+ A_I^{-1}(h_F)_I:\ |I|=16,\ \det A_I\ne0,\ A A_I^{-1}(h_F)_I\ge h_F
+\right\},
+\qquad\calV_5=\bigcup_{F\in\mathcal W_5}\calV_F.
+\end{equation}
+则 $\calV_5$ 有限且由有理系数向量构成；对任意满足式 \eqref{eq:Qfeas} 的\emph{实系数}证书 $Q$，存在 $F\in\mathcal W_5$ 及不超过 $17$ 个 $V_k\in\calV_F$、凸组合系数 $\lambda_k$ 和一个衰退方向 $D$，使
+\[
+Q=\sum_{k=1}^m\lambda_kV_k+D,\quad
+m\le17,\quad\lambda_k\ge0,\quad\sum_k\lambda_k=1,
+\]
+且对任意可行 $(q,b)$ 都有 $L_D(q,b)\ge0$。特别地，
+\begin{equation}\label{eq:atlas}
+\boxed{\Risk^*_{\rm det}(q,b)=\min_{V\in\calV_5}L_V(q,b).}
+\end{equation}
+\end{theorem}
+\begin{proofcn}
+由式 \eqref{eq:Qfeas} 的互补比较，给定 $Q$ 可选择被其上界的 $F\in\mathcal W_5$，所以 $Q\in\calD_F$。矩阵 $A$ 满列秩 $16$，故 $\calD_F$ 不含直线，其极点恰由式 \eqref{eq:vertices} 的满秩活跃约束给出。由 Minkowski--Weyl 分解与 $\mathbb R^{16}$ 的 Carath\'eodory 定理，得到上式，且顶点凸组合最多使用 $17$ 项。
+
+衰退方向满足 $D(x)\ge0$ 且 $D_{\gamma,ij}\ge0$。任取 $\pi\in\calP(q,b)$，
+\[
+L_D(q,b)=\mathbb E_\pi[D(X)]+\sum_{i<j}D_{\gamma,ij}\bigl(b_{ij}-\mathbb E_\pi[X_iX_j]\bigr)\ge0.
+\]
+故 $L_Q\ge\sum_k\lambda_kL_{V_k}\ge\min_{V\in\calV_F}L_V$，且该不等式同时覆盖所有可行参数。对各 $F$ 取最优，对偶强对偶给出式 \eqref{eq:atlas}。\end{proofcn}
+
+\begin{corollary}[只需分类正截距顶点]\label{cor:positive}
+定义 $\calV_5^+=\{V\in\calV_5:a_V>0\}$，则对所有可行异质五分类器实例有\emph{严格精确}的分解：
+\begin{equation}\label{eq:main}
+\boxed{\displaystyle
+\Risk^*_{\rm det}(q,b)=\min\!\left\{q_{\min},\ B_{\rm graph}(b),\ \min_{V\in\calV_5^+}L_V(q,b)\right\}.}
+\end{equation}
+\end{corollary}
+\begin{proofcn}
+每个顶点都必须有 $a_V=Q_V(0)\ge0$。把式 \eqref{eq:atlas} 的顶点分成 $a_V=0$ 与 $a_V>0$ 两部分；由定理 \ref{thm:zero}，前一部分的最优值恰由最佳单模型和图证书给出。\end{proofcn}
+
+\begin{remark}[统一有理复杂度界]
+每个基矩阵 $A_I$ 的行范数至多为 $4$。由 Hadamard 不等式、Cramer 法则，顶点任一坐标写成 $n/d$ 后都有 $|n|,d\le4^{16}=2^{32}$（$d>0$）。这是\emph{所有实系数证书都可被有界复杂度的有理证书覆盖}的定量版本；不是说全部候选顶点均已枚举。未去重的简单上界为
+\[
+1882\binom{42}{16}=313{,}371{,}296{,}054{,}964.
+\]
+\end{remark}
+
+\section{进一步推进：$K=5$ 的图证书变成无 big-$M$ 的小 MILP}
+这是本轮从有限全集出发新增的算法性定理。它使式 \eqref{eq:main} 的零截距部分不仅在理论上解决，而且能独立高效计算。
+
+\begin{theorem}[图证书的精确 20 变量 MILP]\label{thm:graph-milp}
+令 $V=[5]$。则 $B_{\rm graph}(b)$ 恰好等于以下混合整数线性规划的最优值：
+\begin{equation}\label{eq:graph-milp}
+\boxed{
+\begin{aligned}
+\min_{y,z}\quad&\sum_{i<j}b_{ij}y_{ij}\\
+\text{s.t.}\quad&0\le y_{ij}\le1,\qquad z_{ij}\in\{0,1\}\qquad(i<j),\\
+&\sum_{\{j,k\}\subseteq V\setminus\{i\}}y_{jk}\ge1 \qquad (i=1,\dots,5),\\
+&y_{ij}\ge z_{ij}\qquad(i<j),\\
+&\sum_{\{k,\ell\}\subseteq V\setminus\{i,j\}}y_{k\ell}+z_{ij}\ge1\qquad(i<j).
+\end{aligned}}
+\end{equation}
+仅有 $10$ 个连续变量 $y$ 与 $10$ 个二元变量 $z$，无 big-$M$ 参数；最优值总可取得。等价地，可以枚举至多 $2^{10}=1024$ 组二元变量赋值，每组只需求解一个十变量线性规划。
+\end{theorem}
+\begin{proofcn}
+因 $g$ 正齐次，最小化 $\sum b_ey_e/g(y)$ 等价于在 $y\ge0,g(y)\ge1$ 上最小化 $\sum b_ey_e$。对于任意 $g(y)\ge1$，逐条把大于 $1$ 的边权截断到 $1$，不会使任何原本至少为 $1$ 的非负内部边权和降至 $1$ 以下，目标也不增加。因此可加 $y_e\le1$。
+
+对于五顶点的互补划分，除空集与全集外，代表划分仅有 $(1,4)$ 和 $(2,3)$。$(1,4)$ 要求其四顶点内部边权和至少为 $1$，给出式 \eqref{eq:graph-milp} 的首组不等式。$(2,3)$ 划分对应顶点对 $\{i,j\}$ 与三顶点补集，约束恰是
+\[
+y_{ij}\ge1\quad\text{或}\quad y(E(V\setminus\{i,j\}))\ge1.
+\]
+由于 $y_{ij}\le1$，引入 $z_{ij}\in\{0,1\}$ 后，这个析取条件精确等价于
+\(
+y_{ij}\ge z_{ij},\quad y(E(V\setminus\{i,j\}))+z_{ij}\ge1.
+\)
+空集划分约束已由任意 $(1,4)$ 约束蕴含。这样得到式 \eqref{eq:graph-milp}，无任何松弛。可行域紧，因此最优值取到。\end{proofcn}
+
+\section{面向简洁闭式的有限且充要的支配性判据}
+现定义可行参数域的闭包 $\calM_R$，其中 $0\le q_i\le1/2$、$\mathcal P(q,b)\ne\varnothing$、$0\le b_{ij}\le\min(q_i,q_j)$，并满足
+\begin{equation}\label{eq:Rpoly}
+\sum_iq_i-3q_j\le1\qquad(j=1,\ldots,5).
+\end{equation}
+式 \eqref{eq:Rpoly} 与 $\sum_iq_i-3q_{\min}\le1$ 等价，故 $\calM_R$ 是凸多面体的线性投影，不必再分五个 $q_{\min}$ 分支。
+
+对任何\emph{有限}合法证书族 $\mathcal C$ 和待判定的合法证书 $V$，令
+\begin{equation}\label{eq:dominance}
+\Delta_{\mathcal C}(V)=\max_{(q,b)\in\calM_R}\min_{C\in\mathcal C}
+\left[L_C(q,b)-L_V(q,b)\right].
+\end{equation}
+它恰是一个 LP：加入变量 $t$，对每个 $C\in\mathcal C$ 增加 $t\le L_C-L_V$，然后最大化 $t$；用联合分布变量 $\pi_x$ 表示参数域的投影即可。于是
+\[
+\Delta_{\mathcal C}(V)\le0
+\quad\Longleftrightarrow\quad
+\min_{C\in\mathcal C}L_C(q,b)\le L_V(q,b)\quad\forall(q,b)\in\calM_R.
+\]
+
+\begin{theorem}[候选闭式完整性的有限充要判据]
+若 $\mathcal C$ 是有限个合法二次证书构成的集合，则
+\[
+\min_{C\in\mathcal C}L_C(q,b)=\Risk^*_{\rm det}(q,b)
+\quad\forall(q,b)\in\calM_R
+\]
+当且仅当 $\Delta_{\mathcal C}(V)\le0$ 对\emph{所有} $V\in\calV_5$ 成立。若 $\mathcal C$ 已经包含或在整个 $\calM_R$ 上覆盖了定理 \ref{thm:zero} 的全部零截距证书，则只需检查 $V\in\calV_5^+$。
+\end{theorem}
+\begin{proofcn}
+由定理 \ref{thm:atlas}，$\Risk^*_{\rm det}=\min_{V\in\calV_5}L_V$。由于 $\mathcal C$ 中每项均为合法证书，$\Risk^*_{\rm det}\le\min_{C\in\mathcal C}L_C$。两个最小值处处相等，当且仅当候选族的逐点最小值不大于每一项 $L_V$，这正是全部 $\Delta\le0$。零截距简化由定理 \ref{thm:zero} 得到。\end{proofcn}
+
+\section{结论与剩余核心困难}
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{@{}p{0.55\textwidth}X@{}}
+\toprule
+\textbf{研究目标} & \textbf{证明状态}\\
+\midrule
+零截距 $a=0$ 的全实系数证书：$\min(q_{\min},B_{\rm graph})$ & \textbf{已证明精确}\\
+所有 $a>0$ 实系数证书由参数无关的有限有理极点全集覆盖 & \textbf{已证明}\\
+整个异质 $K=5$ 的有限、精确、有理系数表达式 & \textbf{已证明}\\
+$B_{\rm graph}$ 的 20 变量、无 big-$M$ 精确 MILP & \textbf{已证明}\\
+任意有限候选族完整性的单 LP 支配性判据 & \textbf{已证明}\\
+实际列出并压缩全部不可被支配的 $a>0$ 极点 & \textbf{未完成}\\
+几十或数百项组成的简洁完整闭式 & \textbf{未完成}\\
+\bottomrule
+\end{tabularx}
+\end{center}
+\noindent 下一步\emph{无需再扩展预设系数范围}：应从 $\calV_5^+$ 的活跃约束矩阵结构出发，优先在单个非平凡的非负加权规则 $(3,2,2,1,1)$ 上完成正截距极点的生成、同构去重以及精确的参数域支配性消元，随后推广到 60 个规则类型。仅凭若干随机或定向 LP 检验通过，不能宣称简洁公式完整。
+
+\appendix
+\section{独立复核代码（Python）}
+本附录代码可独立运行，不依赖本项目其他脚本。它通过 SymPy 精确核对正截距有理数极点，通过 SciPy 的混合整数规划求解器测试图证书计算。理论正确性来自正文证明，而不是求解器的浮点输出。代码可保存为 Python 脚本运行。
+\begin{lstlisting}[caption={Finite certificate vertex and graph MILP audit}]
+"""Self-contained audit for the finite-atlas and exact K=5 graph-MILP theorems.
+Requires sympy, numpy, scipy. The proofs are mathematical; MILP output is
+only an implementation check, not an exact rational proof of optimality.
+"""
+from itertools import combinations
+from math import comb
+from fractions import Fraction
+import sympy as sp
+import numpy as np
+from scipy.optimize import milp, LinearConstraint, Bounds
+
+K = 5
+E = list(combinations(range(K), 2))
+S = [tuple((m >> i) & 1 for i in range(K)) for m in range(32)]
+ROWS = [[1, *x, *(x[i] * x[j] for i, j in E)] for x in S]
+ROWS += [[int(k == j) for j in range(16)] for k in range(6, 16)]
+A = sp.Matrix(ROWS)
+assert A.shape == (42, 16) and A.rank() == 16
+
+# A fractional positive-intercept vertex for the rule (3,2,2,1,1).
+w = (3, 2, 2, 1, 1)
+f = sp.Matrix([int(sum(w[i] * (2*x[i] - 1) for i in range(5)) > 0)
+               for x in S] + [0] * 10)
+z = sp.Matrix([sp.Rational(1,2), sp.Rational(1,2), 0, 0,
+               sp.Rational(-1,2), sp.Rational(-1,2),
+               0, 0, 0, 0, 0,
+               sp.Rational(1,2), sp.Rational(1,2),
+               sp.Rational(1,2), sp.Rational(1,2), 1])
+slack = A * z - f
+assert all(t >= 0 for t in slack)
+tight = [i for i,t in enumerate(slack) if t == 0]
+assert A[tight, :].rank() == 16
+print('EXACT: positive-intercept rational vertex (a=1/2) verified')
+print('Uniform vertex numerator/denominator bound:', 2**32)
+print('Raw atlas upper bound:', 1882 * comb(42, 16))
+
+# Exact K=5 graph-certificate MILP.
+# y_e in [0,1] continuous; z_ij in {0,1} selects the small-side edge.
+G, lb = [], []
+for i in range(5):
+    row = np.zeros(20)
+    for k,(u,v) in enumerate(E):
+        if i not in (u,v): row[k] = 1
+    G.append(row); lb.append(1.0)
+for k,(i,j) in enumerate(E):
+    row = np.zeros(20); row[k] = 1; row[10+k] = -1
+    G.append(row); lb.append(0.0)  # y_ij >= z_ij
+    row = np.zeros(20); row[10+k] = 1
+    for m,(u,v) in enumerate(E):
+        if i not in (u,v) and j not in (u,v): row[m] = 1
+    G.append(row); lb.append(1.0)  # y(E(V\\{i,j})) + z_ij >= 1
+G = np.asarray(G)
+assert G.shape == (25,20)
+
+def graph_value(b):
+    result = milp(np.r_[np.asarray(b, dtype=float), np.zeros(10)],
+                  integrality=np.r_[np.zeros(10),np.ones(10)],
+                  bounds=Bounds(np.zeros(20), np.ones(20)),
+                  constraints=LinearConstraint(G, np.array(lb), np.inf),
+                  options={'mip_rel_gap':1e-11})
+    assert result.success
+    y = result.x[:10]
+    g = min(max(sum(y[k] for k,(i,j) in enumerate(E) if x[i] and x[j]),
+                    sum(y[k] for k,(i,j) in enumerate(E) if not x[i] and not x[j]))
+            for x in S)
+    assert g > 1-1e-7
+    return result.fun
+
+assert abs(graph_value(np.ones(10)) - 3) < 1e-8
+print('NUMERICAL: graph MILP, 10 continuous + 10 binary, unit costs -> 3')
+print('NOTE: no claim here that arbitrary B_graph equals a shortest-odd-cycle value.')
+\end{lstlisting}
+\end{document}

@@ -1,0 +1,175 @@
+% !TeX program = xelatex
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Noto Serif CJK SC}
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip = 0pt plus 1pt
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\newtheorem{theorem}{定理}
+\newtheorem{proposition}[theorem]{命题}
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{corollary}[theorem]{推论}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{定义}
+\newtheorem{remark}[theorem]{说明}
+\renewcommand{\proofname}{证明}
+\newcommand{\Rdet}{R^*_{\mathrm{det}}}
+\newcommand{\Bg}{B_{\mathrm{graph}}}
+\newcommand{\Odd}{\mathcal C_{\mathrm{odd}}}
+\title{稳健投票精确闭式的项数：超指数下界}
+\author{选题文档来源 [S23]}
+\date{2026 年 10 月 13 日}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+对固定的分类器个数 $K$，确定性 self-dual minimax 错误率 $\Rdet(q,b)$ 是有限个有理仿射函数的最小值（选题文档结果 5）。本文证明：即使只在高精度区域 $R_0=\{\sum_iq_i\le1\}$ 内，任何这样的表示都至少需要
+\[
+K+O_K,\qquad O_K=\sum_{\substack{3\le L\le K\\ L\text{ 奇}}}\binom KL\frac{(L-1)!}{2}\ \ge\ \frac{(K-1)!}{2}
+\]
+个仿射项，其中 $O_K$ 是完全图 $K_K$ 中简单奇环的个数。该下界对 $K\le5$ 是紧的，对 $K=6,7,8$ 也是紧的（计算机辅助），对 $K\ge9$ 不紧。证明除 $R_0$ 内的主定理外是自包含的。
+\end{abstract}
+
+\section{设定与记号}
+$K\ge3$ 个二元分类器，错误指示 $X_i\in\{0,1\}$。参数为边际 $q=(q_i)$ 与成对上界 $b=(b_{ij})_{i<j}$，其中 $0<q_i<\tfrac12$，$0\le b_{ij}\le\min(q_i,q_j)$。令 $m=\binom K2$，参数向量 $\theta=(q,b)\in\mathbb R^{K+m}$。可行联合分布集合为
+\[
+\mathcal P(\theta)=\Bigl\{\pi\ge0:\ \textstyle\sum_x\pi_x=1,\ \mathbb E_\pi X_i=q_i,\ \mathbb E_\pi X_iX_j\le b_{ij}\Bigr\},
+\]
+可行参数域 $\Theta_K=\{\theta:\mathcal P(\theta)\neq\varnothing\}$，高精度区域 $R_0=\{\theta\in\Theta_K:\sum_iq_i\le1\}$。确定性 self-dual 规则 $F$ 满足 $F(x)+F(\mathbf1-x)=1$，
+\[
+\Rdet(\theta)=\min_F\max_{\pi\in\mathcal P(\theta)}\mathbb E_\pi F(X).
+\]
+对边权 $y\in\mathbb R_{\ge0}^{E(K_K)}$，记 $Y=\sum_ey_e$，
+\[
+g(y)=\min_{S\subseteq[K]}\max\{y(E(S)),\,y(E(S^c))\},\qquad
+\Bg(b)=\inf_{y\ge0:\,g(y)>0}\frac{b\cdot y}{g(y)},
+\]
+其中 $E(S)$ 为两端都在 $S$ 内的边集。对简单奇环 $C$，记 $c_C(b)=\sum_{e\in C}b_e$。
+
+\begin{theorem}[$R_0$ 内的主定理；选题文档结果 3(b)，证明见 [S5] 定理 5.2]\label{thm:main}
+对任意 $\theta\in R_0$，$\Rdet(\theta)=\min\{q_{\min},\Bg(b)\}$。
+\end{theorem}
+
+\begin{definition}[最简表示与项数]
+设 $D\subseteq\Theta_K$。若存在有限个仿射函数 $L_1,\dots,L_N$ 使 $\Rdet=\min_jL_j$ 在 $D$ 上成立，称其为 $D$ 上的一个表示；最小的 $N$ 记为 $N_D(K)$。（由选题文档结果 5，$N_{\Theta_K}(K)<\infty$，从而 $N_D(K)\le N_{\Theta_K}(K)<\infty$。）
+\end{definition}
+
+\section{三个引理}
+
+\begin{lemma}[开集上的仿射片必须出现]\label{lem:piece}
+设 $f=\min_{1\le j\le N}L_j$ 在 $D$ 上成立，$L_j$ 仿射。若 $U\subseteq D$ 是 $\mathbb R^{K+m}$ 中的非空开集，且存在仿射函数 $A$ 使 $f=A$ 在 $U$ 上成立，则存在 $j$ 使 $L_j\equiv A$。特别地，若 $U_1,\dots,U_r\subseteq D$ 是非空开集，$f$ 在 $U_k$ 上等于仿射函数 $A_k$，且 $A_1,\dots,A_r$ 两两不同，则 $N\ge r$。
+\end{lemma}
+\begin{proof}
+令 $Z_j=\{\theta\in U:L_j(\theta)=f(\theta)\}$。$f$ 与 $L_j$ 在 $U$ 上连续，故 $Z_j$ 在 $U$ 中相对闭，且 $U=\bigcup_jZ_j$。有限个无处稠密集之并仍无处稠密，而非空开集 $U$ 在自身中不是无处稠密的，所以某个 $Z_j$ 含有非空开集 $W$。在 $W$ 上 $L_j=f=A$；两个仿射函数在非空开集上相等则处处相等，故 $L_j\equiv A$。若 $A_1,\dots,A_r$ 两两不同，对应的 $L_{j_k}$ 也两两不同，故 $N\ge r$。
+\end{proof}
+
+\begin{lemma}[$g$ 的两个初等性质]\label{lem:g}
+对任意 $y\ge0$：
+\begin{enumerate}
+\item $g(y)\le Y/2$；
+\item 设 $C$ 是 $K_K$ 中的简单奇环，$y=y_C+y_{\mathrm{out}}$，其中 $y_C$ 支撑在 $C$ 上、$y_{\mathrm{out}}$ 支撑在 $E(K_K)\setminus C$ 上，$Y_{\mathrm{out}}=\sum_ey_{\mathrm{out},e}$。则 $g(y_C)=\min_{e\in C}y_{C,e}$，且 $g(y)\le g(y_C)+Y_{\mathrm{out}}$。
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+(1) 令 $S$ 为均匀随机子集，每条边以概率 $1/2$ 落在 $E(S)\cup E(S^c)$ 中，故
+\[
+\mathbb E\bigl[y(E(S))+y(E(S^c))\bigr]=Y/2 .
+\]
+于是存在 $S$ 使 $y(E(S))+y(E(S^c))\le Y/2$，从而
+\[
+g(y)\le\max\{y(E(S)),\,y(E(S^c))\}\le Y/2 .
+\]
+
+(2) 奇环不可二染色，故任意 $S$ 都使 $C$ 上至少一条边落在 $E(S)\cup E(S^c)$ 中，从而
+\[
+\max\{y_C(E(S)),\,y_C(E(S^c))\}\ \ge\ \min_{e\in C}y_{C,e}.
+\]
+另一方面，取 $e^*$ 为 $C$ 上 $y_C$ 最小的边，沿 $C$ 交替着色、只让 $e^*$ 两端同色（奇环恰好可以做到），$C$ 以外的顶点任意放置；此时 $y_C$ 的同侧权重只有 $y_{C,e^*}$。故 $g(y_C)=\min_{e\in C}y_{C,e}$。
+
+最后，对任意 $S$，加入 $y_{\mathrm{out}}$ 至多使两侧内部权重各增加 $Y_{\mathrm{out}}$，故
+\[
+\max\{y(E(S)),\,y(E(S^c))\}\ \le\ \max\{y_C(E(S)),\,y_C(E(S^c))\}+Y_{\mathrm{out}} ;
+\]
+对 $S$ 取最小即得 $g(y)\le g(y_C)+Y_{\mathrm{out}}$。
+\end{proof}
+
+\begin{lemma}[奇环占优时的图证书值]\label{lem:cycle}
+设 $C$ 是简单奇环，且 $b_e\ge c_C(b)$ 对一切 $e\notin C$ 成立。则 $\Bg(b)=c_C(b)$。
+\end{lemma}
+\begin{proof}
+上界：取 $y=\mathbf 1_C$，由引理~\ref{lem:g}(2) 得 $g(\mathbf1_C)=1$，故 $\Bg(b)\le c_C(b)$。
+
+下界：$g$ 为一阶齐次，只需对 $g(y)=1$ 的 $y$ 证明 $b\cdot y\ge c_C(b)$。按引理~\ref{lem:g}(2) 分解 $y$，有 $\min_{e\in C}y_{C,e}\ge1-Y_{\mathrm{out}}$。若 $Y_{\mathrm{out}}\ge1$，则 $b\cdot y\ge\min_{e\notin C}b_e\cdot Y_{\mathrm{out}}\ge c_C(b)$。否则
+\[
+b\cdot y\ \ge\ \sum_{e\in C}b_ey_{C,e}+\min_{e\notin C}b_e\cdot Y_{\mathrm{out}}
+\ \ge\ c_C(b)\,(1-Y_{\mathrm{out}})+c_C(b)\,Y_{\mathrm{out}}=c_C(b).\qedhere
+\]
+\end{proof}
+
+\section{主命题}
+
+\begin{proposition}[项数的超指数下界]\label{prop:main}
+对任意 $K\ge3$ 及任意满足 $R_0\subseteq D\subseteq\Theta_K$ 的参数域 $D$（特别地 $D=R_0$、$D=R$ 或 $D=\Theta_K$），
+\[
+\boxed{N_D(K)\ \ge\ K+O_K,\qquad O_K=\sum_{\substack{3\le L\le K\\ L\text{ 奇}}}\binom KL\frac{(L-1)!}{2}.}
+\]
+更具体地，任何表示都必须包含 $K$ 个独裁项 $q_i$，以及每个简单奇环 $C$ 的代价项 $c_C(b)$。
+\end{proposition}
+\begin{proof}
+由引理~\ref{lem:piece}，只需对每个独裁项、每个奇环项分别给出一个非空开集 $U\subseteq R_0$，使 $\Rdet$ 在 $U$ 上等于该项。这些项作为仿射函数两两不同：$q_i$ 互不相同；奇环项是不同支撑集上的系数 $0/1$ 函数。
+
+\emph{(a) 奇环项。} 取简单奇环 $C$，长度 $L\le K$。令 $U_C$ 为满足以下条件的 $\theta$ 构成的开集（各坐标取开区间，故为 $\mathbb R^{K+m}$ 中的非空开集）：
+\[
+q_i\in\Bigl(\tfrac{3}{4K},\tfrac1K\Bigr),\qquad
+b_e\in\Bigl(0,\tfrac{1}{4K^2}\Bigr)\ (e\in C),\qquad
+b_e\in\Bigl(\tfrac1{2K},\tfrac5{8K}\Bigr)\ (e\notin C).
+\]
+\emph{参数合法与可行。}$q_i<\tfrac1K\le\tfrac13<\tfrac12$；$b_e<\tfrac5{8K}<\tfrac3{4K}<\min(q_i,q_j)$。由于 $\sum_iq_i<1$，可令各分类器的出错事件为 $[0,1]$ 上互不相交、长度为 $q_i$ 的区间，所得联合分布使所有 $\mathbb E X_iX_j=0\le b_{ij}$，故 $\theta\in\Theta_K$，且 $\theta\in R_0$。
+
+\emph{取值。}$c_C(b)<L\cdot\tfrac1{4K^2}\le\tfrac1{4K}$，而 $e\notin C$ 时 $b_e>\tfrac1{2K}>c_C(b)$。由引理~\ref{lem:cycle}，$\Bg(b)=c_C(b)<\tfrac1{4K}<q_{\min}$。由定理~\ref{thm:main}，$\Rdet=c_C(b)$ 在 $U_C$ 上成立。
+
+\emph{(b) 独裁项。} 固定 $i$。令 $V_i$ 为满足以下条件的开集：
+\[
+q_i\in\Bigl(\tfrac{0.40}{K},\tfrac{0.45}{K}\Bigr),\qquad
+q_j\in\Bigl(\tfrac{0.90}{K},\tfrac{0.95}{K}\Bigr)\ (j\neq i),\qquad
+b_e\in\Bigl(\tfrac{0.30}{K},\tfrac{0.39}{K}\Bigr)\ (\text{所有边}).
+\]
+合法性：$b_e<\tfrac{0.39}K<\tfrac{0.40}K<q_{\min}$。可行性：$\sum q<\tfrac{0.45}K+\tfrac{(K-1)\,0.95}{K}<1$，同 (a) 用互斥区间构造。取值：$q_{\min}=q_i$；对任意 $y$，由引理~\ref{lem:g}(1)，$b\cdot y\ge\min_eb_e\cdot Y\ge\min_eb_e\cdot2g(y)$，故 $\Bg(b)\ge2\min_eb_e>\tfrac{0.60}K>q_i$。由定理~\ref{thm:main}，$\Rdet=q_i$ 在 $V_i$ 上成立。
+
+最后，长度为 $L$ 的简单环在 $K_K$ 中共有 $\binom KL\frac{(L-1)!}2$ 个，对奇数 $L$ 求和即得 $O_K$。
+\end{proof}
+
+\begin{corollary}[增长速度]\label{cor:growth}
+$O_K\ge\frac{(K-1)!}{2}$，因此 $N_{R_0}(K)\ge2^{\Omega(K\log K)}$：即使在 $R_0$ 内，精确闭式的项数也必然超指数增长。
+\end{corollary}
+\begin{proof}
+$K$ 为奇数时取 $L=K$ 一项，得 $\frac{(K-1)!}2$。$K$ 为偶数时取 $L=K-1$ 一项，得 $K\cdot\frac{(K-2)!}2\ge\frac{(K-1)!}2$。
+\end{proof}
+
+\section{紧性与严格性}
+
+\begin{remark}[$K\le5$ 时下界在 $R_0$ 内是紧的]
+$K\le5$ 时，在 $R_0$ 内 $\Rdet=\min\{q_{\min},c^*(b)\}$。$K=3$ 时只有一个奇环；$K=4$ 时 $K_4$ 是平面图；$K=5$ 时见选题文档结果 3(c) 与 [S15] 定理 2.3、3.1。所以 $N_{R_0}(K)\le K+O_K$，结合命题~\ref{prop:main} 得等号：$N_{R_0}(3)=4$，$N_{R_0}(4)=8$，$N_{R_0}(5)=27$。（$K=5$ 时 27 项逐项不可删，与 [S15] 命题 3.2 一致。）
+\end{remark}
+
+\begin{remark}[$K=6,7,8$ 时下界在 $R_0$ 内也是紧的（计算机辅助）]
+只需说明 $K=6,7,8$ 时对一切 $b\ge0$ 都有 $\Bg(b)=c^*(b)$，这就是 [S28] 证明的 $K_{\min}=9$。此时在 $R_0$ 内 $\Rdet=\min\{q_{\min},c^*(b)\}$，于是 $N_{R_0}(K)\le K+O_K$，结合命题~\ref{prop:main} 得等号：$N_{R_0}(6)=98$，$N_{R_0}(7)=654$，$N_{R_0}(8)=3616$。
+[S28] 的证明分两部分。一是极点归约（[S24] 引理 2.1）加零延拓，把问题化为 $K=8$ 的无上界奇环覆盖多面体的顶点。二是该多面体在 $S_8$ 下恰有 23 个顶点轨道（邻接封闭的精确枚举），19 个分数轨道上都有 $\Bg=1$（[S8] 第十四、十八份审查，[S9] \texttt{d1\_kmin\_review/}）。
+\end{remark}
+
+\begin{remark}[$K\ge9$ 时下界不紧]
+[S20]（审查修订版）推论 2.2 给出一个 9 分类器实例 $\theta^*$：$q_i=\tfrac19$，$J_4^\circ$ 的 10 条付费边取 $b=\tfrac1{36}$，4 条竖边取 $b=0$，其余边取 $b=\tfrac19$。在 $\theta^*$ 处 $\Rdet=\tfrac7{90}<\tfrac1{12}=\min\{q_{\min},\min_Cc_C(b)\}$。
+
+$\Rdet$ 是有限个仿射函数的最小值，因而连续；独裁项、奇环项也连续。所以存在 $\theta^*$ 的邻域，使在其中 $\Rdet$ 严格小于所有独裁项和奇环项。该邻域与 $R_0$ 的交含有非空开集，例如把 $q_i$ 略调小使 $\sum q<1$，把竖边上界取为很小的正数；这些点仍可由互斥区间分布实现。在该开集上，任何表示中取到最小值的仿射项都不是独裁项或奇环项。因此 $N_{R_0}(9)\ge9+O_9+1$。
+
+对 $K>9$，加入 $K-9$ 个分类器，令 $q_i=\tfrac1K$，把 $J_4^\circ$ 的成本乘以 $\gamma=\tfrac1{4K}$，其余边取不起作用的上界 $b=q$。这些边的成本 $\tfrac1K$ 严格大于奇环上界 $3\gamma$，由剔除定理（[S6] 定理 6.1）不会被使用，于是 $\Bg=\tfrac{14}{5}\gamma=\tfrac{0.7}K$，严格小于 $\min\{q_{\min},c^*\}=\tfrac{0.75}K$。同理可得 $N_{R_0}(K)>K+O_K$ 对一切 $K\ge9$ 成立。
+\end{remark}
+
+\begin{remark}[本文没有证明的内容]
+(i) 一般 $K$ 下 $N_D(K)$ 的精确值或与之匹配的上界；存在性证明给出的上界约为 $2^{O(K^3)}$。(ii) $R_0$ 之外（$D=R$ 或 $\Theta_K$）需要的额外正截距项的个数。(iii) 项数是否达到 $2^{\Omega(K^2)}$。项数超指数并不意味着闭式难以描述：奇环项可以用"最便宜奇环"一句话写出；描述复杂度更合适的度量是按 $S_K$ 置换的项类型数。
+\end{remark}
+
+\end{document}

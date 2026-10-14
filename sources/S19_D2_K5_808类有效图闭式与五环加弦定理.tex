@@ -1,0 +1,583 @@
+\documentclass[11pt,a4paper]{ctexart}
+\usepackage[margin=23mm,top=22mm,bottom=23mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,booktabs,hyperref,xcolor,fvextra}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\DefineVerbatimEnvironment{CodeListing}{Verbatim}{fontsize=\scriptsize,breaklines=true,breakanywhere=true,frame=single,framesep=2mm}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{corollary}[theorem]{推论}
+\newtheorem{proposition}[theorem]{命题}
+\theoremstyle{remark}\newtheorem{remark}[theorem]{备注}
+\newcommand{\Rstar}{R^*_{\mathrm{det},5}}
+\newcommand{\Rfour}{R^*_{\mathrm{det},4}}
+\newcommand{\Tk}{T}
+\newcommand{\bx}{\mathbf{1}}
+\newcommand{\codd}{\mathcal C_{\mathrm{odd}}}
+\setlength{\parindent}{2em}
+\sloppy
+\begin{document}
+\begin{center}
+{\LARGE\bfseries D2：异质五分类器稳健投票的结构闭式}\par\vspace{0.5em}
+{\large\bfseries 808 类有效图的完整解与五环加弦图的新增解析区域}\par\vspace{0.4em}
+\today\quad（研究证明及可复现代码；仅 LaTeX 源文件）
+\end{center}
+\begin{abstract}
+研究具有边际错误率 $q_i$ 和成对共错上界 $b_{ij}$ 的确定性 self-dual 投票。
+在复核上一轮研究成果的基础上，给出两个层次的严格结果：
+（1）四变量统一混合对偶只有 24 个有理顶点，从而 $K=4$ 的确定性值、共同对称对抗质量相等，并形成 12 项闭式；利用割点拼接，可以使 $K=5$ 的 1024 种有标号有效约束图中 808 种获得完整显式公式。
+（2）\emph{本轮新增}：对尚未整体解决的“五环加一条弦”六边有效图，证明了一个覆盖异质边际、且允许 $\sum_iq_i>1$ 的显式闭式区域。
+新证明直接构造对所有确定性 self-dual 规则同时有效的联合错误分布，不依赖随机抽样。
+仍余下的五顶点二连通图之通用实系数对偶完整性\textbf{没有被证明}；特别是本轮五环加弦公式含有不可随意删除的附加参数条件。
+\end{abstract}
+
+\section{模型与两个已有精确基础}
+记 $V=\{0,1,2,3,4\}$，$X_i\in\{0,1\}$ 表示第 $i$ 个模型判断错误；
+$0<q_i=\mathbb E X_i<1/2$，$\mathbb E(X_iX_j)\le b_{ij}\le\min(q_i,q_j)$，并假设联合分布可行。
+规则 $F$ 满足 $F(x)+F(\bx-x)=1$，其对抗错误率为
+\[
+\Rstar(q,b)=\min_{F\;\mathrm{self\mbox{-}dual}}
+\max_{\pi\in\mathcal P(q,b)}\mathbb E_\pi F(X).
+\]
+定义\emph{有效共错图} $H=(V,E_H)$，其中
+$E_H=\{ij:b_{ij}<\min(q_i,q_j)\}$。
+当 $b_{ij}=\min(q_i,q_j)$ 时，该成对约束冗余；在二次 LP 对偶中，若
+$q_i\le q_j$，可以用 $\gamma_{ij}x_i$ 无损替换 $\gamma_{ij}x_ix_j$：
+\[
+Q'(x)=Q(x)+\gamma_{ij}x_i(1-x_j)\ge Q(x),\qquad L_{Q'}=L_Q.
+\]
+所以正二次项可严格限制在 $E_H$ 内。
+
+\begin{theorem}[已证：异质 $K=4$ 的 12 项闭式与纯/混合等价]
+对四节点集合 $B$，令
+\[
+A_{B,r}=1-\sum_{i\in B}q_i
++\sum_{\substack{i<j\\i,j\in B\setminus\{r\}}}b_{ij}
++2\sum_{j\in B\setminus\{r\}}b_{rj}.
+\]
+若边际与共错上界可行且 $q_i<1/2$，则
+\[
+\boxed{\displaystyle
+\Rfour=\min\left\{
+\min_{i\in B}q_i,\quad
+\min_{\substack{S\subset B\\|S|=3}}\sum_{ij\in E(S)}b_{ij},\quad
+\min_{r\in B}A_{B,r}\right\}=T_4.}
+\]
+其中 $T_4$ 是全部可行联合分布能够容纳的最大\emph{互补对称子分布半质量}。
+\end{theorem}
+\begin{proof}[证明概述及可验证完整性]
+共同子分布的 LP 对偶是 $Q(x)\ge0$、$Q(x)+Q(\bx-x)\ge1$、
+$\gamma_{ij}\ge0$ 的 $11$ 维有理多面体，含 $30$ 条不等式。
+将其全部顶点做 $S_4$ 置换约化，得到 6 种轨道、总计 24 个顶点。
+代表的证书目标依次为：三角形代价、$q_i$、$A_{B,r}$、$1-q_i$、
+$3-2(q_i+q_j+q_k)+b_{ij}+b_{ik}+b_{jk}$、以及
+$6-5q_r-3\sum_{j\ne r}q_j+2\sum_{j\ne r}b_{rj}+
+\sum_{i<j\ne r}b_{ij}$。
+后三组分别被 $q_i$、三角形代价、$A_{B,r}$ 支配：
+\[
+1-q_i\ge q_i;\qquad
+3-2(q_i+q_j+q_k)\ge0;\qquad
+L_{\rm last}-A_{B,r}=5-4q_r-2\sum_{j\ne r}q_j\ge0.
+\]
+每类 4 个置换，共计 12 个不可省去的基础上界类型。
+零衰退方向不降低目标（由矩约束可行性与 $\gamma\ge0$ 保证）。
+附录 A 给出完整的 C++ 精确邻接审计：对六种顶点的所有极射线，
+要么命中已列 24 顶点之一，要么是衰退射线；故不存在遗漏顶点。
+对偶强对偶给出 $T_4$ 等式，而三个候选家族均有对应确定性投票，故 $T_4=\Rfour$。
+\end{proof}
+
+\section{808 种有效图的统一完整闭式}
+定义 $\mathcal K_4(H)$ 为 $H$ 中四顶点完全子图集合；
+$\codd(H)$ 为 $H$ 的简单奇环集合；空集合上的最小值记 $+\infty$。
+\begin{theorem}[已证：808 种五顶点有标号有效图]
+若 $H$ 满足下面任一条件：
+(i) 每个二连通块至多有 4 个顶点；
+(ii) $H\cong C_5$；
+(iii) $H$ 为二分图；
+则
+\[
+\boxed{\displaystyle
+\Rstar=\min\left\{\min_{i\in V}q_i,\quad
+\min_{C\in\codd(H)}\sum_{e\in C}b_e,\quad
+\min_{\substack{B\in\mathcal K_4(H)\\r\in B}}A_{B,r}\right\}.}
+\]
+所有 $2^{10}=1024$ 种有标号有效图中，
+(i) 有 786 种，(ii) 新增 12 种，(iii) 再新增 10 种，合计 808 种；
+其余 216 种在顶点置换下有 8 种二连通图类型。
+\end{theorem}
+\begin{proof}[证明要点]
+第一步，$T_B$ 对任意四顶点以内的块已有确定性精确闭式；
+对于缺失有效边的四顶点块，四变量锚点项由某个独裁或有效三角形项支配。
+此事由 $b_{uv}=\min(q_u,q_v)$ 及
+$1-q_i-q_j-q_k+b_{ij}+b_{ik}+b_{jk}\ge0$ 逐项推出。
+第二步，共同对称子分布可沿割点拼接：若块上均能构造半质量至少为 $t$ 的
+对称子分布，则在共享节点的 $0/1$ 两个条件层分别拼接对称部分和残余部分，
+得到全图相同 $t$ 的对称子分布，且保持各块矩约束。
+第三步，由任意 self-dual 规则满足 $F(x)+F(\bx-x)=1$，该子分布使其错误率
+至少为 $t$；而独裁、奇环多数及四变量锚点规则给出匹配的上界。
+对于单个五环，使用奇环稳定集分布构造相同的对称质量；对于二分图，仅独裁项有效。
+计数可通过枚举 1024 个图及其二连通块、二分性精确完成，原始审计脚本见随附证明包。
+\end{proof}
+\begin{remark}
+808/1024 是\emph{图结构数量比例}，绝非参数空间中的概率或体积比。
+对余下 216 个图，不能把上述公式当成已证闭式。
+\end{remark}
+
+\section{本轮新增定理：五环加弦图上的非平凡精确参数区域}
+考虑如下六边有效图（所有同构的标签变换均适用）：
+\[
+E_H=\{01,12,23,34,04,02\},\qquad
+\Delta=\{01,12,02\},\qquad
+C=\{01,12,23,34,04\}.
+\]
+$\Delta$ 是唯一三角形，$C$ 是唯一五环，两者共享 $01,12$；
+其余四条非有效边的上界等于 $\min(q_i,q_j)$。
+定义
+\[
+\boxed{t(q,b)=\min\left\{
+q_{\min},\ b_{01}+b_{12}+b_{02},\
+ b_{01}+b_{12}+b_{23}+b_{34}+b_{04}\right\}.}
+\]
+
+\begin{theorem}[本轮新增：六边核心的显式闭式区域]
+在上述六边有效图上，如果
+\begin{equation}\label{eq:triangle-condition}
+\boxed{\displaystyle t(q,b)\ge q_0+q_1+q_2-1,}
+\end{equation}
+则对全部可行异质参数 $0<q_i<1/2$，有
+\begin{equation}\label{eq:chord-closed}
+\boxed{\displaystyle \Rstar(q,b)=t(q,b).}
+\end{equation}
+并且存在\emph{同一个}满足全部矩约束的联合错误分布，使任意确定性 self-dual
+投票的错误率均至少为 $t(q,b)$。
+\end{theorem}
+
+\begin{lemma}[五种奇偶缺陷模式]
+对一组边 $D\subseteq E_H$，称错误配置 $x$ 在 $ij\in E_H$ 上的\emph{缺陷}
+为 $x_i=x_j$。以下五组 $D$ 都对应恰好一对互补配置：
+\[
+\{01\},\quad\{12\},\quad\{02,23\},\quad
+\{02,34\},\quad\{02,04\}.
+\]
+对每一互补对 $\{x,\bx-x\}$ 同时赋予质量 $\lambda$，
+则各节点共同获得边际质量 $\lambda$，一条有效边 $e$ 的共错贡献
+恰好为 $\lambda\bx\{e\in D\}$。
+\end{lemma}
+\begin{proof}
+给定 $D$，规定沿 $e\in D$ 的两个二元标签相同、沿 $e\notin D$ 的标签相异。
+连通图存在这样的配置当且仅当每个环上的 $D$ 边数与该环长度具有相同的奇偶性。
+本图循环空间由奇长为 3、5 的 $\Delta,C$ 生成；上列五个集合在两环上的交数均为奇数，
+因而配置存在，且连通性使其唯一性仅差全体取反。
+互补配置中每个节点恰有一侧为 1；对边 $e$，仅当该边两端相等时
+才有一侧同时为 1，所得贡献即为断言。
+\end{proof}
+
+\begin{lemma}[五环加弦图的稳定集剩余分解]
+令 $z\ge0$、$d_i\ge0$。若
+\[
+ d_i+d_j\le z\quad(ij\in E_H),\qquad d_0+d_1+d_2\le z,
+\]
+则存在总质量为 $z$、各节点边际质量为 $d_i$ 的非负子分布，
+且全部支撑状态的出错模型集合都是 $H$ 的稳定集（不含任何有效边）。
+\end{lemma}
+\begin{proof}
+先只处理四环 $0-2-3-4-0$。
+置 $a=\min(d_3,d_0)$、$c=\min(d_4,d_2)$。
+依次向状态 $\{0,3\},\{0\},\{2,4\},\{2\},\{3\},\{4\},\varnothing$
+赋予质量
+\[
+a,\ d_0-a,\ c,\ d_2-c,\ d_3-a,\ d_4-c,\
+z-d_0-d_2-(d_3-a)-(d_4-c).
+\]
+最后一项非负：若两个括号都正，则由 $d_3+d_4\le z$ 推出；
+若只有一项正，则分别由 $d_3+d_2\le z$ 或 $d_4+d_0\le z$ 推出。
+此时 $x_0=x_2=0$ 的质量恰为 $z-d_0-d_2\ge d_1$。
+在这一条件层，以比例 $d_1/(z-d_0-d_2)$ 添加节点 $1$
+（分母为零时 $d_1=0$，无需添加）；节点 $1$ 只与 $0,2$ 相邻，
+所以仍保持稳定集性质，并获得所需五维边际。
+\end{proof}
+
+\begin{proof}[新增定理的构造性证明]
+写 $s=b_{01}+b_{12}$、$c=b_{02}$、$p=b_{23}+b_{34}+b_{04}$，
+则 $t\le s+c$ 且 $t\le s+p$。
+先在缺陷 $\{01\}$、$\{12\}$ 两个互补对中放入总半质量
+$m=\min(t,s)$，使各自半质量不超过相应边权；
+再将剩余 $r=t-m$ 分配给缺陷
+$\{02,23\},\{02,34\},\{02,04\}$，使分配量分别不超过
+$b_{23},b_{34},b_{04}$。因为
+$r\le c$ 且 $r\le p$，这一步总能完成。
+由前一引理，得到互补对称子分布 $\nu$，总质量 $2t$，每个节点边际贡献 $t$，
+且每条有效边的共同出错贡献不超过对应 $b_e$。
+
+余下总质量、边际需求分别是
+$z=1-2t$、$d_i=q_i-t$。由于 $t\le q_{\min}<1/2$，
+$z>0$ 且 $d_i\ge0$。对每条有效边 $ij$，
+\[
+ d_i+d_j=q_i+q_j-2t\le1-2t=z
+\]
+（使用 $q_i,q_j<1/2$）；而假设 \eqref{eq:triangle-condition} 恰好等价于
+\[
+ d_0+d_1+d_2= q_0+q_1+q_2-3t\le 1-2t=z.
+\]
+由稳定集引理，得到残余子分布 $\rho$，总质量 $z$、边际贡献 $d_i$，
+且任意有效边都没有共同错误。令 $\pi=\nu+\rho$，则其总质量为 1、
+各边际是 $q_i$、所有有效边共错率不超过 $b_{ij}$；
+非有效边的上界是 $\min(q_i,q_j)$，自动满足。
+
+对任意 self-dual $F$，在每个互补对上恰好一侧被判为失败，
+因而 $\mathbb E_\pi F\ge t$。
+另一方面，最佳单模型给出 $q_{\min}$；三人多数和五环多数在失败时
+必至少包含对应奇环上的一条相邻共错边，分别给出
+$b(\Delta)$ 与 $b(C)$ 上界。于是 $\Rstar\le t$。
+上下界吻合，证毕。
+\end{proof}
+
+\begin{corollary}[容易判定的纯边际充分条件]
+如果 $q_0+q_1+q_2\le1$，则附加条件自动成立，\eqref{eq:chord-closed} 精确有效。
+特别地，五个边际可以彼此不同，而三角形三个模型的边际之和不超过 1。
+这个区域不要求 $\sum_{i=0}^4q_i\le1$。
+\end{corollary}
+\begin{corollary}[对称边际的新增完整区域]
+若 $q_0=\cdots=q_4=q\le1/3$，则无论六条有效共错上界如何异质，
+只要联合约束可行，闭式 \eqref{eq:chord-closed} 均成立。
+特别地，$1/5<q\le1/3$ 的一部分属于 $\sum_iq_i>1$ 的非平凡区域。
+\end{corollary}
+
+\begin{remark}[定理的边界与不能宣称的结论]
+\eqref{eq:triangle-condition} \emph{不是}由六边图的联合矩可行性自动推出的。
+例如所有 $q_i=0.45$，五环上每条边 $b_e=0.05$，弦 $b_{02}=0.40$，
+其余边取非有效上界 $0.45$；这些矩约束有显式可行联合分布：
+对错误集合二进制掩码 $m\in\{5,9,10,18,20\}$ 各赋概率 $3/20$，
+对 $m\in\{11,13,21,22,26\}$ 各赋概率 $1/20$（其余为零）。
+逐项可得五个边际均为 $9/20$，五环边共错均为 $1/20$，弦边共错为 $1/4$。
+但此时 $t=0.25<0.35=q_0+q_1+q_2-1$。
+故本轮不能称为“五环加弦图的全参数闭式”，更不能将 808 个\emph{全图结构类}
+增加为 868 个。当前新增的是 60 种同构标号六边图中的\emph{明确参数子区域}。
+\end{remark}
+
+\section{两组严格有理数实例与下一步研究}
+取边序 $01,02,03,04,12,13,14,23,24,34$。
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+ & $q=(q_0,\ldots,q_4)$ & $b_{01},b_{12},b_{02};b_{23},b_{34},b_{04}$ & 精确 $R^*$ \\
+\midrule
+A & $(.28,.25,.30,.28,.25)$ & $(.02,.03,.08;.05,.04,.02)$ & $13/100$ \\
+B & $(.42,.40,.40,.40,.41)$ & $(.08,.08,.10;.04,.04,.05)$ & $13/50$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+未列出的四条非有效边一律取 $b_{ij}=\min(q_i,q_j)$。
+实例 A 的 $\sum_iq_i=1.36$，实例 B 的 $\sum_iq_i=2.03$，均满足
+$\sum_iq_i-3q_{\min}<1$ 且 $\sum_iq_i>1$。
+实例 B 还满足 $q_0+q_1+q_2-1=0.22>0$，因此验证了不只是在
+“三角形边际和不超过 1”的简单子区域内成立。
+附录 B 的独立程序直接生成完整 32 状态有理联合分布，并逐项验证全部
+5 个边际、10 个共错上界和互补对称构造。
+
+本轮研究\emph{没有解决}全部 8 种剩余二连通图，也尚未证明
+$C_5$ 加弦的闭式对不满足 \eqref{eq:triangle-condition} 的参数成立。
+接下来最明确的解析目标是：允许残余分布在三角形上承担适当的共错质量，
+以用掉 $b(\Delta)-t$ 的剩余容量；这相当于将本次的“稳定集剩余”构造
+推广为“带受控三角形交互的剩余”构造。若成功，可望把附加条件逐步消去，
+但在完成严格推导前不能称为通用闭式。
+
+\section{证明程序的自包含附录}
+\noindent\textbf{附录 A（完整性）：}下面是上一轮已经通过编译和复核的
+$K=4$ 混合二次对偶 24 极点邻接证明 C++17 程序。它不使用浮点数；
+程序输出六种轨道的全部有界邻点和衰退方向统计。
+\begin{CodeListing}
+// Certified complete vertex list of randomized/self-dual K=4 quadratic dual.
+// Shows EVERY extreme ray of each of six vertex-orbit tangent cones either
+// hits another one of 24 listed vertices or is an unbounded recession ray.
+// Thus via connectedness of polyhedral 1-skeleton, no other vertices exist.
+// Compile g++ -O3 -std=c++17 D2_K4_mixed_24_vertex_exact_audit.cpp -o audit
+#include <bits/stdc++.h>
+using namespace std;
+using i64=long long; using i128=__int128_t;
+constexpr int N=11,M=30;
+using Z=array<i64,N>;
+array<Z,M> A;array<i64,M> h;
+vector<Z> V;vector<Z> P;
+const int ee[6][2]={{0,1},{0,2},{0,3},{1,2},{1,3},{2,3}};
+int edge(int x,int y){if(x>y)swap(x,y);for(int e=0;e<6;e++)if(ee[e][0]==x&&ee[e][1]==y)return e;abort();}
+Z permute(const Z&z,const array<int,4>&p){Z w{};w[0]=z[0];for(int i=0;i<4;i++)w[1+p[i]]=z[1+i];for(int k=0;k<6;k++)w[5+edge(p[ee[k][0]],p[ee[k][1]])]=z[5+k];return w;}
+void setup(){
+ int m=0;
+ for(int mask=0;mask<16;mask++){
+  Z row{};row[0]=1;for(int i=0;i<4;i++)row[1+i]=(mask>>i)&1;
+  for(int k=0;k<6;k++)row[5+k]=((mask>>ee[k][0])&1)*((mask>>ee[k][1])&1);
+  A[m++]=row;
+ }
+ for(int mask=0;mask<16;mask++)if(mask<(15^mask)){
+  Z row{};for(int j=0;j<N;j++)row[j]=A[mask][j]+A[15^mask][j];
+  A[m]=row;h[m++]=1;
+ }
+ for(int k=0;k<6;k++){Z row{};row[5+k]=1;A[m++]=row;}
+ assert(m==M);
+ P={Z{0,0,0,0,0,0,0,0,1,1,1},
+    Z{0,0,0,0,1,0,0,0,0,0,0},
+    Z{1,-1,-1,-1,-1,1,1,2,1,2,2},
+    Z{1,-1,0,0,0,0,0,0,0,0,0},
+    Z{3,-2,-2,-2,0,1,1,0,1,0,0},
+    Z{6,-5,-3,-3,-3,2,2,2,1,1,1}};
+ set<Z> uniq;
+ array<int,4> p={0,1,2,3};
+ for(const auto& prototype:P){do{uniq.insert(permute(prototype,p));}while(next_permutation(p.begin(),p.end()));p={0,1,2,3};}
+ V.assign(uniq.begin(),uniq.end());
+ assert(V.size()==24);
+ for(auto const& v:V)for(int i=0;i<M;i++){
+  i128 dot=0;for(int j=0;j<N;j++)dot+=(i128)A[i][j]*v[j];assert(dot>=h[i]);}
+}
+// A 10x11 full-row-rank integer matrix has a one-dimensional exact nullspace.
+bool kernel(const array<int,10>&ii,Z &d){
+ i64 T[10][11];for(int r=0;r<10;r++)for(int c=0;c<11;c++)T[r][c]=A[ii[r]][c];
+ int pc[10];int rank=0; i64 prev=1;
+ for(int c=0;c<11&&rank<10;c++){
+  int s=rank;while(s<10&&T[s][c]==0)s++;
+  if(s==10)continue;
+  if(s!=rank)for(int t=c;t<11;t++)swap(T[rank][t],T[s][t]);
+  i64 pivot=T[rank][c];
+  for(int r=rank+1;r<10;r++){
+   for(int t=c+1;t<11;t++){
+    i128 num=(i128)T[r][t]*pivot-(i128)T[r][c]*T[rank][t];
+    assert(num%prev==0);num/=prev;
+    assert(num>=LLONG_MIN&&num<=LLONG_MAX);T[r][t]=(i64)num;
+   }
+   T[r][c]=0;
+  }
+  pc[rank]=c;prev=pivot;rank++;
+ }
+ if(rank<10)return false;
+ int freecol=0;while(find(pc,pc+10,freecol)!=pc+10)freecol++;
+ d.fill(0);d[freecol]=T[9][pc[9]];
+ for(int r=9;r>=0;r--){
+  i128 num=0;for(int c=pc[r]+1;c<11;c++)num-=(i128)T[r][c]*d[c];
+  assert(num%T[r][pc[r]]==0);num/=T[r][pc[r]];
+  assert(num>=LLONG_MIN&&num<=LLONG_MAX);d[pc[r]]=(i64)num;
+ }
+ i64 g=0;for(auto v:d)g=gcd(g,abs(v));assert(g>0);
+ for(auto &v:d)v/=g;
+ return true;
+}
+int active[30],kact,choose[10];
+Z current;
+long long bases=0,rank10=0,valid=0,bounded=0,unbounded=0;
+set<Z> seen_dirs;
+void classify(){
+ ++bases;Z d;array<int,10>idx;for(int j=0;j<10;j++)idx[j]=active[choose[j]];
+ if(!kernel(idx,d))return;
+ ++rank10;
+ bool plus=true,minus=true;
+ for(int k=0;k<kact;k++){
+  i128 v=0;for(int j=0;j<N;j++)v+=(i128)A[active[k]][j]*d[j];
+  if(v<0)plus=false;
+  if(v>0)minus=false;
+ }
+ if(!plus&&!minus)return;
+ assert(plus!=minus);
+ if(minus)for(auto &v:d)v=-v;
+ if(!seen_dirs.insert(d).second)return;
+ ++valid;
+ // Follow this feasible tangent ray up to the nearest inactive facet.
+ i64 mn=1,md=0; // fraction mn/md; md=0 denotes infinity
+ for(int i=0;i<M;i++){
+  i128 dot=0,slack=-h[i];
+  for(int j=0;j<N;j++){
+   dot+=(i128)A[i][j]*d[j];slack+=(i128)A[i][j]*current[j];
+  }
+  assert(slack>=0);
+  if(dot<0){
+   assert(slack>0);
+   i64 nu=(i64)slack, de=(i64)-dot;
+   if(md==0||(i128)nu*md<(i128)mn*de){mn=nu;md=de;}
+  }
+ }
+ if(md==0){++unbounded;for(int i=0;i<M;i++){
+  i128 dot=0;for(int j=0;j<N;j++)dot+=(i128)A[i][j]*d[j];assert(dot>=0);
+ }return;}
+ ++bounded;
+ bool found=false;
+ for(const Z&v:V){
+  bool equal=true;
+  for(int j=0;j<N;j++)if((i128)v[j]*md!=(i128)current[j]*md+(i128)mn*d[j]){equal=false;break;}
+  if(equal){found=true;break;}
+ }
+ if(!found){cerr<<"UNKNOWN ADJACENT VERTEX at "<<" basis "<<bases<<"\n";exit(2);}
+}
+void comb(int start,int depth){
+ if(depth==10){classify();return;}
+ for(int k=start;k<=kact-(10-depth);k++){
+  choose[depth]=k;comb(k+1,depth+1);
+ }
+}
+int main(){
+ setup();cout<<"EXACT: 24 candidates, all satisfy 30 inequalities.\n";
+ for(int orbit=0;orbit<6;orbit++){
+  current=P[orbit];kact=0;
+  for(int i=0;i<M;i++){
+   i128 v=-h[i];for(int j=0;j<N;j++)v+=(i128)A[i][j]*current[j];
+   if(v==0)active[kact++]=i;
+  }
+  bases=rank10=valid=bounded=unbounded=0;seen_dirs.clear();
+  comb(0,0);
+  cout<<"orbit "<<orbit<<" act="<<kact<<" bases="<<bases<<" rank10="<<rank10
+      <<" rays="<<valid<<" finite="<<bounded<<" infinity="<<unbounded<<"\n"<<flush;
+ }
+ cout<<"THEOREM: no missing vertices; 24 is the complete mixed dual vertex atlas.\n";
+}
+
+\end{CodeListing}
+\medskip
+\noindent\textbf{附录 B（本轮新增）：}下列 Python 程序仅用标准库
+\texttt{fractions.Fraction}，实现五种缺陷互补对、稳定集残余分解、
+构造整体对抗分布及两个精确实例的逐项审计。
+\begin{CodeListing}
+"""Exact construction for a C5 with one chord (01,12,23,34,04,02).
+
+Theorem: if 0<=q_i<1/2, non-chord edges are uninformative,
+ t=min(min(q),b01+b12+b02,b01+b12+b23+b34+b04),
+and t>=q0+q1+q2-1, then R_det^*=t.
+Constructs the common adversarial distribution using Fraction only.
+"""
+from fractions import Fraction as F
+from itertools import combinations
+from collections import defaultdict
+
+V=range(5)
+E=list(combinations(V,2))
+H={(0,1),(1,2),(0,2),(2,3),(3,4),(0,4)}
+C3={(0,1),(1,2),(0,2)}
+C5={(0,1),(1,2),(2,3),(3,4),(0,4)}
+
+def mask_for_defects(defects):
+    target=frozenset(defects)
+    fits=[]
+    for mask in range(32):
+        agree=frozenset(e for e in H if ((mask>>e[0])&1)==((mask>>e[1])&1))
+        if agree==target: fits.append(mask)
+    assert len(fits)==2 and fits[0]^fits[1]==31,(target,fits)
+    return fits
+
+def construct(q,b):
+    """q sequence, b dictionary indexed by canonical edges, exact rationals."""
+    q=[F(v) for v in q]
+    b={e:F(v) for e,v in b.items()}
+    assert 0<=min(q) and max(q)<F(1,2)
+    assert all(0<=b[e]<=min(q[e[0]],q[e[1]]) for e in E)
+    assert all(b[e]==min(q[e[0]],q[e[1]]) for e in E if e not in H)
+    t=min(min(q),sum(b[e] for e in C3),sum(b[e] for e in C5))
+    assert t>=q[0]+q[1]+q[2]-1,'Additional triangle condition is required'
+
+    # Symmetric pairs: each pair carries 2*lambda total mass, and
+    # contributes lambda to E[X_i X_j] exactly when edge ij is a defect.
+    r=t
+    first=min(r,b[(0,1)]);r-=first
+    second=min(r,b[(1,2)]);r-=second
+    assert r<=b[(0,2)]
+    third=min(r,b[(2,3)]);r-=third
+    fourth=min(r,b[(3,4)]);r-=fourth
+    fifth=r
+    assert 0<=fifth<=b[(0,4)]
+    slots=[({(0,1)},first),({(1,2)},second),
+           ({(0,2),(2,3)},third),({(0,2),(3,4)},fourth),
+           ({(0,2),(0,4)},fifth)]
+    assert sum(mass for _,mass in slots)==t
+    pi=defaultdict(F)
+    for defects,mass in slots:
+        if mass:
+            masks=mask_for_defects(defects)
+            for m in masks:pi[m]+=mass
+
+    # Residual subdistribution: every supported set is H-independent.
+    # Separator {0,2}: the triangle {0,1,2} and square {0,2,3,4}
+    # meet in the edge 02.  Work with UNNORMALIZED residual marginals.
+    z=1-2*t
+    d=[v-t for v in q]
+    assert all(v>=0 for v in d)
+    assert d[0]+d[1]+d[2]<=z
+    assert all(d[i]+d[j]<=z for i,j in H)
+
+    # First allocate a measure on (X0,X2,X3,X4), no adjacent ones.
+    base=defaultdict(F)
+    def add(mask,mass):
+        assert mass>=0
+        if mass:base[mask]+=mass
+    a=min(d[3],d[0]); add((1<<0)|(1<<3),a);add(1<<0,d[0]-a)
+    c=min(d[4],d[2]); add((1<<2)|(1<<4),c);add(1<<2,d[2]-c)
+    remain=z-d[0]-d[2]
+    extra3=d[3]-a;extra4=d[4]-c
+    assert remain>=extra3+extra4>=0
+    add(1<<3,extra3);add(1<<4,extra4)
+    add(0,remain-extra3-extra4)
+    assert sum(base.values())==z
+
+    # Add x1 only where x0=x2=0, preserving all graph independence.
+    none_mass=sum(p for mask,p in base.items() if not(mask&((1<<0)|(1<<2))))
+    assert none_mass==remain and d[1]<=remain
+    for mask,p in base.items():
+        if mask&((1<<0)|(1<<2)):
+            pi[mask]+=p
+        elif remain:
+            mass1=p*d[1]/remain
+            pi[mask|(1<<1)]+=mass1
+            pi[mask]+=p-mass1
+        else:
+            assert d[1]==0
+            pi[mask]+=p
+
+    assert sum(pi.values())==1
+    q_actual=[sum(v*((mask>>i)&1) for mask,v in pi.items()) for i in V]
+    assert q_actual==q,(q_actual,q)
+    pair_actual={e:sum(v*((mask>>e[0])&1)*((mask>>e[1])&1)
+                       for mask,v in pi.items()) for e in E}
+    assert all(pair_actual[e]<=b[e] for e in E),(pair_actual,b)
+    assert sum(pi.values())==1
+    # The t symmetric pair mass simultaneously yields failure >=t
+    # for EVERY deterministic self-dual rule.
+    return t,dict(sorted(pi.items())),pair_actual
+
+def examples():
+    # A genuinely heterogeneous R\R0 example with t < min(q_i)
+    q=[F(28,100),F(25,100),F(30,100),F(28,100),F(25,100)]
+    caps={(0,1):F(2,100),(1,2):F(3,100),(0,2):F(8,100),
+          (2,3):F(5,100),(3,4):F(4,100),(0,4):F(2,100)}
+    b={e:caps[e] if e in H else min(q[e[0]],q[e[1]]) for e in E}
+    t,pi,actual=construct(q,b)
+    assert t==F(13,100) and sum(q)>1
+    assert sum(q)-3*min(q)<=1
+    assert len(pi)<=32
+    print('EXAMPLE 1: q=',[str(v) for v in q],'t=',t,
+          'number of nonzero atoms=',len(pi))
+    print('  distribution:',{m:str(v) for m,v in pi.items() if v})
+
+    # Triangle-overload case, where q0+q1+q2>1 but theorem still works.
+    q=[F(42,100),F(40,100),F(40,100),F(40,100),F(41,100)]
+    caps={(0,1):F(8,100),(1,2):F(8,100),(0,2):F(10,100),
+          (2,3):F(4,100),(3,4):F(4,100),(0,4):F(5,100)}
+    b={e:caps[e] if e in H else min(q[e[0]],q[e[1]]) for e in E}
+    t,pi,actual=construct(q,b)
+    assert t==F(26,100) and t>=q[0]+q[1]+q[2]-1
+    assert sum(q)-3*min(q)<=1
+    print('EXAMPLE 2: q=',[str(v) for v in q],'t=',t,
+          'triangle overload=',sum(q[i] for i in (0,1,2))-1)
+    # Feasible data outside the sufficient condition: the theorem does NOT
+    # claim the formula beyond that condition.  This exact witness prevents
+    # conflating a sufficient region with full feasibility.
+    pi_bad={5:F(3,20),9:F(3,20),10:F(3,20),18:F(3,20),20:F(3,20),
+            11:F(1,20),13:F(1,20),21:F(1,20),22:F(1,20),26:F(1,20)}
+    q_bad=[F(9,20)]*5
+    b_bad={e:(F(1,20) if e in C5 else F(2,5) if e==(0,2)
+              else F(9,20)) for e in E}
+    assert sum(pi_bad.values())==1
+    assert all(sum(p*((m>>i)&1) for m,p in pi_bad.items())==q_bad[i]
+               for i in V)
+    assert all(sum(p*((m>>i)&1)*((m>>j)&1) for m,p in pi_bad.items())<=b_bad[i,j]
+               for i,j in E)
+    t_bad=min(min(q_bad),sum(b_bad[e] for e in C3),sum(b_bad[e] for e in C5))
+    assert t_bad==F(1,4)<sum(q_bad[i] for i in (0,1,2))-1
+    print('BOUNDARY CHECK: feasible but outside sufficient condition, t=',t_bad)
+    print('All construction checks PASSED.')
+
+if __name__=='__main__':examples()
+\end{CodeListing}
+\end{document}

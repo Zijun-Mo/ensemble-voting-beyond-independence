@@ -1,0 +1,86 @@
+{
+ "A_finite_sample": {
+  "200": {
+   "n": 38.0,
+   "frac_event": 1.0,
+   "frac_valid": 1.0,
+   "frac_gap_le_bound": 1.0,
+   "mean_gap": 0.24282324897964228,
+   "mean_maj_gap": 0.282237640004427,
+   "mean_bound": 1.0251383064963566,
+   "eps_p": 0.12238734153404082,
+   "eps_m": 0.07866989646270804,
+   "mean_maxmin_regret": 0.02894244546288563,
+   "max_maxmin_regret": 0.09733521914330057
+  },
+  "800": {
+   "n": 38.0,
+   "frac_event": 1.0,
+   "frac_valid": 1.0,
+   "frac_gap_le_bound": 1.0,
+   "mean_gap": 0.14465170479821143,
+   "mean_maj_gap": 0.1768446475671353,
+   "mean_bound": 0.5125691532481783,
+   "eps_p": 0.06119367076702041,
+   "eps_m": 0.03933494823135402,
+   "mean_maxmin_regret": 0.02290292015100549,
+   "max_maxmin_regret": 0.09859740809298367
+  },
+  "3200": {
+   "n": 38.0,
+   "frac_event": 1.0,
+   "frac_valid": 1.0,
+   "frac_gap_le_bound": 1.0,
+   "mean_gap": 0.08492063489037549,
+   "mean_maj_gap": 0.11192666087688827,
+   "mean_bound": 0.25628457662408916,
+   "eps_p": 0.030596835383510206,
+   "eps_m": 0.01966747411567701,
+   "mean_maxmin_regret": 0.021469180622615665,
+   "max_maxmin_regret": 0.0937741471240141
+  }
+ },
+ "A_dual_norms_by_type": {
+  "(1, 0, 0, 0, 0)": {
+   "lam_l1_max": 1.0,
+   "lam_l1_mean": 1.0,
+   "mu_inf_max": 0.0
+  },
+  "(3, 1, 1, 1, 1)": {
+   "lam_l1_max": 5.0,
+   "lam_l1_mean": 2.5385964912280703,
+   "mu_inf_max": 4.0
+  },
+  "(2, 1, 1, 1, 0)": {
+   "lam_l1_max": 5.0,
+   "lam_l1_mean": 2.8228070175438598,
+   "mu_inf_max": 4.0
+  },
+  "(3, 2, 2, 1, 1)": {
+   "lam_l1_max": 5.0,
+   "lam_l1_mean": 3.108479532163743,
+   "mu_inf_max": 4.0
+  },
+  "(1, 1, 1, 0, 0)": {
+   "lam_l1_max": 3.0,
+   "lam_l1_mean": 2.8149122807017544,
+   "mu_inf_max": 2.0
+  },
+  "(2, 2, 1, 1, 1)": {
+   "lam_l1_max": 5.0,
+   "lam_l1_mean": 3.6736842105263157,
+   "mu_inf_max": 4.0
+  },
+  "(1, 1, 1, 1, 1)": {
+   "lam_l1_max": 5.0,
+   "lam_l1_mean": 4.078947368421052,
+   "mu_inf_max": 4.0
+  }
+ },
+ "B_symmetric_K5": {
+  "n": 858,
+  "maj5_closed_vs_lp_maxerr": 1.1102230246251565e-15,
+  "maj3_closed_vs_lp_maxerr": 2.220446049250313e-16,
+  "maxmin_value_closed_vs_lp_maxerr": 8.881784197001252e-16
+ }
+}

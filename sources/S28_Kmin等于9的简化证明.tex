@@ -1,0 +1,73 @@
+\documentclass[11pt]{article}
+\usepackage{fontspec}
+\setmainfont{Noto Serif CJK SC}
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip = 0pt plus 1pt
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\newtheorem{theorem}{定理}
+\newtheorem{lemma}[theorem]{引理}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{说明}
+\renewcommand{\proofname}{证明}
+\newcommand{\Bg}{B_{\mathrm{graph}}}
+\newcommand{\Q}{\mathcal Q^{\uparrow}}
+\title{奇圈界失效的最小规模 $K_{\min}=9$：一个简化证明}
+\author{选题文档 [S28]（审查方整理，2026-10-14）}
+\date{}
+\begin{document}
+\sloppy
+\maketitle
+
+\noindent\textbf{记号。}$K_K$ 为 $K$ 个顶点的完全图，边权 $b\in\mathbb R_{\ge0}^{E(K_K)}$。$c^*_K(b)=\min_{C}\sum_{e\in C}b_e$，$C$ 取遍奇圈。$g(y)=\min_{S}\max\{y(E(S)),y(E(\bar S))\}$，$\mathcal F_K=\{y\ge0:g(y)\ge1\}$，$\Bg^{(K)}(b)=\inf_{y\in\mathcal F_K}b^\top y$。奇圈的指示向量属于 $\mathcal F_K$，故恒有 $\Bg\le c^*$。$\Q(K_K)=\{u\ge0:u(C)\ge1\ \forall C\}$。
+
+\begin{theorem}
+对一切 $b\ge0$ 都有 $\Bg^{(K)}(b)=c^*_K(b)$，当且仅当 $K\le 8$。
+\end{theorem}
+
+证明分四步：引理~\ref{lem:ext} 把问题化为有限个顶点；引理~\ref{lem:emb} 用零延拓在不同 $K$ 之间传递；$K\ge9$ 用一个显式例子；$K=8$ 用一次可复核的计算。原报告 [S24]、[S27] 中的匹配归约、$c\le4$ 整性、10 割定理、$m=3$ 唯一性、$\ge\tfrac13$ 包络等引理都不再需要。
+
+\begin{lemma}[{极点归约；即 [S24] 引理 2.1}]\label{lem:ext}
+$\Bg^{(K)}=c^*_K$ 对一切 $b\ge0$ 成立，当且仅当 $\Q(K_K)$ 的每个顶点 $u$ 满足 $\Bg^{(K)}(u)\ge1$。
+\end{lemma}
+\begin{proof}
+若 $c^*(b)=0$，两边都为 $0$。否则按齐次性设 $c^*(b)=1$，则 $b\in\Q$。$u\mapsto\Bg(u)=\inf_{y\in\mathcal F}u^\top y$ 是非负线性函数的下确界，所以凹、单调。由 Minkowski--Weyl 定理，$b=\sum_j\lambda_ju_j+r$，其中 $u_j$ 为顶点，$\lambda_j\ge0$，$\sum\lambda_j=1$，$r\ge0$。于是 $\Bg(b)\ge\Bg(\sum\lambda_ju_j)\ge\sum\lambda_j\Bg(u_j)\ge1=c^*(b)$。反之，每个顶点都有一个紧奇圈，所以 $c^*(u)=1$，等式要求 $\Bg(u)=1$。
+\end{proof}
+
+\begin{lemma}[零延拓]\label{lem:emb}
+设 $K<K'$，$b\in\mathbb R_{\ge0}^{E(K_K)}$。在 $K_{K'}$ 上令 $b'$ 在 $K_K$ 的边上等于 $b$，在其余边上等于 $M\ge c^*_K(b)$。则 $c^*_{K'}(b')=c^*_K(b)$，且 $\Bg^{(K')}(b')\le\Bg^{(K)}(b)$。
+\end{lemma}
+\begin{proof}
+经过新顶点的奇圈至少用两条新边，代价 $\ge2M$，所以 $c^*$ 不变。对 $y\in\mathcal F_K$，把它零延拓为 $\hat y$：$K_{K'}$ 的任一划分限制到 $V(K_K)$ 上，两侧内部的权重不变，反之 $V(K_K)$ 的任一划分都可以延拓。所以 $g(\hat y)=g(y)$，代价不变，取下确界即得。
+\end{proof}
+
+\paragraph{$K\ge9$：失效。}[S20] 定理 2.1 给出 9 顶点的边权 $b^*=b^*(9,4)\in\{0,1,2\}^{E(K_9)}$（即归约图 $H(K_4)$，[S20] 记作 $J_4^\circ$），满足 $\Bg^{(9)}(b^*)=\tfrac{14}5<3=c^*_9(b^*)$（10 行对偶证明）。对 $K>9$，由引理~\ref{lem:emb} 得 $\Bg^{(K)}(b')\le\tfrac{14}5<3=c^*_K(b')$。
+
+\paragraph{$K\le7$ 归结为 $K=8$。}若 $K=8$ 时等式成立，则对 $K<8$ 的任意 $b$，由引理~\ref{lem:emb}，$\Bg^{(K)}(b)\ge\Bg^{(8)}(b')=c^*_8(b')=c^*_K(b)$；又总有 $\Bg\le c^*$。
+
+\paragraph{$K=8$：一次计算。}由引理~\ref{lem:ext}，只需列出 $\Q(K_8)$ 的全部顶点并逐一检验 $\Bg\ge1$。$\Q(K_8)$ 由 3,608 个奇圈不等式（56 个三角形、672 个五环、2,880 个七环）与 28 个非负约束给出。
+\begin{enumerate}
+\item \textbf{顶点完整列表。}在 $S_8$ 置换下共 23 个顶点轨道：4 个整数轨道（$K_{a,8-a}$ 割的补集，$a=1,2,3,4$），以及 19 个分数轨道（分母 3、4、5、6、7；其中 12 个的零边构成匹配）。
+\item \textbf{完整性的证书。}尖多面体的"顶点—有界边"图是连通的。对 23 个轨道代表元 $v$ 中的每一个，精确求出切锥 $\{d:A_{T(v)}d\ge0\}$ 的全部极射线：21 个用 cddlib（GMP 有理数），$v=\tfrac13\mathbf 1$（56 行，52,367 条射线）与 $K_{4,4}$ 整数顶点（928 行，12,503 条射线）用 Normaliz（精确整数）。再对每条射线做精确比值检验得到相邻顶点，它的 $S_8$ 规范形都在 23 个轨道之中。所以列表在邻接下封闭，因而完整。
+\item \textbf{$\Bg$ 的检验。}整数顶点 $u=\mathbf 1-\chi_{\delta(S)}$：对 $y\in\mathcal F$ 取划分 $S$，得 $u^\top y=y(E(S))+y(E(\bar S))\ge g(y)\ge1$。19 个分数轨道代表元上，$\Bg\ge1$ 由精确有理证书给出（$\Bg\le c^*=1$ 是平凡的）。证书是一棵二叉决策树：每个内部结点取一个划分 $S$，两个分支分别假设 $y(E(S))\ge1$ 与 $y(E(\bar S))\ge1$；每个叶子给出非负有理乘子 $\lambda_j$，满足 $\sum_j\lambda_j\ge1$，并且对每条边 $e$ 都有 $\sum_j\lambda_j[e\in T_j]\le u_e$，其中 $T_j$ 是根到叶路径上的第 $j$ 个边集。任一满足 $g(y)\ge1$ 的 $y\ge0$ 都沿某条路径走到一个叶子，于是 $u^\top y\ge\sum_j\lambda_jy(T_j)\ge1$。19 棵树共 1,256 个叶子（$\tfrac13\mathbf 1$ 最大，364 个叶子、深度 35），乘子的最大分母为 285，用纯有理数校验只需 0.4 秒。
+\end{enumerate}
+由引理~\ref{lem:ext}，$K=8$ 时等式成立。定理证毕。\qed
+
+\begin{remark}[可信度]
+整个证明不含任何浮点判断：顶点列表与邻接封闭性来自精确的 cddlib、Normaliz 与有理比值检验；$\Bg$ 的下界来自有理决策树证书。浮点求解器只用于寻找证书，不参与校验。
+\end{remark}
+
+\begin{remark}[与原报告的关系]
+[S27] 声称同一结论，但所附代码只展开了 19 个分数轨道中的 18 个（不含 $\tfrac13\mathbf 1$），4 个整数轨道也没有展开；文中声称的二级邻接分解没有附代码。本证明中这两部分由审查独立补算。[S27] 的定理 3.2（全部正权 $\ge\tfrac13$ 时用 $2\times2$ Birkhoff 分解归约）论证正确，可作为结构解释；其定理 3.1（$m=3$ 的唯一性）的论证不严格，但结论与完整枚举一致。
+\end{remark}
+
+\paragraph{复现。}代码在 \texttt{code/review\_checks/d1\_kmin\_review/}，每个脚本的运行时间都不超过 5 分钟：
+\begin{itemize}
+\item \texttt{adj\_orbits.py}：21 个轨道的 cdd 展开；
+\item \texttt{f01\_normaliz.py}、\texttt{tangent\_normaliz.py}、\texttt{expand\_from\_rays.py}：两个大切锥；
+\item \texttt{make\_B\_certs.py}（子代理编写的证书生成器）、\texttt{verify\_B\_certs.py}（审查方独立编写的精确校验器）、\texttt{exact\_B\_certs/}（19 份证书）；
+\item \texttt{compare\_orbits.py}：与 [S27] 的轨道表比对。
+\end{itemize}
+
+\end{document}

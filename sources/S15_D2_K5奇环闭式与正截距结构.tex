@@ -1,0 +1,517 @@
+\documentclass[11pt,a4paper]{ctexart}
+\usepackage[margin=23mm,top=23mm,bottom=24mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,booktabs,xcolor,hyperref,listings}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\definecolor{codebg}{RGB}{245,247,248}
+\lstdefinestyle{python}{language=Python,basicstyle=\ttfamily\scriptsize,
+  backgroundcolor=\color{codebg},frame=single,breaklines=true,
+  columns=fullflexible,keepspaces=true,showstringspaces=false,tabsize=4}
+\lstset{style=python}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{corollary}[theorem]{推论}
+\newtheorem{proposition}[theorem]{命题}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{备注}
+\newcommand{\V}{[5]}
+\newcommand{\CE}{\mathcal C_{\rm odd}(K_5)}
+\newcommand{\Pset}{\mathcal P(q,b)}
+\newcommand{\Rstar}{R^*_{\rm det}}
+\newcommand{\one}{\mathbf 1}
+\newcommand{\N}{\mathbb R_{\ge0}}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{.18em}
+\begin{document}
+\begin{center}
+{\Large\bfseries D2：异质 $K=5$ 稳健投票的奇环闭式与正截距结构}\\[.4em]
+{\large\bfseries 零截距的 27 项精确公式、系数凸包定理及后续提升路线}\\[.5em]
+\today\quad\textbar\quad 数学研究备忘录（仅 \LaTeX{} 源文件）
+\end{center}
+\noindent\textbf{证明状态。}
+本文的\emph{已证明主结果}是：$K_5$ 图证书与最小奇环代价严格相等；
+在 $\sum_iq_i\le1$ 得到 27 项完整闭式；以及继续研究得到的\emph{更强零截距系数凸包定理}。
+对 $\sum_iq_i>1$，我们进一步给出正截距的精确一维消元和有限活跃面分类；
+\emph{尚未}证明 $U_{188}$ 或任何规模为几百项的候选式已经完整。
+
+\section{问题及二次对偶}
+考虑 $K=5$ 个二分类器的错误指示量 $X_i\in\{0,1\}$。
+设 $\mathbb E X_i=q_i\in(0,1/2)$，
+$\mathbb E(X_iX_j)\le b_{ij}$，且由这些约束定义的联合分布集合
+\[
+\Pset=\bigl\{\pi\ge0:\ \sum_x\pi_x=1,\ \mathbb E_\pi X_i=q_i,\ 
+\mathbb E_\pi X_iX_j\le b_{ij}\bigr\}\ne\varnothing.
+\]
+确定性 self-dual 失败规则 $F$ 满足 $F(x)+F(\one-x)=1$。
+固定 $F$ 的最坏错误率与其二次 LP 对偶为
+\begin{align}
+R(F)&=\max_{\pi\in\Pset}\mathbb E_\pi F(X)
+=\min_{a,\beta,\gamma}\Bigl\{a+\sum_i q_i\beta_i+
+\sum_{i<j}b_{ij}\gamma_{ij}: Q(x)\ge F(x),\ \gamma_{ij}\ge0\Bigr\},\label{eq:fixeddual}\\
+Q(x)&=a+\sum_i\beta_ix_i+\sum_{i<j}\gamma_{ij}x_ix_j.\notag
+\end{align}
+消去 self-dual $F$ 后的证书条件为
+\begin{equation}\label{eq:orientation}
+Q(x)\ge0,\qquad
+\max\{Q(x),Q(\one-x)\}\ge1\quad(\forall x\in\{0,1\}^5),
+\qquad\gamma_{ij}\ge0.
+\end{equation}
+因此 $\Rstar$ 等于满足式~\eqref{eq:orientation} 的全部二次证书的最小对偶目标。
+
+\section{$K_5$ 的图证书等于最小奇环代价}
+令 $E=E(K_5)$，奇环集合 $\CE$ 由 $10$ 个三角形和 $12$ 个五环组成，定义
+\[
+c^*(b)=\min_{C\in\CE}\sum_{e\in C}b_e.
+\]
+对于非负边权 $y$，定义
+\[
+g(y)=\min_{S\subseteq\V}\max\bigl\{y(E(S)),y(E(\V\setminus S))\bigr\},\qquad
+B_{\rm graph}(b)=\inf_{y\ge0:g(y)>0}\frac{b\cdot y}{g(y)}.
+\]
+
+\begin{lemma}[五顶点的加权公平划分]\label{lem:split}
+任意 $y\in\N^{E(K_5)}$，记 $Y=\sum_e y_e$。存在一个 $2+3$ 顶点划分
+$S\mid S^c$，满足
+\[
+y(E(S))\le Y/3,\qquad y(E(S^c))\le Y/3.
+\]
+从而 $g(y)\le Y/3$。
+\end{lemma}
+\begin{proof}
+称权重大于 $Y/3$ 的边为重边，至多存在两条。
+若没有重边，$10$ 个三角形的内部边权总和恰为 $3Y$，故存在权重
+$\le3Y/10<Y/3$ 的三角形；其补集是一条非重边。
+若只有一条重边 $uv$，取恰好包含 $u,v$ 之一的 $6$ 个三角形。
+每条非重边在这些三角形中恰出现 $2$ 次，因此三角形权重和
+$2(Y-y_{uv})<4Y/3$；至少一个三角形权重小于 $2Y/9<Y/3$，
+其补集那条边也不是 $uv$。
+若有两条重边，其余全部边权之和严格小于 $Y/3$。
+将这两条重边都跨越的一个二分着色调整为 $2+3$ 大小，即可使两侧
+内部边全为非重边。三种情形均得结论。
+\end{proof}
+
+\begin{lemma}[$K_5$ 奇环覆盖多面体的顶点]\label{lem:cover}
+记
+\[
+P_{\rm odd}=\bigl\{u\in\N^{10}:\sum_{e\in C}u_e\ge1\quad\forall C\in\CE\bigr\}.
+\]
+其顶点恰好是以下 $16$ 个点：
+\begin{enumerate}
+\item $15$ 个二分划分的内部边指示向量 $h^S$，即
+$h^S_{ij}=\mathbf1\{i,j\in S\text{ 或 }i,j\in S^c\}$（$S\mid S^c$ 非平凡）；
+\item 唯一的分数顶点 $u^*=\tfrac13\one\in\mathbb R^{10}$。
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+文献\cite{cornuejols,padberg,lehmanlectures}中的已知定理包括：
+$K_5$ 奇环 clutter 是 minimally non-ideal，以及 Lehman 定理所断言的
+\emph{唯一分数极点}性质。由于 $10$ 个三角形关联矩阵非奇异（其行列式为
+$-48$），$\tfrac13\one$ 确实是一个极点，故它就是唯一分数极点。
+其他极点为整数，且必须是 $0/1$ 的极小奇环击中集。
+一个边集命中全部奇环，当且仅当剩余边构成二分图；极小击中集
+正好是完全图的一种非平凡二分划分的全部内部边。因此恰好有
+$2^{5-1}-1=15$ 个整数极点。
+\end{proof}
+
+\begin{theorem}[图证书的 22 项严格闭式]\label{thm:graph}
+对所有 $b\ge0$，
+\begin{equation}\label{eq:graph}
+\boxed{B_{\rm graph}(b)=c^*(b)=\min_{C\in\CE}\sum_{e\in C}b_e.}
+\end{equation}
+\end{theorem}
+\begin{proof}
+固定 $y\ge0$。对整数极点 $h^S$，
+$g(y)\le\max\{y(E(S)),y(E(S^c))\}\le h^S\cdot y$；
+对分数极点 $\tfrac13\one$，由引理~\ref{lem:split} 得
+$g(y)\le\frac13\sum_e y_e$。
+于是 $g(y)\le u\cdot y$ 对 $P_{\rm odd}$ 所有极点成立，进而
+对整个 $P_{\rm odd}$（其衰退锥为 $\N^{10}$）成立。
+当 $c^*>0$ 时，$b/c^*\in P_{\rm odd}$，故
+$g(y)\le(b\cdot y)/c^*$，即 $B_{\rm graph}\ge c^*$。
+反向取最小奇环 $C$ 的关联向量 $y=\one_C$；由于奇环的任意二着色
+至少产生一条同色边、又可安排恰好一条同色边，$g(\one_C)=1$，
+从而 $B_{\rm graph}\le\sum_{e\in C}b_e=c^*$。
+$c^*=0$ 时后一个构造直接给出两边同为零。
+\end{proof}
+
+\section{零截距与 $R_0$ 的完整公式}
+\begin{theorem}[零截距面与 $R_0$]\label{thm:r0}
+若 $Q$ 满足式~\eqref{eq:orientation} 且 $Q(0)=0$，则
+\[
+\inf_{Q:Q(0)=0} L_Q(q,b)=\min\{q_1,\ldots,q_5,c^*(b)\}.
+\]
+此外，若 $\sum_iq_i\le1$，对\emph{全部}确定性 self-dual 规则都有
+\begin{equation}\label{eq:r0}
+\boxed{\Rstar(q,b)=\min\left\{q_1,\ldots,q_5,
+\min_{C\in\CE}\sum_{e\in C}b_e\right\}.}
+\end{equation}
+右侧包含 $5+22=27$ 个仿射项。
+\end{theorem}
+\begin{proof}
+当截距为零时，$Q(e_i)\ge0$ 强制 $\beta_i\ge0$。令
+$s=\sum_i\beta_i$。若 $s\ge1$，则 $L_Q\ge q_{\min}$；
+若 $s<1$，互补约束给出 $g(\gamma)\ge1-s$，从而
+$L_Q\ge sq_{\min}+(1-s)B_{\rm graph}\ge\min(q_{\min},c^*)$。
+反向由独裁证书 $Q=x_i$ 和各奇环证书
+$Q=\sum_{e=ij\in C}x_ix_j$ 达到。
+
+现在对任意合法证书 $Q$，令 $a=Q(0)\ge0$，构造
+\[
+Q_0(x)=Q(x)+a\left(\sum_i x_i-1\right).
+\]
+可以直接按 $|x|=0,1,\ldots,5$ 检查 $Q_0$ 仍满足式~\eqref{eq:orientation}，
+并且 $Q_0(0)=0$。其目标满足
+$L_{Q_0}=L_Q+a(\sum_iq_i-1)\le L_Q$。
+因此在 $\sum q_i\le1$ 时所有正截距证书都可被零截距证书替代，
+结合第一部分即得式~\eqref{eq:r0}。
+\end{proof}
+
+\begin{proposition}[$R_0$ 的 27 个项逐项不可删除]\label{prop:irreducible}
+在 $q_i\in(0,1/2)$、$\sum_iq_i\le1$ 且 $\mathcal P(q,b)\ne\varnothing$
+的参数域内，式~\eqref{eq:r0} 的 $27$ 个仿射项中，
+每一项都可以成为\emph{严格唯一的最小值}。所以不能在保留
+这 $27$ 个原有表达式的前提下删除任何一项。
+\end{proposition}
+\begin{proof}
+对任意给定奇环 $C$，取所有 $q_i=1/10$，
+令 $b_e=0$（$e\in C$）且 $b_e=1/10$（$e\notin C$）。
+以概率 $1/10$ 使每个单独的模型出错，并以剩余概率 $1/2$
+使所有模型正确，就得到可行联合分布。$C$ 的边权和为 $0$，
+而其他奇环 $C'\ne C$ 必须包含至少一条 $C$ 之外的边，故其代价
+$\ge1/10$；所有独裁项也等于 $1/10$。
+
+对给定顶点 $i$，取 $q_i=1/100$，其他四个 $q_j=1/10$，
+令 $b_{jk}=\min(q_j,q_k)$。同样用互斥单模型错误分布即可实现
+联合分布（其余质量置于 $x=0$）。此时 $q_i=1/100$ 严格小于
+其他四个边际及全部奇环代价。因此所有 $27$ 项均分别必要。
+\end{proof}
+
+\section{进一步推进：27 原子构成零截距系数空间的精确凸包}
+本节的结论\emph{比}仅仅知道最小目标值为 27 项更强，
+它为处理正截距实系数证书提供了一个\emph{统一的系数分解}。
+
+对于 $s\in\N^5,\gamma\in\N^{10}$，记
+\[
+H_{s,\gamma}(S)=\sum_{i\in S}s_i+\sum_{\{i,j\}\subseteq S}\gamma_{ij},
+\quad
+\mathcal D_0=\bigl\{(s,\gamma)\ge0:
+\max\{H(S),H(S^c)\}\ge1\ \forall S\subseteq\V\bigr\}.
+\]
+用 $d_i\in\mathbb R^{15}$ 表示在第 $i$ 个\emph{顶点系数}上为 1 的向量，
+用 $c_C\in\mathbb R^{15}$ 表示在奇环 $C$ 的\emph{边系数}上为 1 的向量。
+定义 27 原子集合 $\mathcal A=\{d_i\}_{i=1}^5\cup\{c_C\}_{C\in\CE}$。
+
+\begin{theorem}[零截距系数凸包定理；本阶段的新结构结果]\label{thm:hull}
+\begin{equation}\label{eq:hull}
+\boxed{
+\operatorname{conv}(\mathcal D_0)
+=\operatorname{conv}(\mathcal A)+\N^{15}.
+}
+\end{equation}
+其右侧的最小顶点集恰为 $\mathcal A$ 中的 27 个元素。
+等价地，\emph{每个} $(s,\gamma)\in\mathcal D_0$ 都存在
+$\lambda_i,\mu_C\ge0$，使
+\begin{equation}\label{eq:majorization}
+\sum_i\lambda_i+\sum_{C\in\CE}\mu_C=1,
+\qquad s_i\ge\lambda_i,
+\qquad
+\gamma_e\ge\sum_{C\ni e}\mu_C\quad(\forall e\in E).
+\end{equation}
+该分解同时适用于\emph{全部实系数}的合法零截距证书。
+\end{theorem}
+\begin{proof}
+设 $K=\operatorname{conv}(\mathcal A)+\N^{15}$，它是闭凸向上集。
+假如存在 $v\in\mathcal D_0\setminus K$，强分离给出一个向量
+$h\in\N^{15}$，使
+$h\cdot v<\min_{p\in\mathcal A}h\cdot p$。
+（因为 $K$ 对加上非负向量封闭，分离向量必非负。）
+但定理~\ref{thm:r0} 的\emph{零截距证明}实际上对\emph{任意非负}
+系数目标 $h=(q,b)$ 成立，而不需要这些非负数对应一个可行联合分布；
+故 $h\cdot v\ge\min_{p\in\mathcal A}h\cdot p$，矛盾。
+因此 $\mathcal D_0\subseteq K$。
+另一方面，$\mathcal A\subseteq\mathcal D_0$，并且
+$\mathcal D_0$ 对逐坐标增加非负量封闭，故
+$K\subseteq\operatorname{conv}(\mathcal D_0)$，得到等式。
+任意两个不同奇环的边集互不包含，且顶点原子与奇环原子具有
+互不相交的坐标支撑；由此可知 27 原子中没有任何一个能被其他
+原子的凸组合逐系数支配，所以它们均为右侧的极点。
+式~\eqref{eq:majorization} 是 $v\in K$ 的坐标展开。
+\end{proof}
+
+\begin{remark}[凸包\emph{不是}原可行集]
+$\mathcal D_0$ 通常不凸。例如 $\frac12d_1+\frac12d_2$
+不满足某些 $2+3$ 互补状态约束。
+因此不能未经论证将式~\eqref{eq:hull} 直接应用于非线性正截距可行集；
+真正可用的结论是对\emph{已合法}证书的系数逐坐标分解~\eqref{eq:majorization}。
+\end{remark}
+
+\begin{corollary}[正截距证书的 27 原子提升分解]\label{cor:lift}
+对任何满足式~\eqref{eq:orientation} 且截距 $a>0$ 的证书，
+令 $s_i=a+\beta_i\ge0$。则存在如式~\eqref{eq:majorization} 的
+$\lambda_i,\mu_C$ 及 $r_i,t_e\ge0$，使
+\begin{equation}\label{eq:lift}
+\boxed{
+Q(x)=\sum_i\lambda_ix_i+
+\sum_{C\in\CE}\mu_C\sum_{e=ij\in C}x_ix_j
++\sum_i r_ix_i+\sum_{e=ij}t_ex_ix_j
+-a\left(\sum_i x_i-1\right).
+}
+\end{equation}
+因而所有正截距证书都可看作对 27 原子的\emph{有限混合加上非负余量，
+再作公共截距提升}。式~\eqref{eq:lift} 为必要的结构分解，
+不是声称任意这样的混合都自动生成合法正截距证书。
+\end{corollary}
+\begin{proof}
+$Q_0(x)=Q(x)+a(\sum_i x_i-1)$ 是合法零截距证书，其一阶系数
+$s_i=a+\beta_i$、二阶系数 $\gamma$ 均非负。
+应用定理~\ref{thm:hull} 并令 $r_i=s_i-\lambda_i$、
+$t_e=\gamma_e-\sum_{C\ni e}\mu_C$，整理即可。
+\end{proof}
+
+\begin{corollary}[能够改善基线的提升余量预算]\label{cor:budget}
+设 $\tau=\sum_iq_i-1>0$，且 $U_0=\min\{q_{\min},c^*(b)\}$。
+对任意式~\eqref{eq:lift} 中的分解，有
+\[
+L_Q(q,b)\ge U_0+\sum_iq_ir_i+\sum_eb_et_e-a\tau.
+\]
+因此如果 $Q$ 严格改善零截距基线，即 $L_Q<U_0$，则
+\begin{equation}\label{eq:budget}
+\boxed{\sum_iq_ir_i+\sum_eb_et_e<a\tau.}
+\end{equation}
+若还要求 $(q,b)\in R:\sum_iq_i-3q_{\min}\le1$，
+则必要条件进一步给出余量代价 $<3a q_{\min}$。
+这是对\emph{全部}正截距实系数证书成立的结构筛选条件，
+但它不是完整性判据，也不足以单独确定最优提升证书。
+\end{corollary}
+\begin{proof}
+式~\eqref{eq:lift} 的 27 原子具有目标值
+$q_i$ 或 $\sum_{e\in C}b_e$，每项均不小于 $U_0$；
+凸组合权重和为 $1$，非负余量的目标贡献为
+$\sum_iq_ir_i+\sum_eb_et_e$，其余截距贡献为 $-a\tau$。
+将三部分相加即可。
+\end{proof}
+
+\section{正截距部分：精确消元与活跃面归约}
+下面是进一步推进简洁闭式的\emph{可证明归约}，但仍不是无优化闭式。
+写 $Q_a(\mathbf1_S)=H(S)-a(|S|-1)$，其中
+$H(S)=H_{s,\gamma}(S)$、$s_i=a+\beta_i\ge0$。
+由于 $a>0$ 的合法性蕴含 $Q_0$ 合法，所以必有
+$(s,\gamma)\in\mathcal D_0$；反过来，对给定
+$(s,\gamma)\in\mathcal D_0$，定义
+\begin{align*}
+A_{\rm pos}&=\min_{|S|\ge2}\frac{H(S)}{|S|-1},\\
+A_{1,4}&=\min_{i:\,s_i<1}\frac{H(\V\setminus\{i\})-1}{3},
+\quad(\text{空索引集的最小值为 }+\infty),\\
+A_{2,3}&=\min_{|S|=2}\max\left\{H(S)-1,
+\frac{H(\V\setminus S)-1}{2}\right\},\\
+A&=\min\{A_{\rm pos},A_{1,4},A_{2,3}\},
+\qquad T=\frac{H(\V)-1}{4}.
+\end{align*}
+
+\begin{proposition}[常数项的精确许可集合与活跃面]\label{prop:cap}
+固定 $(s,\gamma)\in\mathcal D_0$，证书 $Q_a$ 合法的截距恰好是
+\begin{equation}\label{eq:adomain}
+\boxed{
+0\le a\le\min\{A,T\}
+\quad\text{或}\quad1\le a\le A\ \text{（仅在 $A\ge1$ 时）}.
+}
+\end{equation}
+当 $\tau=\sum_iq_i-1>0$ 时，对固定 $(s,\gamma)$ 的最优截距为
+\begin{equation}\label{eq:acap}
+\boxed{
+a^*(s,\gamma)=
+\begin{cases}
+A,&A\ge1,\\
+\min\{A,T\},&A<1.
+\end{cases}}
+\end{equation}
+特别地，任何这样的最优正截距都落在至多 $52$ 种\emph{显式仿射
+活跃边界形式}之一：$26$ 个非负性上界、$5$ 个 $1+4$ 上界、
+$10\times2$ 个 $2+3$ 上界分支，和一个 $0+5$ 上界。
+\end{proposition}
+\begin{proof}
+$Q_a(\mathbf1_S)\ge0$ 对 $|S|\ge2$ 当且仅当
+$a\le H(S)/(|S|-1)$，合并得到 $A_{\rm pos}$；
+$|S|=0,1$ 的非负性只需 $a\ge0$ 和 $s_i\ge0$。
+对于互补对 $1+4$，当 $s_i\ge1$ 时已经覆盖，否则四元侧必须
+至少为 $1$，得到 $A_{1,4}$。对于 $2+3$，至少一侧达到 $1$
+等价于对应的 $A_{2,3}$ 约束。
+最后空集与全集的互补对要求
+$a\ge1$ 或 $H(\V)-4a\ge1$，即 $a\le T$。
+以上全部条件互为充要，因此得到式~\eqref{eq:adomain}。
+目标函数改写为
+\[
+L_{Q_a}(q,b)=\sum_iq_is_i+\sum_{e}b_e\gamma_e-a\tau.
+\]
+当 $\tau>0$，它随 $a$ 严格下降，故最大合法截距给出式~\eqref{eq:acap}。
+由于 $A$ 由明确列出的上界取最小，而 $A_{2,3}$ 各项由两个
+仿射表达式取最大，活跃边界类型数至多为
+$\binom52+\binom53+\binom54+\binom55+5+2\binom52+1=52$。
+\end{proof}
+
+\begin{corollary}[正截距研究的精确剩余任务]
+若 $\tau>0$，定义 $\mathcal D_0$ 如上，则整个确定性 minimax 问题等价于
+\begin{equation}\label{eq:fullreduced}
+\boxed{
+\Rstar(q,b)=\inf_{(s,\gamma)\in\mathcal D_0}
+\Bigl[\sum_iq_is_i+\sum_eb_e\gamma_e-\tau a^*(s,\gamma)\Bigr].
+}
+\end{equation}
+在这 15 个非负系数上，已知其\emph{凸包}由 27 个原子给出，
+而可选截距的非线性仅来自式~\eqref{eq:acap} 的有限活跃面切换。
+但是，$\mathcal D_0$ 本身不凸，式~\eqref{eq:fullreduced} 仍含连续优化；
+不能据此宣称已获得普遍简洁闭式。
+\end{corollary}
+
+\section{成果边界与下一项证明目标}
+\begin{center}
+\begin{tabular}{p{.70\linewidth}p{.22\linewidth}}
+\toprule
+数学命题 & 当前状态\\ \midrule
+$B_{\rm graph}=c^*$，适用于所有 $b\ge0$ & 已证明\\
+$\sum_iq_i\le1$ 时的完整 27 项闭式 & 已证明\\
+$\operatorname{conv}(\mathcal D_0)=\operatorname{conv}(27\text{ 原子})+\N^{15}$ & 已证明\\
+任意正截距证书的 27 原子提升分解 & 已证明\\
+正截距最大许可值和 52 类活跃边界 & 已证明\\
+52 类活跃边界能否进一步压缩为少数极点模板 & 尚未证明\\
+$U_{188}$ 或其他简短候选与全部 minimax 值相等 & 尚未证明\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent\textbf{后续任务。}优先利用式~\eqref{eq:lift} 与式~\eqref{eq:acap}
+研究\emph{哪些 27 原子混合及非负余量能支持正截距活跃面}，
+从而得到可证明穷尽的高精度区域证书族；不再依赖随机抽样推断完整性。
+
+\appendix
+\section{内嵌可复现核验脚本}
+程序全部采用整数或有理数验证奇环计数、三角形矩阵行列式、
+$15$ 个极小整数覆盖和正截距公式在有理数样本上的计算。
+最后的 $27$ 原子凸分解示例使用浮点 LP，只作为数值审计；
+\emph{定理的全称证明是正文的数学论证，而不是有限样本测试}。
+\begin{lstlisting}[caption={D2\_K5\_oddcycle\_positive\_active\_audit.py}]
+"""Exact audit for the K=5 odd-cycle collapse and positive-intercept activity theorem.
+Requires Python 3.10+, sympy. No floating-point arithmetic is used.
+The Lehman/MNI implication is a cited theorem, NOT proved by this script.
+"""
+from itertools import combinations, permutations, product
+from fractions import Fraction as F
+from random import Random
+import sympy as sp
+
+V = range(5)
+E = tuple(combinations(V, 2))
+edge = {e: k for k, e in enumerate(E)}
+tri = [tuple(edge[e] for e in combinations(S, 2)) for S in combinations(V, 3)]
+pent = []
+for rest in permutations(range(1, 5)):
+    if rest[0] > rest[-1]: continue
+    cyc = (0,) + rest
+    pent.append(tuple(sorted(edge[tuple(sorted((cyc[i], cyc[(i+1)%5])))]
+                             for i in range(5))))
+cycles = tri + pent
+assert len(cycles) == len(set(cycles)) == 22
+M = sp.Matrix([[int(k in C) for k in range(10)] for C in tri])
+assert M.det() == -48 and M.inv()*sp.ones(10, 1) == sp.ones(10, 1)/3
+
+covers = set()
+for mask in range(1 << 10):
+    if all(any(mask & (1 << e) for e in C) for C in cycles):
+        covers.add(mask)
+minimal = {m for m in covers if all((m ^ (1 << e)) not in covers
+                                     for e in range(10) if m & (1 << e))}
+parts = set()
+for mask in range(1, 1 << 5):
+    if not(mask & 1) or mask == 31: continue
+    parts.add(sum((1 << k) for k, (i, j) in enumerate(E)
+                  if bool(mask & (1 << i)) == bool(mask & (1 << j))))
+assert minimal == parts and len(parts) == 15
+
+# For any nonnegative s_i, gamma_ij, express Q_a(S)=H(S)-a(|S|-1).
+# All a>=0 satisfying quadratic cover constraints form:
+#    [0, min(A,T)] union [1,A] (the second interval if A>=1).
+# A comprises 26 positivity caps, 5 singleton/complement caps if needed,
+# and 10 pair/triple caps; T=(H(V)-1)/4.
+subs = list(range(32))
+size = [m.bit_count() for m in subs]
+
+def max_a(s, g):
+    H = [sum(s[i] for i in V if m & (1 << i)) +
+         sum(g[k] for k,(i,j) in enumerate(E)
+             if m & (1 << i) and m & (1 << j)) for m in subs]
+    caps = [H[m] / (size[m] - 1) for m in subs if size[m] >= 2]
+    caps.extend((H[31 ^ (1 << i)]-1)/3
+                for i in V if s[i] < 1)
+    caps.extend(max(H[m]-1, (H[31 ^ m]-1)/2)
+                for m in subs if size[m] == 2)
+    A = min(caps)
+    T = (H[31]-1)/4
+    a = A if A >= 1 else min(A, T)
+    return a, A, T, H
+
+def legal(a, H):
+    return (a >= 0 and
+            all(H[m]-a*(size[m]-1) >= 0 for m in subs) and
+            all(max(H[m]-a*(size[m]-1),
+                    H[31^m]-a*(size[31^m]-1)) >= 1
+                for m in range(16)))
+
+rng = Random(20261013)
+checks = 0
+for _ in range(120):
+    s = [F(rng.randrange(0, 15), 8) for i in V]
+    g = [F(rng.randrange(0, 15), 8) for e in E]
+    a, A, T, H = max_a(s, g)
+    if a < 0: continue     # no feasible intercept for this (s,g)
+    assert legal(a, H)
+    assert legal(F(0), H)
+    # There can be no admissible larger intercept: scan all 52 cap values.
+    for step in [F(1,100), F(1,4), F(1)]:
+        assert not legal(a+step, H)
+    checks += 1
+assert checks > 30
+print('PASS: 22 odd cycles; 15 minimal integral covers; 1/3 fractional point')
+print('PASS: exact positive-intercept endpoint formula on', checks,
+      'rational test instances')
+print('THEOREM: Lehman MNI implication and cap formula require analytic proofs.')
+
+# Demonstrate the NEW coefficientwise 27-atom convex-hull decomposition.
+# This LP audit is numerical; the theorem in the report uses separation.
+import numpy as np
+from scipy.optimize import linprog
+B = np.zeros((15, 27))
+B[:5, :5] = np.eye(5)
+for j, C in enumerate(cycles):
+    for k in C:
+        B[5 + k, 5 + j] = 1.0
+assert B.shape == (15, 27)
+for _ in range(150):
+    vec = np.array([rng.randrange(1, 24) / 20 for _ in range(15)])
+    hv = [sum(vec[i] for i in V if m & (1 << i)) +
+          sum(vec[5 + k] for k,(i,j) in enumerate(E)
+              if m & (1 << i) and m & (1 << j)) for m in subs]
+    norm = min(max(hv[m], hv[31 ^ m]) for m in range(16))
+    assert norm > 0
+    vec /= norm             # thus vec is in D_0, in fact on its boundary
+    witness = linprog(np.zeros(27), A_ub=B, b_ub=vec,
+                      A_eq=[np.ones(27)], b_eq=[1],
+                      bounds=(0, None), method='highs')
+    assert witness.success
+    assert np.min(vec - B @ witness.x) > -1e-8
+print('NUMERICAL SUPPLEMENT: 150 normalized zero-intercept certificates')
+print('admit 27-atom coefficientwise convex decompositions.')
+\end{lstlisting}
+\begin{thebibliography}{9}
+\bibitem{cornuejols}
+G.~Cornu\'ejols, \emph{Combinatorial Optimization: Packing and Covering},
+SIAM, CBMS-NSF Regional Conference Series in Applied Mathematics, vol.~74,
+2001, Chapter~4 (Ideal Matrices) and Chapter~5 (Odd Cycles in Graphs).
+\url{https://doi.org/10.1137/1.9780898717105}.
+\bibitem{padberg}
+M.~W.~Padberg, ``Lehman's forbidden minor characterization of ideal
+$0$--$1$ matrices,'' \emph{Discrete Mathematics} 111 (1993), 409--420.
+\url{https://doi.org/10.1016/0012-365X(93)90178-V}.
+\bibitem{lehmanlectures}
+A.~Abdi, \emph{Packing and Covering}, lecture notes, \S9.2,
+Theorem~9.10 (Lehman's uniqueness of the fractional vertex for MNI clutters).
+\url{https://ahmadabdi.com/co750/packing_covering.pdf}.
+\end{thebibliography}
+\end{document}

@@ -1,0 +1,386 @@
+\documentclass[11pt,a4paper]{ctexart}
+\usepackage[margin=24mm,top=25mm,bottom=24mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{booktabs,tabularx,array}
+\usepackage{hyperref,xcolor,microtype}
+\usepackage{enumitem,fancyhdr,lastpage,tcolorbox}
+\tcbuselibrary{breakable}
+\hypersetup{colorlinks=true,urlcolor=blue,linkcolor=blue!50!black}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{.18em}
+\setlist{topsep=.3em,itemsep=.15em}
+\definecolor{navy}{HTML}{193149}
+\definecolor{teal}{HTML}{1B7281}
+\definecolor{paper}{HTML}{F3F7F8}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\textcolor{navy}{有限样本认证与最优值收敛}}
+\fancyhead[R]{\small\textcolor{navy}{论文 \S7 专项证明}}
+\fancyfoot[C]{\small 第 \thepage\ 页 / 共 \pageref{LastPage} 页}
+\renewcommand{\headrulewidth}{.3pt}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{proposition}[theorem]{命题}
+\newtheorem{corollary}[theorem]{推论}
+\theoremstyle{definition}
+\newtheorem{remark}[theorem]{说明}
+\newenvironment{proofcn}{\par\noindent\textbf{证明.}\ }{\hfill$\square$\par}
+\newtcolorbox{keybox}{breakable,colback=paper,colframe=teal,boxrule=.6pt,arc=1.5mm,left=2.6mm,right=2.6mm,top=2mm,bottom=2mm}
+\newcommand{\calP}{\mathcal P}
+\newcommand{\calF}{\mathcal F}
+\newcommand{\Rsk}{\mathsf R}
+\newcommand{\CGraph}{\mathsf C_0}
+\newcommand{\Pp}{\mathbb P}
+\newcommand{\Ee}{\mathbb E}
+\newcommand{\one}{\mathbf 1}
+\newcommand{\epsl}{\varepsilon_{\ell}}
+\newcommand{\epsu}{\varepsilon_u}
+\newcommand{\hC}{\widehat C}
+\newcommand{\evec}{\bm e}
+\newcommand{\qvec}{\bm q}
+\newcommand{\bvec}{\bm b}
+\begin{document}
+\thispagestyle{empty}
+\vspace*{1.1cm}
+\noindent{\color{teal}\rule{\textwidth}{1.7pt}}\par
+\vspace{.6cm}
+{\Huge\bfseries 任务 1：有限样本认证定理（修订版）}\par
+\vspace{.24cm}
+{\LARGE\bfseries 从无标签分歧率到可认证的稳健加权投票}\par
+\vspace{.6cm}
+{\Large 论文 \S7 理论正文与证明附录稿}\par
+\vspace{.7cm}
+\noindent\begin{tabularx}{\textwidth}{@{}p{27mm}X@{}}
+\textbf{版本} & 2026 年 10 月 14 日；新增无 big-M 区间 MILP、精确计算认证与可检验 $R_0$ 分支。\\
+\textbf{数据} & $n_\ell$ 个每成员带标签验证样本，$n_u$ 个无标签验证样本；分类器在验证前固定。\\
+\textbf{定理 A} & 只调用结果 6 图证书 MILP：始终高概率有效，在 $R_0$ 中以 $n^{-1/2}$ 速率逼近总体 minimax 值。\\
+\textbf{定理 B} & 使用区间 LP 对偶的无 big-M MILP：所有可行参数上均有 $n^{-1/2}$ 速率，须经有理数或区间算术认证。\\
+\end{tabularx}
+\vfill
+\begin{keybox}
+\textbf{必须区分的两个结论：}\par
+(1) \emph{有效认证}：不管真实参数是否落在 $R_0$ 中，只要同时置信事件成立，所选规则的真实错误率不超过数据依赖的认证值。\par
+(2) \emph{收敛至总体最优}：图证书算法需要 $\sum_iq_i\le1$。对整个原区域 $R$，这个结论不成立；若要求全参数 oracle 一致性，须求解完整的置信可行集 minimax 问题。
+\end{keybox}
+\vspace{.6cm}
+\noindent{\small\color{gray} 本报告给出独立的数学论证；[S11] Q3 在上传的选题文档中仅被作为旧框架结果概述，其原始证明文件未附，故不能声称已经逐行复核旧版 Q3。}
+\newpage
+\tableofcontents
+\newpage
+
+\section{设定与总体 oracle}
+固定 $K\ge3$ 个二元分类器。令 $X_i=\one\{f_i(U)\ne Y\}$，并定义
+\begin{equation}\label{eq:qD}
+q_i=\Pp(X_i=1)<\tfrac12,\qquad
+D_{ij}=\Pp(f_i(U)\ne f_j(U))=\Pp(X_i\ne X_j),\qquad
+e_{ij}=\Pp(X_iX_j=1).
+\end{equation}
+二元分类器下，分歧率的恒等式精确成立：
+\begin{equation}\label{eq:id}
+e_{ij}=\tfrac12(q_i+q_j-D_{ij}).
+\end{equation}
+对边际向量 $\qvec$ 与成对上界 $\bvec$，定义模糊集
+\begin{equation}\label{eq:ambig}
+\calP(\qvec,\bvec)=\left\{\pi\ge0:\sum_x\pi_x=1,\ \Ee_\pi X_i=q_i,\ \Ee_\pi X_iX_j\le b_{ij}\ (i<j)\right\}.
+\end{equation}
+令 $\calF_K$ 为所有确定性自对偶错误规则 $F:\{0,1\}^K\to\{0,1\}$，满足 $F(x)+F(\one-x)=1$。固定规则与 minimax oracle 的错误率分别为
+\begin{equation}\label{eq:R}
+\Rsk_F(\qvec,\bvec)=\max_{\pi\in\calP(\qvec,\bvec)}\Ee_\pi F(X),\qquad
+V(\qvec,\bvec)=\min_{F\in\calF_K}\Rsk_F(\qvec,\bvec).
+\end{equation}
+默认讨论的总体基准是 $V_0:=V(\qvec,\evec)$，其中 $\evec=(e_{ij})$ 为实际成对矩；由定义，$\calP(\qvec,\evec)$ 非空。可以将真实可信的先验上界 $u_{ij}\ge e_{ij}$ 进一步与统计上界取最小，但这不改变大样本极限 $\evec$。
+
+一个关键事实是：$V_0$ \textbf{并不是}真实联合分布下的贝叶斯最优投票错误率。它是只知道真实 $\qvec$ 与 $\evec$，但不知道更高阶依赖时的\emph{人口总体 minimax} 值。选题文档的区域
+\begin{equation}\label{eq:R0}
+R_0=\left\{\sum_iq_i\le1\right\}\subseteq
+R=\left\{\sum_iq_i-(K-2)q_{\min}\le1\right\}
+\end{equation}
+是图证书精确值定理的适用范围。
+
+\section{统计假设与同时置信区间}
+\paragraph{抽样与训练数据隔离。}
+对每个成员有 $n_\ell$ 个来自同一目标部署分布的带标签 i.i.d. 观测，用于计算经验错误率 $\hat q_i$；有 $n_u$ 个目标部署分布上的无标签 i.i.d. 观测，各模型在同一无标签样本上预测，从而计算 $\hat D_{ij}$。不同模型的验证样本可以重合，标签样本和无标签样本也不需要彼此独立；只要求每个经验均值沿样本索引具备 Hoeffding 所需的独立性。所有分类器必须在验证数据使用前固定；若用同一数据拟合或选择分类器，应使用独立校准集或另行给出统一泛化界。
+
+记 $m=\binom K2$、$H=\log(2(K+m)/\delta)$，取
+\begin{equation}\label{eq:eps}
+\epsl=\sqrt{\frac{H}{2n_\ell}},\qquad\epsu=\sqrt{\frac{H}{2n_u}}.
+\end{equation}
+用 $[t]_a^b:=\max\{a,\min\{b,t\}\}$ 表示截断，构造
+\begin{equation}\label{eq:intervals}
+\hat q_i^-=[\hat q_i-\epsl]_0^{1/2},\qquad
+\hat q_i^+=[\hat q_i+\epsl]_0^{1/2},\qquad
+\hat D_{ij}^-=[\hat D_{ij}-\epsu]_0^1.
+\end{equation}
+并设
+\begin{equation}\label{eq:bhat}
+\hat b_{ij}=\min\left\{\hat q_i^+,\hat q_j^+,\left[\frac{\hat q_i^++\hat q_j^+-\hat D_{ij}^-}{2}\right]_0^1\right\}.
+\end{equation}
+如有确定有效的先验上界 $u_{ij}$，可以把它进一步放进式 \eqref{eq:bhat} 的 $\min$；本文以下的收敛结果仍以真实成对值 $e_{ij}$ 为总体基准。
+
+\begin{lemma}[同时覆盖、偏差大小、保守可行性]\label{lem:coverage}
+令事件
+\[
+\mathcal E_\delta=\left\{\max_i|\hat q_i-q_i|\le\epsl,\ \max_{i<j}|\hat D_{ij}-D_{ij}|\le\epsu\right\}.
+\]
+则 $\Pp(\mathcal E_\delta)\ge1-\delta$。在该事件上，所有 $i<j$ 同时满足
+\begin{align}\label{eq:bounds}
+\hat q_i^-\le q_i\le\hat q_i^+,&\qquad0\le \hat q_i^+-q_i\le2\epsl,\\
+e_{ij}\le\hat b_{ij},&\qquad 0\le \hat b_{ij}-e_{ij}\le2\epsl+\epsu.\notag
+\end{align}
+特别地，以下经验置信模糊集必非空，且包含真实联合分布 $\pi^0$：
+\begin{equation}\label{eq:Phat}
+\widehat{\calP}=\left\{\pi\ge0:\ \sum_x\pi_x=1,\ \hat q_i^-\le\Ee_\pi X_i\le\hat q_i^+,\ \Ee_\pi X_iX_j\le\hat b_{ij}\right\}.
+\end{equation}
+\end{lemma}
+\begin{proofcn}
+每个经验变量均在 $[0,1]$ 内，Hoeffding 不等式给出 $\Pp(|\hat q_i-q_i|>\epsl)\le2e^{-2n_\ell\epsl^2}=\delta/(K+m)$，对于分歧率亦然。对 $K+m$ 个变量取并集界得到 $\Pp(\mathcal E_\delta)\ge1-\delta$。
+
+真值 $0<q_i<1/2$，所以截断不破坏 $q_i\in[\hat q_i^-,\hat q_i^+]$；且 $q_i^+-q_i\le2\epsl$。同理 $D_{ij}-2\epsu\le\hat D_{ij}^-\le D_{ij}$。记未截断的上界 $u_{ij}^+=(\hat q_i^++\hat q_j^+-\hat D_{ij}^-)/2$，利用式 \eqref{eq:id} 得
+\[
+0\le u_{ij}^+-e_{ij}=\tfrac12\left[(\hat q_i^+-q_i)+(\hat q_j^+-q_j)+(D_{ij}-\hat D_{ij}^-)\right]\le2\epsl+\epsu.
+\]
+因 $e_{ij}\le q_i,q_j\le\hat q_i^+,\hat q_j^+$，做非负截断和取 $\min$ 仍保留 $\hat b_{ij}\ge e_{ij}$，且不增大上偏差。真实 $\pi^0$ 满足所有上述区间与上界，故 $\pi^0\in\widehat{\calP}$。
+\end{proofcn}
+
+\section{结果 5：有限片段结构导出的 Lipschitz 常数}
+给每条 self-dual 规则 $F$ 写出固定规则的对偶多面体
+\begin{equation}\label{eq:dual}
+\mathcal D_F=\left\{(a,\beta,\gamma):\ a+\sum_i\beta_i x_i+\sum_{i<j}\gamma_{ij}x_ix_j\ge F(x)\ (\forall x),\ \gamma\ge0\right\}.
+\end{equation}
+目标 $L_{a,\beta,\gamma}(q,b)=a+\sum_i\beta_iq_i+\sum_{i<j}\gamma_{ij}b_{ij}$。在参数 $(q,b)$ 使 $\calP(q,b)$ 非空时，线性规划强对偶说明
+\begin{equation}\label{eq:vertexF}
+\Rsk_F(q,b)=\min_{v\in\operatorname{vert}(\mathcal D_F)}L_v(q,b).
+\end{equation}
+这是上传文档结果 5 的核心内容。$\mathcal D_F$ 与参数 $q,b$ 无关，并且是尖多面体（不存在整条双向直线）：沿任意双向可行方向必须有 $\Delta\gamma=0$，又由全部二元 $x$ 的约束可知 $\Delta a+\sum_i\Delta\beta_i x_i=0$，因而所有方向分量为零。故其顶点有限，有限最优目标必可由顶点取得。
+
+令 $d=1+K+m$，定义
+\begin{equation}\label{eq:LK}
+L_K:=\max_{F\in\calF_K}\ \max_{v=(a,\beta,\gamma)\in\operatorname{vert}(\mathcal D_F)}\left(\sum_i|\beta_i|+\sum_{i<j}\gamma_{ij}\right)<\infty.
+\end{equation}
+又记零截距多面体
+\[
+\mathcal D_F^0=\{(s,\gamma):\sum_is_ix_i+\sum_{i<j}\gamma_{ij}x_ix_j\ge F(x)\ \forall x,\ \gamma\ge0\},
+\]
+以及同样定义的 $L_{0,K}$（对其顶点取 $\sum_i|s_i|+\sum\gamma_{ij}$ 的最大值）。令
+\begin{equation}\label{eq:C0}
+\CGraph(q,b):=\min\{\min_iq_i,B_{\rm graph}(b)\}
+=\min_{F\in\calF_K}\ \min_{(s,\gamma)\in\mathcal D_F^0}\left(\sum_iq_is_i+\sum_{i<j}b_{ij}\gamma_{ij}\right).
+\end{equation}
+第二个等号是选题文档的结果 3(a)：\emph{零截距证书最优值恰为独裁或最优图证书}，对所有非负 $(q,b)$ 成立。零截距可行证书必有 $s_i\ge0$，因为把 $x=e_i$ 代入约束。
+
+\begin{lemma}[两种值函数的全局 Lipschitz 性]\label{lem:lip}
+在参数对均可行的区域，对固定 $F$ 有
+\begin{equation}\label{eq:LipF}
+|\Rsk_F(q,b)-\Rsk_F(q',b')|\le L_K\Vert(q,b)-(q',b')\Vert_\infty.
+\end{equation}
+对任意非负参数（无需对应可行的联合分布），有
+\begin{equation}\label{eq:LipC}
+|\CGraph(q,b)-\CGraph(q',b')|\le L_{0,K}\Vert(q,b)-(q',b')\Vert_\infty.
+\end{equation}
+更明确地，上述常数可以保守地选择为 $L_K,L_{0,K}\le (K+m)d^{d/2}$，其中 $d=1+K+m$。
+\end{lemma}
+\begin{proofcn}
+有限个仿射函数 $A_t$ 的最小值在统一斜率上界下是 Lipschitz 的：
+\[|\min_tA_t(z)-\min_tA_t(z')|\le\max_t|A_t(z)-A_t(z')|.\]
+将其用于式 \eqref{eq:vertexF} 与式 \eqref{eq:C0} 即得两条不等式。为给出不依赖实验枚举的粗显式常数，观察所有顶点都是线性约束矩阵的一组满秩活动行求出的唯一解，矩阵系数属于 $\{-1,0,1\}$，右端属于 $\{0,1\}$。由 Cramer 法则，分母是非零整数，故绝对值至少为 $1$；由 Hadamard 行列式界，每个坐标的分子绝对值至多 $d^{d/2}$。因此各斜率坐标均有 $d^{d/2}$ 的统一上界，乘以 $K+m$ 即得结论。此显式界非常宽松，其用途仅是证明常数有限，而非推荐直接用于样本复杂度估算。
+\end{proofcn}
+
+
+\begin{remark}[$K=5$ 的紧化常数与可复核性]\label{rem:L5}
+本项目补充材料 [S16] 给出的五成员枚举常数为
+\begin{equation}\label{eq:L5}
+L_5=65,\qquad L_{0,5}=5.
+\end{equation}
+若将二者视作\emph{经过精确有理数顶点枚举核验的统一上界}，则下述两个定理中可分别直接代入 $65$ 和 $5$，不必使用上面的 Hadamard 粗界。
+这里的 $L_5$、$L_{0,5}$ 采用式 \eqref{eq:LK} 所对应的 $\ell_\infty$ 参数扰动与系数 $\ell_1$ 范数；不能将其他范数下的常数混用。\textbf{本次附件没有提供 [S16] 的原始顶点目录及机器可检查的有理数证书，故式 \eqref{eq:L5} 在本文标记为“源自 [S16]、待附机器可核验材料”的计算机辅助引理，而不是本次独立完成的枚举证明。}正文可引用该结果，正式定稿前应随附其精确算术核验文件。
+\end{remark}
+
+\begin{remark}[与 $K$ 的关系]
+下述 $O(\sqrt{\log(K/\delta)/n})$ 结论采用\emph{固定 $K$} 的渐近约定；隐藏常数可以随 $K$ 快速增长。若让 $K=K(n)$ 随样本数增大，必须额外控制 $L_K$，不能据此声称有与 $K$ 无关的统一常数。
+\end{remark}
+
+\section{定理 A：使用结果 6 图证书算法的认证与收敛}
+定义纯图式数据依赖的认证值
+\begin{equation}\label{eq:graphcert}
+\hC_G:=\min\left\{\min_i\hat q_i^+,\ B_{\rm graph}(\hat b)\right\}=\CGraph(\hat q^+,\hat b).
+\end{equation}
+若第一项较小，选择相应成员的独裁投票；否则使用结果 6 的精确 MILP 求得图权重 $y\ge0$，选择按加权度数 $d_i(y)=\sum_{j\ne i}y_{ij}$ 进行的 self-dual 投票。若图证书的最优值以数值精度 $\eta_{\rm alg}$ 近似，则返回经过可行性检查的实际权重及其上界 $\widetilde C_G\in[\hC_G,\hC_G+\eta_{\rm alg}]$。理论上采用精确求解，或者把数值误差作为附加项。
+
+\begin{theorem}[图认证的有限样本覆盖与 oracle 速率]\label{thm:graph}
+在本报告抽样假设下，以至少 $1-\delta$ 的概率，上述算法选择的 $\hat F_G$ 满足
+\begin{equation}\label{eq:graphcov}
+\Pp_{\pi^0}\{\hat F_G(X)=1\}\le\widetilde C_G.
+\end{equation}
+并且若真实参数位于 $R_0$，即 $\sum_iq_i\le1$，则在同一事件上
+\begin{equation}\label{eq:graphgap}
+0\le\hC_G-V_0\le L_{0,K}(2\epsl+\epsu),\qquad
+0\le\widetilde C_G-V_0\le L_{0,K}(2\epsl+\epsu)+\eta_{\rm alg}.
+\end{equation}
+因此对于固定 $K$，精确算法满足
+\[
+\hC_G-V_0=O\!\left(\sqrt{\frac{\log(K/\delta)}{n_\ell}}+\sqrt{\frac{\log(K/\delta)}{n_u}}\right)
+\quad\text{（至少以 $1-\delta$ 的概率）}.
+\]
+\end{theorem}
+\begin{proofcn}
+在事件 $\mathcal E_\delta$ 上，真实错误率 $q_i\le\hat q_i^+$，因此所选独裁规则的实际风险不超过对应上界。对于任意图权重，图证书上界给出
+\[\Rsk(\hat F_G;\pi^0)\le\frac{\sum_{i<j}e_{ij}y_{ij}}{g(y)}\le\frac{\sum_{i<j}\hat b_{ij}y_{ij}}{g(y)}.\]
+故经过核验的候选规则，其实际风险均不超过返回的认证值，得到式 \eqref{eq:graphcov}。
+
+由引理 \ref{lem:coverage}，$\hat q_i^+\ge q_i$，$\hat b_{ij}\ge e_{ij}$；又因 $B_{\rm graph}$ 对每个 $b_{ij}$ 均单调不减，得 $\hC_G\ge\CGraph(q,e)$。真实参数位于 $R_0$ 时，选题文档结果 3(b) 说明 $\CGraph(q,e)=V_0$。另一方面，由式 \eqref{eq:bounds}，
+\[
+\Vert(\hat q^+,\hat b)-(q,e)\Vert_\infty\le2\epsl+\epsu.
+\]
+对式 \eqref{eq:C0} 应用引理 \ref{lem:lip} 得 $\hC_G\le V_0+L_{0,K}(2\epsl+\epsu)$。算法误差至多再增加 $\eta_{\rm alg}$。
+\end{proofcn}
+
+\begin{remark}[为什么不需要额外进行模型选择修正？]
+证书同时覆盖所有成员与所有模型对；在覆盖事件上，\emph{每一个}合法图权重都满足认证不等式。因此 $y$ 虽然用同一批验证数据自适应挑选，也不需要再对候选图或候选规则数做并集界。这一点与“先选一个规则再用同一数据做未经调整的经验风险区间”不同。
+\end{remark}
+
+
+\subsection{可检验的 $R_0$ 条件及自动分支}
+定义事件 $\mathcal T_0:=\{\sum_i\hat q_i^+\le1\}$。在同时覆盖事件 $\mathcal E_\delta$ 上，
+\begin{equation}\label{eq:testR0}
+\mathcal T_0\ \Longrightarrow\ \sum_iq_i\le\sum_i\hat q_i^+\le1.
+\end{equation}
+因此\textbf{数据满足 $\mathcal T_0$ 时}，允许采用结果 6 的图证书 MILP，并且这时取得总体 minimax 的 $O(n^{-1/2})$ 保证。若 $\mathcal T_0$ 不满足，则不能反推真实参数不属于 $R_0$，只能退回完整区间求解。由于两条路径共用同一个同时置信覆盖事件，不需要额外为数据驱动分支扣除一份置信概率。
+
+\section{定理 B：完整置信模糊集的全参数认证}
+若希望\emph{不依赖} $R_0$ 条件，则使用式 \eqref{eq:Phat} 的整个置信可行集，并求解
+\begin{equation}\label{eq:Cfull}
+\hC_{\rm full}=\min_{F\in\calF_K}\ \max_{\pi\in\widehat{\calP}}\Ee_\pi F(X),
+\qquad \hat F_{\rm full}\in\operatorname*{argmin}_{F\in\calF_K}\max_{\pi\in\widehat{\calP}}\Ee_\pi F(X).
+\end{equation}
+如果经验约束在低概率的置信事件外碰巧不可行，则定义认证值为 $1$ 并任取一条 self-dual 规则作为回退；在覆盖事件上由引理 \ref{lem:coverage} 可行性自动保证。该问题仍是有限维的精确优化，内层 LP 中含有 $q_i^-$ 和 $q_i^+$ 两组边际不等式。对于固定 $F$，对偶具有明确形式：
+\begin{align}\label{eq:intervaldual}
+\widehat{\mathsf R}_F=\min_{a,\lambda^+,\lambda^-,\gamma}\quad& a+\sum_i(\lambda_i^+\hat q_i^+-\lambda_i^-\hat q_i^-)+\sum_{i<j}\gamma_{ij}\hat b_{ij}\\
+\text{s.t.}\quad& a+\sum_i(\lambda_i^+-\lambda_i^-)x_i+\sum_{i<j}\gamma_{ij}x_ix_j\ge F(x)\quad(\forall x),\notag\\
+&\lambda_i^+,\lambda_i^-,\gamma_{ij}\ge0.\notag
+\end{align}
+所以仍可以比较二次证书在 $x$ 与 $\one-x$ 的差，交叉项相消，推出存在最优的\emph{有符号线性阈值规则}；计算上可枚举 self-dual 规则（或只枚举可实现的阈值规则）并逐一解 LP。\textbf{结果 6 的纯图 MILP 不能替代}式 \eqref{eq:Cfull}。
+
+
+\subsection{结果 2(a) 的无 big-$M$ 区间 MILP}\label{subsec:milp}
+将区间边际的自由对偶系数写成 $\beta_i=\lambda_i^+-\lambda_i^-$，其中 $\lambda_i^\pm\ge0$。令 $\mathcal Z$ 为所有 $\{x,\one-x\}$ 互补模式对中任取一个代表的集合，$|\mathcal Z|=2^{K-1}$。对每个 $z\in\mathcal Z$ 引入一个二元变量 $t_z$：$t_z=1$ 表示 $F(z)=1$，而 $F(\one-z)=0$。定义
+\[
+Q(x)=a+\sum_i(\lambda_i^+-\lambda_i^-)x_i+\sum_{i<j}\gamma_{ij}x_ix_j.
+\]
+\begin{proposition}[完整区间最优值的无 big-$M$ 精确混合整数线性规划]\label{prop:milp}
+若 $\widehat{\calP}\ne\varnothing$，则 $\hat C_{\rm full}$ 精确等于
+\begin{equation}\label{eq:milp}
+\begin{aligned}
+\min_{a,\lambda^+,\lambda^-,\gamma,t}\quad& a+\sum_i\bigl(\lambda_i^+\hat q_i^+-\lambda_i^-\hat q_i^-\bigr)+\sum_{i<j}\gamma_{ij}\hat b_{ij},\\
+\text{s.t.}\quad& Q(z)\ge t_z,\qquad\ \forall z\in\mathcal Z,\\
+&Q(\one-z)\ge1-t_z,\quad\forall z\in\mathcal Z,\\
+& t_z\in\{0,1\},\quad \lambda_i^\pm,\gamma_{ij}\ge0,\quad a\in\mathbb R.
+\end{aligned}
+\end{equation}
+这里\emph{没有任何 big-$M$ 常数}，且每对互补模式只需一个二元变量。对于 $K=5$，共有 $16$ 个二元变量、$21$ 个连续变量以及 $32$ 条互补模式约束（不计变量界）。
+\end{proposition}
+\begin{proofcn}
+对任意固定 self-dual $F$，令 $t_z=F(z)$，则两条互补不等式正好是式 \eqref{eq:intervaldual} 中该互补对上的 $Q\ge F$ 条件；故每个 $F$ 的 LP 对偶是本 MILP 固定 $t$ 后的连续部分。反向地，任意二元向量 $t$ 直接定义一个 self-dual $F$。对 $t$ 及连续对偶变量同时取最小，相当于对全部规则的最坏风险取最小。因为 $\widehat{\calP}$ 非空，固定规则满足 LP 强对偶，从而两边相等。
+\end{proofcn}
+
+式 \eqref{eq:intervaldual} 的 $Q(x)-Q(\one-x)$ 仍是
+\[
+\sum_i \left(\lambda_i^+-\lambda_i^-+\tfrac12\sum_{j\ne i}\gamma_{ij}\right)(2x_i-1),
+\]
+因而仍存在最优的\emph{有符号齐次线性阈值规则}。$K=5$ 时可预先枚举 $1{,}882$ 条不同的无平局 self-dual 阈值规则；逐条求解式 \eqref{eq:intervaldual} 的 LP，最后取最小值，作为 MILP 的独立交叉核验。前期提供的计数为 $1{,}882$；此处不把代码枚举视作已经完成的独立实验。
+
+\begin{theorem}[完整区间鲁棒方法：所有参数的高概率 oracle 界]\label{thm:full}
+在同样抽样假设下，以至少 $1-\delta$ 的概率，\emph{不要求}真实参数处于 $R$ 或 $R_0$，有
+\begin{equation}\label{eq:fullcov}
+\Pp_{\pi^0}\{\hat F_{\rm full}(X)=1\}\le\hC_{\rm full},
+\end{equation}
+并且
+\begin{equation}\label{eq:fullgap}
+\boxed{\quad 0\le\hC_{\rm full}-V_0\le L_K(2\epsl+\epsu).\quad}
+\end{equation}
+因此对固定 $K$，$\hC_{\rm full}\to V_0$ 的速率同样为 $n_\ell^{-1/2}+n_u^{-1/2}$（带 $\sqrt{\log(K/\delta)}$ 系数）。
+\end{theorem}
+\begin{proofcn}
+考虑覆盖事件 $\mathcal E_\delta$，引理 \ref{lem:coverage} 给出 $\pi^0\in\widehat{\calP}$，所以对\emph{任意}可能依赖验证数据的 $F$，都有 $\Ee_{\pi^0}F\le\max_{\pi\in\widehat{\calP}}\Ee_\pi F$；对 $\hat F_{\rm full}$ 应用得到式 \eqref{eq:fullcov}。
+
+同样由于总体真值约束集 $\calP(q,e)\subseteq\widehat{\calP}$，可对全部 $F$ 取最小，得到 $\hC_{\rm full}\ge V_0$。取总体 oracle 规则 $F^*\in\arg\min_F\Rsk_F(q,e)$，则
+\begin{align*}
+\hC_{\rm full}&\le\max_{\pi\in\widehat{\calP}}\Ee_\pi F^*(X)\\
+&=\max_{q'\in\mathcal I:\ \calP(q',\hat b)\ne\varnothing}\Rsk_{F^*}(q',\hat b),
+\end{align*}
+其中 $\mathcal I=\prod_i[\hat q_i^-,\hat q_i^+]$，等式把经验可行集按边际 $q'$ 分解。
+对任何出现在最大化中的 $q'$，都满足 $\Vert q'-q\Vert_\infty\le2\epsl$，而 $\Vert\hat b-e\Vert_\infty\le2\epsl+\epsu$。由于 $\calP(q',\hat b)$ 和 $\calP(q,e)$ 都非空，应用引理 \ref{lem:lip} 中固定 $F^*$ 的全局 Lipschitz 性，
+\[
+\Rsk_{F^*}(q',\hat b)\le\Rsk_{F^*}(q,e)+L_K(2\epsl+\epsu)
+=V_0+L_K(2\epsl+\epsu).
+\]
+对 $q'$ 取最大，即得式 \eqref{eq:fullgap}。
+\end{proofcn}
+
+\begin{corollary}[数据选择规则的 oracle 逼近]\label{cor:sel}
+在定理 \ref{thm:graph} 的 $R_0$ 条件下，$\hat F_G$ 满足
+$\Ee_{\pi^0}\hat F_G\le V_0+L_{0,K}(2\epsl+\epsu)+\eta_{\rm alg}$。
+对任何可行真实参数，$\hat F_{\rm full}$ 满足
+$\Ee_{\pi^0}\hat F_{\rm full}\le V_0+L_K(2\epsl+\epsu)$。
+\end{corollary}
+\begin{proofcn}
+分别合并两条定理的覆盖保证与认证值上界。
+\end{proofcn}
+
+
+\section{可交付的有限样本自动分支定理}
+\begin{theorem}[数据驱动双路径：覆盖、收敛及 $K=5$ 常数]\label{thm:hybrid}
+在抽样和固定模型假设下，定义算法：若 $\sum_i\hat q_i^+\le1$，选择经证书核验的图投票，返回上界 $\widetilde C_G$；否则选择经证书核验的式 \eqref{eq:milp} 最优规则，返回上界 $\widetilde C_{\rm full}$。假设计算过程额外提供经\emph{严格核验}的加性最优性误差 $\eta\ge0$，使返回上界与对应精确算法值之差至多 $\eta$。记输出为 $(\widehat F,\widetilde C)$，$r=2\epsl+\epsu$。则以至少 $1-\delta$ 的概率，
+\begin{equation}\label{eq:hybrid}
+\Pp_{\pi^0}\{\widehat F\text{ 出错}\}\le\widetilde C,
+\qquad0\le\widetilde C-V_0\le L_K r+\eta.
+\end{equation}
+在进入图分支时，右侧可以加强为 $L_{0,K}r+\eta$。若采用 [S16] 的五成员系数核验结果，则 $K=5$ 时两种分支分别具有
+\[
+\widetilde C_G-V_0\le 5r+\eta,\qquad
+\widetilde C_{\rm full}-V_0\le65r+\eta.
+\]
+这里的 $\eta$ 不能仅凭求解器的浮点容差声称为严格上界；必须附精确算术或向外舍入的区间核验结果。
+\end{theorem}
+\begin{proofcn}
+在事件 $\mathcal E_\delta$ 上，若进入图分支，则由式 \eqref{eq:testR0} 确定真实参数位于 $R_0$，从而定理 \ref{thm:graph} 既保证覆盖又保证图证书与 $V_0$ 的差距。若进入完整区间分支，则由定理 \ref{thm:full} 得到不依赖 $R_0$ 的结论。两个分支在同一覆盖事件上逐一成立，所以其数据依赖选择也成立；取较大的 Lipschitz 常数得到统一式 \eqref{eq:hybrid}。计算加性误差 $\eta$ 只在已经核验优化下界和候选上界的情况下加入。
+\end{proofcn}
+
+\section{必要限制、计算与实践细节}
+\subsection{图证书不可能在整个 $R$ 内实现人口最优一致性}
+第九版选题文档结果 4(a) 的解析反例：$K=5$、$q_i=0.3$、$e_{ij}=0.05$，属于 $R$ 但不属于 $R_0$。此时 $V(q,e)=0$（五人多数保证零错误），而 $B_{\rm graph}(e)>0$（按文档结果 6 的完全对称计算可得 $3e=0.15$）。即便令 $n_\ell,n_u\to\infty$，图证书算法的认证值也收敛到 $0.15$ 而不是 $0$。因此若仅使用结果 6，论文 \S7 \textbf{不得}声称在整个 $R$ 内对 $V(q,e)$ 的 $n^{-1/2}$ 收敛。
+
+\subsection{带先验共错上界的情况}
+如果外部先验给出 $u_{ij}\ge e_{ij}$，可定义
+$\hat b_{ij}=\min\{u_{ij},\hat q_i^+,\hat q_j^+,(\hat q_i^++\hat q_j^+-\hat D_{ij}^-)/2\}$，覆盖率证明不变。因为即便先验很松，统计项仍收敛到 $e_{ij}$，总体目标仍是 $V(q,e)$。如果\emph{只提供固定先验上界而没有分歧估计}，可认证但通常不能收敛到以精确 $e$ 为参数的 oracle；必须改为以真实先验上界为目标，或者明确不可识别的剩余差距。
+
+\subsection{严格可验证计算：候选上证书与优化下界必须区分}\label{subsec:rigor}
+若验证数据的经验频率 $\hat q_i,\hat D_{ij}$ 是有理数，但 Hoeffding 半径包含对数与平方根，推荐对半径\emph{向上舍入为有理数}，并以有理数构造 $\hat q^\pm,\hat D^-,\hat b$。例如取网格步长 $h>0$，置 $\tilde\varepsilon= h\lceil \varepsilon/h\rceil$；将 $h$ 选为 $o(n^{-1/2})$ 以保持速率。严格实数区间算术也可实现同样效果。
+
+对求解器返回的候选 $t$（对应规则 $F$）、有理数化的 $(a,\lambda^+,\lambda^-,\gamma)$，需要对全部 $2^K$ 个输入模式\emph{逐点精确核对} $Q(x)\ge F(x)$，检查非负性，并按有理数计算
+\[
+U=a+\sum_i(\lambda_i^+\hat q_i^+-\lambda_i^-\hat q_i^-)+\sum_{i<j}\gamma_{ij}\hat b_{ij}.
+\]
+一旦通过核验，$U$ 就是该规则对整个 $\widehat{\calP}$ 的有效\textbf{上界}，因而足以用于真实风险认证——即便并未证明这条规则是最优规则。\emph{仅将浮点数四舍五入或用 \texttt{limit\_denominator} 拟合为有理数，并不能自动保证对偶可行；必须在转换之后重新精确验算全部约束。}
+
+若还要声称 $U\le\hat C_{\rm full}+\eta$ 以及对应 oracle 收敛速率中的算法项 $\eta$，则必须另外给出\textbf{优化下界} $L\le\hat C_{\rm full}$，且证明 $0\le U-L\le\eta$。可采用带严格区间界的分支定界证明，或者对 $K=5$ 枚举 $1{,}882$ 条阈值规则并为\emph{每一条规则的最坏分布 LP} 给出有理数 primal 与 dual 匹配的证明。单条规则的有理数 primal 可行点只是该规则的最坏风险下界，不能自动充当所有规则 minimax 值的下界。K=5 的图证书可用所有 $2^{K-1}$ 个互补划分对进行有理数核验 $g(y)$；只取得可行图权重则能证明风险上界，想证明最优值的间隙仍需全局优化下界。
+
+在置信事件外，若 $\widehat{\calP}$ 为空或求解器无法提供可验证的候选上界，应返回平凡认证值 $1$ 并将状态标记为退回处理，绝不能输出未经验证的数值声称覆盖。
+
+\subsection{可选收紧：经验 Bernstein 与 Clopper--Pearson}
+任意对 $q_i$ 与 $D_{ij}$ 有\emph{同时覆盖}的区间族都可替换 Hoeffding 置信区间，定理中仅需把 $r$ 换为实际区间端点对真值的统一上界。具体实现可用各 Bernoulli 样本的 Clopper--Pearson 单侧精确区间（按 $K+\binom K2$ 个指标分配显著性预算），或带适当有限样本修正的经验 Bernstein 上下界。若还希望保留文中\emph{显式}的 $O(n^{-1/2})$ 速率，可同时构造两套覆盖区间，分别分配 $\delta/2$，并把较紧的区间与 Hoeffding 区间相交；在两套区间都覆盖的事件上，交集仍包含真实参数，且区间宽度不超过 Hoeffding 的宽度。这种方法通常提升低方差事件的经验紧度，但不能不经计算就保证每一组数据的区间严格缩小。
+
+\subsection{样本数不同、复用数据以及总体分布偏移}
+如果各成员有不同的 $n_{\ell,i}$，直接把 $\epsl$ 替换为 $\varepsilon_{\ell,i}=\sqrt{H/(2n_{\ell,i})}$；若各对分歧有不同 $n_{u,ij}$，对应替换为 $\varepsilon_{u,ij}$。最终误差可用这些半径的最大值控制。数据自适应选择\emph{投票规则}是允许的，但不能不加修正地复用同一验证集去\emph{训练基础分类器}。若训练/验证和部署分布不同，本文所有覆盖及一致性结论都需要额外分布偏移条件。
+
+\section{面向论文 \S7 的精简表述}
+\begin{keybox}
+\textbf{Theorem (Finite-sample certifiable voting).}
+Let $K$ fixed binary voters be evaluated on $n_\ell$ i.i.d. labeled and $n_u$ i.i.d. unlabeled samples from a common target distribution. Let $\hat q_i^\pm,\hat D_{ij}^-$ be simultaneous Hoeffding bounds at level $1-\delta$ and put $\hat b_{ij}=\min\{\hat q_i^+,\hat q_j^+,(\hat q_i^++\hat q_j^+-\hat D_{ij}^-)/2\}$. Write $V_0=V(q,e)$ for the population deterministic self-dual minimax error. Then: 
+\begin{enumerate}[leftmargin=1.5em]
+\item The graph-certificate rule selected by minimizing $\min\{\min_i\hat q_i^+,B_{\rm graph}(\hat b)\}$ has true error at most its reported certificate with probability $\ge1-\delta$. If $\sum_iq_i\le1$, its certificate satisfies $0\le\hat C_G-V_0\le L_{0,K}(2\epsl+\epsu)$.
+\item The robust rule selected from $\widehat{\calP}$ has true error at most $\hat C_{\rm full}$ with probability $\ge1-\delta$ for every feasible population parameter, and satisfies $0\le\hat C_{\rm full}-V_0\le L_K(2\epsl+\epsu)$.
+\end{enumerate}
+Here $L_{0,K},L_K$ are finite constants depending only on $K$, justified by the finite dual-vertex representation, with $2\epsl+\epsu=O(\sqrt{\log(K/\delta)/n_\ell}+\sqrt{\log(K/\delta)/n_u})$ for fixed $K$.
+\end{keybox}
+\vspace{.4em}
+\noindent\textbf{结语：} 任务 1 的统计定理已形成可审查的证明：区间无 big-$M$ MILP 与可检验的图/完整分支都明确。与旧框架不同，成对信息在经验层面只有\emph{上界}；包含真实联合分布的区间模糊集保证了认证覆盖，而不经修改的图算法只在 $R_0$ 具有总体 minimax 一致性。全参数一致性需要完整鲁棒优化；作为认证算法，还须附准确的算术可行性核验，才可正式声明所报告数值的严格有效性。
+\end{document}
