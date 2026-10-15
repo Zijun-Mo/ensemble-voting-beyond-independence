@@ -30,6 +30,7 @@ DSAA2011 Task B · Project 2 "Ensemble Voting Beyond Independence" · 四人组�
 | 8 ★ | K=5 有 248 项全参数闭式，每项都不可删；附截距分解与两侧显式界 | 计算机辅助（精确） |
 | 9 | 确定性规则与随机化规则何时相等、何时不等 | 已证 / 计算机辅助（精确） |
 | 10 ★ | 有限样本认证：图认证、置信集认证、K=5 闭式认证、计算间隙、双路径定理 | 已证 |
+| 11 ★ | 对称参数（成员错误率与成对上界都相同）下任意 K 的闭式：随机化规则已证；确定性规则的上界闭式只有 $`O(K^2)`$ 项，奇偶 K 结构不同 | 随机化与边界部分已证；确定性 K≤11 数值精确，一般 K 为猜想 |
 
 "计算机辅助（精确）"指证明依赖计算，但全部判断都用有理数完成，并附有可以独立校验的证书。
 
@@ -39,15 +40,15 @@ DSAA2011 Task B · Project 2 "Ensemble Voting Beyond Independence" · 四人组�
 
 ```
 .
-├── 选题文档.md                  主文档（第 1 节为完整记号表，附录 A 为来源索引 [S1]–[S30]）
+├── 选题文档.md                  主文档（第 1 节为完整记号表，附录 A 为来源索引 [S1]–[S31]）
 ├── 选题文档_归档.md             唯一的归档：被取代的说法、旧编号对照、旧任务、旧术语 → 新术语对照
 ├── review_counterexample_report.md   [S8] 逐份审查记录（第 1–22 份）
-├── sources/                     [S1]–[S7]、[S13]–[S30]：证明文档、推导报告及其证书包
+├── sources/                     [S1]–[S7]、[S13]–[S31]：证明文档、推导报告及其证书包
 │   ├── S1/S2/S3_*.pdf           课程 Part I/II 的证明、引用式证明、初学者讲解
 │   ├── S4–S7, S13–S24_*.tex     推导报告
 │   ├── S26, S27_*.md            K=5 闭式与 K_min 的报告
-│   ├── S28/S29/S30_*.tex|pdf    K_min=9 简化证明、有限样本认证、248 项闭式的结构解释
-│   └── S17/19/21/22/25/26/27/29_bundle/   各报告附带的验证脚本与证书数据
+│   ├── S28–S31_*.tex|pdf        K_min=9 简化证明、有限样本认证、248 项闭式的结构解释、对称参数下任意 K 的闭式
+│   └── S17/19/21/22/25/26/27/29/31_bundle/   各报告附带的验证脚本与证书数据
 ├── code/
 │   ├── part12_checks/           [S9b] 课程 Part I/II 的数值核验
 │   ├── early_experiments/       [S10] K=3 对偶顶点枚举等早期实验
@@ -61,7 +62,7 @@ DSAA2011 Task B · Project 2 "Ensemble Voting Beyond Independence" · 四人组�
 └── history/                     选题文档 v6–v37 的完整备份；early/ 为最早的两份选题文档
 ```
 
-**编号约定**。主文档用 [S1]–[S30] 引用来源，完整对照见主文档附录 A。
+**编号约定**。主文档用 [S1]–[S31] 引用来源，完整对照见主文档附录 A。
 
 **路径说明**。旧路径只出现在两处历史记录里：审查记录 [S8] 和 `history/` 中的旧版文档。它们写的是整理前的路径（如 `research_notes/依赖不确定下加权投票研究选题/...`）。对照方法：去掉这个前缀，剩下的部分就是本仓库中的相对路径；`novelty_*.md` 现在在 `notes/novelty/` 下。
 
@@ -117,7 +118,7 @@ python3 -I dominance_full.py ../../../sources/S26_bundle 0 2000
 
 - 用 `xelatex` 编译。
 - `sources/` 中多数推导报告基于 `ctexart`，需要 TeX Live 的 ctex 宏包。
-- [S23]、[S28]、[S30] 和 `course_part12/` 用 `fontspec` 加 Noto Serif/Sans CJK SC 字体，不依赖 ctex。
+- [S23]、[S28]、[S30]、[S31] 和 `course_part12/` 用 `fontspec` 加 Noto Serif/Sans CJK SC 字体，不依赖 ctex。
 
 ---
 

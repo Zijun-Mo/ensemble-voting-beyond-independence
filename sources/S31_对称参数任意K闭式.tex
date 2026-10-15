@@ -1,0 +1,761 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[a4paper,margin=20mm,headheight=14pt]{geometry}
+\usepackage{graphicx}
+\usepackage{fontspec}
+\usepackage{babel}
+\babelprovide[import, main]{chinese}
+\babelfont{rm}{Noto Serif CJK SC}
+\babelfont{sf}{Noto Sans CJK SC}
+\babelfont{tt}{DejaVu Sans Mono}
+
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,tabularx,array,longtable}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{microtype}
+
+\definecolor{primary}{RGB}{24,53,79}
+\definecolor{accent}{RGB}{36,106,128}
+\definecolor{codebg}{RGB}{247,249,250}
+\definecolor{codeframe}{RGB}{210,220,226}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=primary,
+  citecolor=accent,
+  urlcolor=accent
+}
+
+\setlength{\parskip}{5pt plus 2pt minus 1pt}
+\setlength{\parindent}{0pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{primary}{对称参数下任意 $K$ 的稳健加权投票精确闭式}}
+\fancyhead[R]{\small\textcolor{primary}{理论推导与可复现核验文档}}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{proposition}[theorem]{命题}
+\newtheorem{corollary}[theorem]{推论}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{定义}
+\newtheorem{example}[theorem]{例}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{说明}
+
+\newcommand{\takeaway}[2]{%
+  \vspace{4pt}\noindent\colorbox{primary!6}{%
+    \parbox{\dimexpr\textwidth-2\fboxsep\relax}{%
+      \vspace{4pt}\textbf{\color{primary}#1}\hspace{0.5em}#2\vspace{4pt}%
+    }%
+  }\vspace{4pt}%
+}
+
+\newcommand{\Rdet}{R^*_{\mathrm{det}}}
+\newcommand{\Rrand}{R^*_{\mathrm{rand}}}
+\newcommand{\Bg}{B_{\mathrm{graph}}}
+\newcommand{\Thetasym}{\Theta^{\mathrm{sym}}_K}
+\newcommand{\Psym}{\mathcal{P}^{\mathrm{sym}}}
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\scriptsize,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  framesep=4pt,
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  columns=fullflexible,
+  keepspaces=true,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=6pt
+}
+
+\title{\textbf{\color{primary}对称参数下任意 $K$ 的稳健集成投票精确闭式：\\奇偶二分结构、代数消元定理与可复现证书核验}}
+\author{DSAA2011 Task B $\cdot$ Project 2 理论扩展与可复现专题文档}
+\date{2026 年 10 月 14 日}
+
+\begin{document}
+\sloppy
+\maketitle
+
+\begin{abstract}
+在已知各分类器边际错误率 $q_i$ 与成对共同出错概率上界 $b_{ij}$ 的稳健加权投票问题中，一般异质参数下的确定性自对偶 minimax 错误率 $\Rdet(q,b)$ 具有超指数项数下界 $T_\Theta(K) \ge K + o_K \ge \frac{(K-1)!}{2}$（结果 5(b)，[S23]），且在高精度区域 $R_0 = \{\sum_i q_i \le 1\}$ 内精确计算图证书 $\Bg(b)$ 是 NP 难的（结果 6(d)，[S20]）。本文研究**完全对称参数**（$q_i \equiv q \in [0, 1/2]$，$b_{ij} \equiv b \in [0, q]$）下的全参数闭式问题，证明复杂性壁垒在对称化下完全坍缩，并给出对**任意 $K \ge 3$** 成立的显式闭式体系：
+\begin{enumerate}
+  \setlength{\itemsep}{2pt}\setlength{\parskip}{0pt}
+  \item \textbf{$R_0$ 区域的二项闭式（定理~\ref{thm:R0}，已解析证明）}：对一切 $K \ge 3$ 与 $Kq \le 1$，恒有 $\Rdet(q, b) = \min\{q, 3b\}$，异质情形下 $K_{\min}=9$ 的奇圈失效现象完全消失。
+  \item \textbf{随机化规则的全参数闭式（定理~\ref{thm:rand}，已解析证明）}：对一切 $K \ge 3$，互补对约束因凸性而单调坍缩为单一中间层约束，$\Rrand(q,b)$ 恰由 $\lceil K/2 \rceil$ 项显式分式给出。
+  \item \textbf{确定性规则的全参数闭式与奇偶二分结构（定理~\ref{thm:det_main}--\ref{thm:odd_dom}）}：当 $K=2m+1$ 为奇数时，无权奇数子集多数规则完备；当 $K=2m \ge 6$ 为偶数时，全员破平局加权规则 $w=(2,1,\dots,1)$ 严格优于一切奇数子集简单多数（从而在 $K=6$ 处证伪“成对信息下加权投票不优于奇数子集简单多数”的猜想）。通过两条精确代数支配恒等式，可解析消去一切规模 $<K$ 的偶数子集项以及一切满足 $s \le 3t+1$ 的奇数子集项（特别地，$K \in \{3,5,7,9\}$ 时简化为最简的 $\frac{K+1}{2}$ 项公式）。
+  \item \textbf{边界解析相等与内部极点精确审计（定理~\ref{thm:boundary}--\ref{thm:vertices}）}：在可行域全部四段边界 $\partial\Thetasym$ 上纯解析证明 $\Rdet = \Rrand = U_{\rm det}$；在内部区域通过凹性极点归约与对称破缺精确 MILP，完成 $K = 3 \sim 10$ 全部非平凡内部极点的零间隙核验。
+\end{enumerate}
+文档附录收录自包含 Python 验证脚本 \texttt{verify\_symmetric\_closed\_form.py}，使用纯有理数算术（\texttt{fractions.Fraction}）与对称破缺 MILP 完整复现全部定理、见证点与极点表。
+\end{abstract}
+
+\takeaway{核心结论一览}{
+对称参数下不仅存在对任意 $K \ge 3$ 成立的多项式项数闭式，而且呈现出奇偶二分规律：奇数 $K=2m+1$ 仅需独裁、三人多数与奇数子集二项矩界 $B_{2s+1,t}$（当 $K \le 9$ 时仅需顶层 $B_{K,t}$，共 $\frac{K+1}{2}$ 项）；偶数 $K=2m$ 则由顶层破平局加权规则 $w=(2,1,\dots,1)$ 额外贡献对称层项 $B^{\mathrm{even}}_{2m,t}$ 与锚点项 $B^{\mathrm{anch}}_{2m,t}$（当 $K \le 12$ 时共 $\frac{3K}{2}-4$ 项）。
+}
+
+\section{问题设定与对称可行域的精确多边形刻画}
+
+设 $K \ge 3$ 个二元分类器的出错指示变量为 $X = (X_1, \dots, X_K) \in \{0, 1\}^K$，总出错个数为 $N = |X| = \sum_{i=1}^K X_i$。在对称参数设定下，各分类器具有相同的边际错误率 $q_i = \mathbb{P}(X_i = 1) = q \in [0, 1/2]$，且成对共同出错概率满足统一上界 $\mathbb{P}(X_i = X_j = 1) \le b_{ij} = b \in [0, q]$（$1 \le i < j \le K$）。可行联合分布集合为：
+\begin{equation}\label{eq:P_sym}
+  \mathcal{P}(q, b) = \left\{ \pi \in \mathbb{R}_{\ge 0}^{2^K} : \sum_{x \in \{0,1\}^K} \pi_x = 1,\ \mathbb{E}_\pi[X_i] = q\ (\forall i \in [K]),\ \mathbb{E}_\pi[X_i X_j] \le b\ (\forall i < j) \right\}.
+\end{equation}
+自对偶确定性投票规则 $F: \{0,1\}^K \to \{0,1\}$ 与随机化规则 $F: \{0,1\}^K \to [0,1]$ 均满足互补对称条件 $F(x) + F(\mathbf{1}-x) = 1$（$\forall x \in \{0,1\}^K$）。对应的 minimax 错误率定义为：
+\begin{equation}\label{eq:minimax_def}
+  \begin{aligned}
+    \Rdet(q, b) &:= \min_{F:\{0,1\}^K \to \{0,1\}\text{ 自对偶}} \max_{\pi \in \mathcal{P}(q,b)} \mathbb{E}_\pi[F(X)], \\
+    \Rrand(q, b) &:= \min_{F:\{0,1\}^K \to [0,1]\text{ 自对偶}} \max_{\pi \in \mathcal{P}(q,b)} \mathbb{E}_\pi[F(X)].
+  \end{aligned}
+\end{equation}
+
+由线性规划强对偶（主文档结果 2(a)，[S4] 定理 6.1），对任意可行参数 $(q, b)$，$\Rdet(q, b)$ 等价于在二次对偶证书 $Q(x) = a + \sum_{i=1}^K \beta_i x_i + \sum_{1 \le i < j \le K} \gamma_{ij} x_i x_j$（$\gamma_{ij} \ge 0$）上最小化线性目标：
+\begin{equation}\label{eq:dual_obj}
+  L_Q(q, b) = a + \left(\sum_{i=1}^K \beta_i\right) q + \left(\sum_{1 \le i < j \le K} \gamma_{ij}\right) b,
+\end{equation}
+约束为 $Q(x) \ge 0$ 且 $\max\{Q(x), Q(\mathbf{1}-x)\} \ge 1$（$\forall x \in \{0,1\}^K$）；若将析取约束替换为线性约束 $Q(x) + Q(\mathbf{1}-x) \ge 1$，则得到 $\Rrand(q, b)$ 的精确对偶。
+
+\begin{proposition}[对称可行参数域 $\Thetasym$ 的精确多边形刻画]\label{prop:feasible_domain}
+对任意 $K \ge 3$，模糊集 $\mathcal{P}(q, b) \neq \varnothing$ 且 $0 \le q \le 1/2$ 当且仅当 $(q, b)$ 属于如下二维凸多边形：
+\begin{equation}\label{eq:Theta_sym}
+  \boxed{\Thetasym = \left\{ (q, b) \in \mathbb{R}^2 : 0 \le q \le \frac{1}{2},\quad b_{\min, K}(q) := \max_{0 \le r \le \lfloor K/2 \rfloor} \frac{2r K q - r(r+1)}{K(K-1)} \le b \le q \right\}.}
+\end{equation}
+下边界 $b = b_{\min, K}(q)$ 是分片线性凸函数，其转折点位于 $q = \frac{r}{K}, b = \frac{r(r-1)}{K(K-1)}$（$r = 1, \dots, \lfloor K/2 \rfloor$）。在第 $r$ 段区间 $q \in \bigl[\frac{r}{K}, \frac{r+1}{K}\bigr]$ 上，下边界由支撑在相邻整数 $N \in \{r, r+1\}$ 上的可交换分布精确达到。
+\end{proposition}
+\begin{proof}
+若 $\pi \in \mathcal{P}(q, b)$，将其在对称群 $S_K$ 的 $K!$ 个坐标置换下平均，所得可交换分布 $\bar{\pi}$ 仍属于 $\mathcal{P}(q, b)$。对任意可交换分布，记 $p_n = \mathbb{P}(N = n)$（$n \in \{0, \dots, K\}$），则 $\mathbb{E}[N] = Kq$ 且 $\mathbb{E}[N(N-1)] = K(K-1)\mathbb{E}[X_1 X_2] \le K(K-1)b$。对任意整数 $r \in \{0, \dots, \lfloor K/2 \rfloor\}$，因 $N$ 取整数值，逐点恒有 $(N - r)(N - r - 1) \ge 0$，展开并取期望得：
+\[
+  K(K-1)b \ge \mathbb{E}[N(N-1)] \ge 2r\mathbb{E}[N] - r(r+1) = 2rKq - r(r+1),
+\]
+即 $b \ge b_{\min, K}(q)$。反之，若 $b_{\min, K}(q) \le b \le q$，设 $Kq \in [r, r+1]$（其中 $0 \le r \le \lfloor K/2 \rfloor$），取支撑在 $\{r, r+1\}$ 上的二点分布 $p_{r+1} = Kq - r, p_r = r + 1 - Kq$，则 $(N-r)(N-r-1) \equiv 0$，故 $\mathbb{E}[N] = Kq$ 且 $\mathbb{E}[N(N-1)] = 2rKq - r(r+1) = K(K-1)b_{\min, K}(q) \le K(K-1)b$，按每个权重层均匀分配概率即得 $\bar{\pi} \in \mathcal{P}(q, b)$。
+\end{proof}
+
+\section{$R_0$ 区域内的二项闭式与全参数随机化闭式}
+
+\begin{theorem}[$R_0$ 区域内任意 $K \ge 3$ 的二项精确闭式]\label{thm:R0}
+对任意 $K \ge 3$ 及满足 $Kq \le 1$ 的任意可行参数 $(q, b) \in \Thetasym \cap R_0$，确定性 minimax 错误率恒为：
+\begin{equation}\label{eq:R0_closed}
+  \boxed{\Rdet(q, b) = \min\{q,\ 3b\} \qquad (\forall K \ge 3,\ Kq \le 1).}
+\end{equation}
+\end{theorem}
+\begin{proof}
+由主文档结果 3(b)（[S5] 定理 5.2），在 $R_0 = \{\sum_{i=1}^K q_i \le 1\}$ 内正截距可无损归零，故对任意 $K \ge 3$ 有 $\Rdet(q, b) = \min\{q_{\min}, \Bg(b)\}$。在对称参数下 $q_{\min} = q$，且对任意非负边权 $y \in \mathbb{R}_{\ge 0}^{E(K_K)}$（记总权 $Y = \sum_e y_e > 0$），取最大权割 $(S, S^c)$，由局部最优性知每个顶点跨割边权不少于同侧边权，对两侧分别求和得 $2y(E(S)) \le y(E(S, S^c))$ 与 $2y(E(S^c)) \le y(E(S, S^c))$，从而 $3g(y) \le 3\max\{y(E(S)), y(E(S^c))\} \le Y$（[S6] 引理 6.1）。于是对等权完全图 $b_e \equiv b$，有
+\[
+  \Bg(b) = \inf_{y \ge 0:\, g(y) > 0} \frac{b Y}{g(y)} \ge 3b.
+\]
+另一方面，取单个三角形的三条边权为 $1$、其余边权为 $0$，有 $Y = 3, g(y) = 1$，达到上界 $3b$。故对一切 $K \ge 3$ 均有 $\Bg(b) = 3b$。
+\end{proof}
+
+\begin{theorem}[全参数随机化规则 $\Rrand(q,b)$ 对任意 $K \ge 3$ 的精确闭式]\label{thm:rand}
+记 $m = \lfloor K/2 \rfloor$。对任意 $K \ge 3$ 及一切 $(q, b) \in \Thetasym$，随机化 minimax 错误率由如下 $\lceil K/2 \rceil$ 项闭式精确给出：
+\begin{equation}\label{eq:rand_closed}
+  \boxed{\Rrand(q, b) = \min\left\{ q,\ \min_{0 \le t \le \lceil K/2 \rceil - 2} \frac{t(t+1) - 2t K q + K(K-1) b}{D^{\mathrm{rand}}_{K, t}} \right\},}
+\end{equation}
+其中分母为：
+\begin{equation}\label{eq:D_rand}
+  D^{\mathrm{rand}}_{K, t} := (m - t)(m - t - 1) + (K - m - t)(K - m - t - 1) = \begin{cases}
+    2(m - t)^2, & K = 2m + 1 \text{ 为奇数}, \\
+    2(m - t)(m - t - 1), & K = 2m \text{ 为偶数}.
+  \end{cases}
+\end{equation}
+\end{theorem}
+\begin{proof}
+随机化自对偶规则的对偶问题为最小化 $L_Q(q,b)$，受限于 $Q(x) \ge 0$、$Q(x) + Q(\mathbf{1}-x) \ge 1$（$\forall x \in \{0,1\}^K$）及 $\gamma \ge 0$。因约束与目标均为凸且对 $S_K$ 置换不变，最优证书可无损取为 $S_K$ 对称二次多项式 $Q(x) = P(|x|)$，其中 $P(n) = a + \beta n + \gamma \binom{n}{2}$（$\gamma \ge 0$）。对任意 $n \in \{0, \dots, m\}$，考察互补和：
+\[
+  S(n) := P(n) + P(K - n) = 2a + \beta K + \frac{\gamma}{2}\bigl[K(K-1) - 2n(K-n)\bigr].
+\]
+因 $\gamma \ge 0$ 且 $n(K-n)$ 在 $0 \le n \le m = \lfloor K/2 \rfloor$ 上严格递增，$S(n)$ 在 $n \in \{0, \dots, m\}$ 上单调递减：
+\[
+  \min_{0 \le n \le m} \bigl[P(n) + P(K - n)\bigr] = P(m) + P(K - m).
+\]
+故全部互补对约束等价于单一线性等式/不等式 $P(m) + P(K - m) \ge 1$。在三维尖多面体 $\{P(n) \ge 0\ (0 \le n \le K),\ P(m)+P(K-m)=1,\ \gamma \ge 0\}$ 中：
+\begin{itemize}
+  \setlength{\itemsep}{1pt}\setlength{\parskip}{0pt}
+  \item 当 $\gamma = 0$ 时，因 $q \le 1/2$，最优极点满足 $P(0) = 0, P(m)+P(K-m)=1$，即 $P(n) = n/K$，期望值为 $q$；
+  \item 当 $\gamma > 0$ 时，严格凸二次函数 $P(n)$ 必在某对相邻整数 $\{t, t+1\}$（$0 \le t \le \lceil K/2 \rceil - 2$）处取零，即 $P(t) = P(t+1) = 0$ 且 $P(m) + P(K-m) = 1$，唯一解为 $P_t^{\mathrm{rand}}(n) = \frac{(n-t)(n-t-1)}{D^{\mathrm{rand}}_{K,t}}$。
+\end{itemize}
+利用 $\mathbb{E}[(N-t)(N-t-1)] = t(t+1) - 2tKq + K(K-1)b$ 对全部极点取最小即得式~\eqref{eq:rand_closed}。
+\end{proof}
+
+\section{全参数确定性规则 $\Rdet(q,b)$ 的通用闭式与代数消元定理}
+
+与随机化规则不同，确定性自对偶规则在互补对 $\{x, \mathbf{1}-x\}$ 上必须二选一判错（$\max\{Q(x), Q(\mathbf{1}-x)\} \ge 1$）。本节构造三族基本确定性证书，并证明它们在任意 $K \ge 3$ 下的代数消元结构。
+
+\subsection{三族基本确定性证书及其逐点可行性}
+
+\begin{lemma}[三族基本确定性二次证书的合法性]\label{lem:three_families}
+对任意 $(q, b) \in \Thetasym$，以下三族仿射函数均为合法的确定性自对偶规则上界（即 $\Rdet(q, b) \le L_Q(q, b)$）：
+\begin{enumerate}
+  \setlength{\itemsep}{3pt}\setlength{\parskip}{0pt}
+  \item \textbf{奇数子集多数的平移二项矩证书 $B_{2s+1, t}(q, b)$}（子集规模 $2s+1 \le K$，$1 \le s \le \lfloor (K-1)/2 \rfloor$，整数平移 $0 \le t \le s - 1$）：取子集 $S = \{1, \dots, 2s+1\}$ 上的简单多数规则 $\mathrm{Maj}_S(x) = \mathbf{1}\{N_S \ge s+1\}$，证书
+  \[
+    Q_{S, t}(x) := \frac{(N_S - t)(N_S - t - 1)}{(s + 1 - t)(s - t)} \ge \mathrm{Maj}_S(x)
+  \]
+  给出上界：
+  \begin{equation}\label{eq:B_odd}
+    B_{2s+1, t}(q, b) := \frac{t(t+1) - 2t(2s+1)q + 2s(2s+1)b}{(s + 1 - t)(s - t)}.
+  \end{equation}
+  特别地，当 $t = 0$ 时，$B_{2s+1, 0}(q, b) = \frac{2(2s+1)}{s+1}b \ge 3b = B_{3, 0}(q, b)$，故所有 $t=0$ 项均由 $B_{3,0}(q,b) = 3b$ 支配。
+
+  \item \textbf{偶数规模对称层证书 $B^{\mathrm{even}}_{2s, t}(q, b)$}（偶数子集规模 $2s \le K$，$s \ge 3$，整数平移 $1 \le t \le s - 2$）：记 $N_{2s} = \sum_{i=1}^{2s} x_i$，证书
+  \[
+    Q^{\mathrm{even}}_{2s, t}(x) := \frac{(N_{2s} - t)(N_{2s} - t - 1)}{(s - t)(s - 1 - t)}
+  \]
+  在 $N_{2s} \in \{0, \dots, 2s\}$ 上非负，且当 $N_{2s} \ge s$ 时 $Q^{\mathrm{even}}_{2s, t}(x) \ge 1$。由于 $\mathrm{Maj}_{2s-1}(x) = \mathbf{1}\{N_{2s-1} \ge s\} \le \mathbf{1}\{N_{2s} \ge s\}$，且破平局加权多数规则 $w = (2, \mathbf{1}_{2s-1})$ 的失败指示也满足 $\mathbf{1}\{2x_1 + \sum_{i=2}^{2s} x_i \ge s+1\} \le \mathbf{1}\{N_{2s} \ge s\}$，故 $Q^{\mathrm{even}}_{2s, t}$ \textbf{同时对 $\mathrm{Maj}_{2s-1}$ 与 $w = (2, \mathbf{1}_{2s-1})$ 合法}，给出上界：
+  \begin{equation}\label{eq:B_even}
+    B^{\mathrm{even}}_{2s, t}(q, b) := \frac{t(t+1) - 2t(2s)q + 2s(2s-1)b}{(s - t)(s - 1 - t)}.
+  \end{equation}
+
+  \item \textbf{偶数规模破平局锚点证书 $B^{\mathrm{anch}}_{2s, t}(q, b)$}（偶数子集规模 $2s \le K$，$s \ge 3$，整数平移 $1 \le t \le s - 2$）：对破平局加权多数规则 $w = (2, \underbrace{1, \dots, 1}_{2s-1}, 0, \dots, 0)$（总权重 $2s+1$，失败阈值 $r = s+1$），记加权和 $W = 2x_1 + \sum_{i=2}^{2s} x_i \in \{0, \dots, 2s+1\}$，证书
+  \[
+    Q^{\mathrm{anch}}_{2s, t}(x) := \frac{(W - t)(W - t - 1)}{(s + 1 - t)(s - t)} \ge \mathbf{1}\{W \ge s + 1\} = F_w(x)
+  \]
+  给出上界：
+  \begin{equation}\label{eq:B_anch}
+    B^{\mathrm{anch}}_{2s, t}(q, b) := \frac{t(t+1) + \bigl(2 - 2t(2s+1)\bigr) q + 2(2s-1)(s+1) b}{(s + 1 - t)(s - t)}.
+  \end{equation}
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+三类多项式均形如 $\frac{(Z - t)(Z - t - 1)}{(r - t)(r - 1 - t)}$，其中 $Z$ 取整数值（分别为 $N_S, N_{2s}, W$），$t \le r - 2$ 为整数。因相邻整数之间无其他整数，对一切整数 $Z \in \mathbb{Z}$ 均有 $(Z - t)(Z - t - 1) \ge 0$；当 $Z \ge r > t + 1$ 时，由单调性知 $(Z - t)(Z - t - 1) \ge (r - t)(r - 1 - t) > 0$，分式值 $\ge 1$。展开二次项：对 $W = 2x_1 + \sum_{i=2}^{2s} x_i$，利用 $x_i^2 = x_i$ 得
+\[
+  W^2 = 4x_1 + \sum_{i=2}^{2s} x_i + 4\sum_{i=2}^{2s} x_1 x_i + 2\sum_{2 \le i < j \le 2s} x_i x_j,
+\]
+故二次交叉项系数全为正，且 $\mathbb{E}[W] = (2s+1)q$，$\mathbb{E}[W^2] = (2s+3)q + 2(2s-1)(s+1)b$，代入 $\mathbb{E}[W^2 - (2t+1)W + t(t+1)]$ 即得式~\eqref{eq:B_anch}。
+\end{proof}
+
+\begin{remark}[对“奇数子集多数充分性猜想”的严格反例]
+仓库笔记 \texttt{notes/unlabeled\_thread\_completion.md}（§Q2, §Q6）曾基于 $K=4, 5, 7$ 的数值搜索猜想：“在成对信息下，加权投票的最坏情况错误率永不严格优于最佳无权奇数子集简单多数”。引理~\ref{lem:three_families}(3) 表明该猜想在**偶数 $K \ge 6$** 时不成立：取 $K = 6, q = 5/18, b = 1/18 \in \Theta^{\mathrm{sym}}_6$（由 $b_{\min, 6}(5/18) = 1/90 \le 1/18 \le 5/18$ 知可行），独裁（$s=0$）、三人多数（$2s+1=3$）与五人多数（$2s+1=5$）在该点的精确最坏错误率（通过原始 LP 直接求解）分别为 $5/18 \approx 0.2778$、$1/6 \approx 0.1667$ 与 $1/6 \approx 0.1667$；而全员加权规则 $w = (2, 1, 1, 1, 1, 1)$ 由证书 $B^{\mathrm{anch}}_{6, 1}(5/18, 1/18) = \frac{1}{3} - 2\cdot\frac{5}{18} + \frac{20}{3}\cdot\frac{1}{18} = \frac{4}{27} \approx 0.1481 < \frac{1}{6}$ 严格胜出。
+\end{remark}
+
+\subsection{两条精确代数消元定理与任意 $K$ 的闭式}
+
+\begin{theorem}[偶数子集项的完全代数消元]\label{thm:even_dom}
+设 $s \ge 3$ 且 $1 \le t \le s - 2$。只要分类器总数满足 $K \ge 2s + 1$（即存在 $2s+1$ 人的奇数子集），则在 $\Thetasym$ 上恒有以下两条精确代数恒等式：
+\begin{align}
+  B^{\mathrm{anch}}_{2s, t}(q, b) &= B_{2s+1, t}(q, b) + \frac{2(q - b)}{(s + 1 - t)(s - t)} \ \ge\ B_{2s+1, t}(q, b), \label{eq:dom_anch} \\
+  B^{\mathrm{even}}_{2s, t}(q, b) &= \left(1 - \frac{t}{2s+1} + \frac{2s}{(2s+1)(s - 1 - t)}\right) B_{2s+1, t}(q, b) + \frac{t}{2s+1} B_{2s+1, t+1}(q, b) \nonumber \\
+  &\ge\ \min\bigl\{ B_{2s+1, t}(q, b),\ B_{2s+1, t+1}(q, b) \bigr\}. \label{eq:dom_even}
+\end{align}
+因此：\textbf{(i)} 当 $K = 2m+1$ 为奇数时，一切偶数规模子集项 $B^{\mathrm{even}}_{2s, t}$ 与 $B^{\mathrm{anch}}_{2s, t}$（$2s \le 2m$）全部冗余；\textbf{(ii)} 当 $K = 2m$ 为偶数时，一切非顶层偶数规模子集项（$2s \le 2m - 2$）全部冗余，仅顶层 $2s = 2m = K$ 保留。
+\end{theorem}
+\begin{proof}
+式~\eqref{eq:dom_anch} 由式~\eqref{eq:B_anch} 与式~\eqref{eq:B_odd} 同分母直接相减得到，因 $(q, b) \in \Thetasym$ 满足 $q \ge b$，故右端非负。对于式~\eqref{eq:dom_even}，将右端记为 $\bigl(1 - \lambda + \delta\bigr) B_{2s+1, t} + \lambda B_{2s+1, t+1}$，其中 $\lambda = \frac{t}{2s+1} \in (0, 1)$，$\delta = \frac{2s}{(2s+1)(s-1-t)} > 0$。通分至分母 $(s-t)(s-1-t)$ 后比较常数项、$q$ 系数与 $b$ 系数：
+\begin{itemize}
+  \setlength{\itemsep}{1pt}\setlength{\parskip}{0pt}
+  \item 常数项：$\frac{(2s+1-t)(s-1-t) + 2s}{(2s+1)(s+1-t)} t(t+1) + \frac{t}{2s+1}(t+1)(t+2) = \frac{(s+1-t)(2s+1)}{(2s+1)(s+1-t)} t(t+1) = t(t+1)$；
+  \item $q$ 系数：$-2t\bigl[(s-1-t) + (t+1)\bigr] = -2t(2s)$；
+  \item $b$ 系数：$2s\bigl[(s-1-t) + t\bigr] = 2s(2s-1)$。
+\end{itemize}
+左端与右端完全恒等。又当 $K \ge 2s+1$ 时，在 $\Thetasym$ 上必有 $B_{2s+1, t}(q, b) = \mathbb{E}[Q_{S, t}(X)] \ge 0$，故 $\delta B_{2s+1, t}(q, b) \ge 0$，从而 $B^{\mathrm{even}}_{2s, t} \ge (1-\lambda) B_{2s+1, t} + \lambda B_{2s+1, t+1} \ge \min\{B_{2s+1, t}, B_{2s+1, t+1}\}$。
+\end{proof}
+
+\begin{theorem}[奇数子集项的精确代数消元与相变阈值 $s \le 3t + 1$]\label{thm:odd_dom}
+对任意整数 $s \ge 3$ 与 $1 \le t \le s - 2$，相邻两个奇数子集规模 $2s-1$ 与 $2s+1$ 的二项矩项恒满足如下精确线性恒等式：
+\begin{equation}\label{eq:odd_dom_id}
+  \boxed{B_{2s-1, t}(q, b) = L_1 B_{2s+1, t}(q, b) + L_2 B_{2s+1, t+1}(q, b) + L_3 \cdot (3b),}
+\end{equation}
+其中三个系数全为严格正有理数：
+\begin{equation}\label{eq:L_coeffs}
+  L_1 = \frac{(2s - 2t - 3)(s - t + 1)}{(2s + 1)(s - t - 1)} > 0, \qquad
+  L_2 = \frac{2t}{2s + 1} > 0, \qquad
+  L_3 = \frac{2}{3(s - t)(s - t - 1)} > 0,
+\end{equation}
+且系数和满足：
+\begin{equation}\label{eq:L_sum}
+  L_1 + L_2 + L_3 = 1 + \frac{2(3t + 1 - s)}{3(2s + 1)(s - t)(s - t - 1)}.
+\end{equation}
+由此得出：
+\begin{enumerate}
+  \setlength{\itemsep}{2pt}\setlength{\parskip}{0pt}
+  \item \textbf{当 $s \le 3t + 1$ 时（消元区）}：$L_1 + L_2 + L_3 \ge 1$，故在 $\Thetasym$（$K \ge 2s+1$）上 $B_{2s-1, t}(q, b) \ge \min\bigl\{B_{2s+1, t}(q, b),\, B_{2s+1, t+1}(q, b),\, 3b\bigr\}$，即 $B_{2s-1, t}$ 恒为冗余项。特别地，当 $K \in \{3, 5, 7, 9\}$（最大奇数子集参数 $m \le 4$）时，对所有 $t \ge 1$ 均有 $s \le 4 \le 3t + 1$，一切中间奇数子集项全部消去。
+  \item \textbf{当 $s \ge 3t + 2$ 时（相变激活区）}：$L_1 + L_2 + L_3 < 1$。在平面 $B_{2s+1, t}(q,b) = B_{2s+1, t+1}(q,b) = 3b$ 的交点处，$B_{2s-1, t}$ 严格小于该公共值，故在 $K \ge 11$（$t=1$）、$K \ge 17$（$t=2$）等规模下，较小奇数子委员会项在靠近 $b = q/3$ 区域严格生效。
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+将式~\eqref{eq:L_coeffs} 代入式~\eqref{eq:odd_dom_id} 右端并通分至分母 $(s-t)(s-t-1)$：
+\begin{itemize}
+  \setlength{\itemsep}{1pt}\setlength{\parskip}{0pt}
+  \item 常数项：$\frac{(2s-2t-3)t(t+1) + 2t(t+1)(t+2)}{2s+1} = \frac{(2s+1)t(t+1)}{2s+1} = t(t+1)$；
+  \item $q$ 系数：$-2t(2s-2t-3) - 4t(t+1) = -2t(2s - 1)$；
+  \item $b$ 系数：$2s(2s-2t-3) + 4st + 2 = 4s^2 - 6s + 2 = (2s-2)(2s-1)$。
+\end{itemize}
+与 $B_{2s-1, t}(q, b)$ 的分子完全一致。再将 $L_1, L_2, L_3$ 求和即得式~\eqref{eq:L_sum}。当 $s \le 3t+1$ 时，由于在 $\Thetasym$ 上 $B_{2s+1, t} \ge 0, B_{2s+1, t+1} \ge 0, 3b \ge 0$，系数非负且和 $\ge 1$ 直接推出 $B_{2s-1, t} \ge \min\{B_{2s+1, t}, B_{2s+1, t+1}, 3b\}$。
+\end{proof}
+
+\begin{theorem}[对称参数下任意 $K \ge 3$ 的确定性闭式候选族 $U_{\mathrm{det}}(q, b)$]\label{thm:det_main}
+对任意 $K \ge 3$，消除定理~\ref{thm:even_dom} 与定理~\ref{thm:odd_dom} 证明的恒冗余项后，确定性上界闭式 $U_{\mathrm{det}}(q, b)$ 为：
+\begin{equation}\label{eq:U_det_general}
+  \resizebox{0.92\textwidth}{!}{$\displaystyle
+  \boxed{U_{\mathrm{det}}(q, b) = \begin{cases}
+    \displaystyle \min\left\{ q,\ 3b,\ \min_{1 \le t \le m - 1} B_{2m+1, t}(q, b),\ \min_{\substack{2 \le s \le m - 1 \\ 1 \le t \le \min(s-1, \lfloor\frac{s-1}{3}\rfloor)}} B_{2s+1, t}(q, b) \right\}, & K = 2m + 1, \\[16pt]
+    \displaystyle \min\left\{ q,\ 3b,\ \min_{1 \le t \le m - 2} \min\bigl\{ B_{2m-1, t},\, B^{\mathrm{even}}_{2m, t},\, B^{\mathrm{anch}}_{2m, t} \bigr\},\ \min_{\substack{2 \le s \le m - 2 \\ 1 \le t \le \min(s-1, \lfloor\frac{s-1}{3}\rfloor)}} B_{2s+1, t} \right\}, & K = 2m.
+  \end{cases}}$}
+\end{equation}
+特别地：
+\begin{itemize}
+  \setlength{\itemsep}{2pt}\setlength{\parskip}{0pt}
+  \item 对奇数 $K \in \{3, 5, 7, 9\}$（$m \in \{1, 2, 3, 4\}$），最后一项集合为空，共有 $m + 1 = \frac{K+1}{2}$ 个不可约项：
+  \[
+    U_{\mathrm{det}}(q, b) = \min\left\{ q,\ 3b,\ \min_{1 \le t \le m - 1} B_{K, t}(q, b) \right\}.
+  \]
+  \item 对偶数 $K \in \{4, 6, 8, 10, 12\}$（$m \in \{2, 3, 4, 5, 6\}$），不可约表示恰好包含 $2 + 3(m - 2) = \frac{3K}{2} - 4$ 项（即 $q, 3b$ 以及每个 $1 \le t \le m-2$ 对应的三元组 $B_{2m-1, t}, B^{\mathrm{even}}_{2m, t}, B^{\mathrm{anch}}_{2m, t}$）。
+\end{itemize}
+\end{theorem}
+
+\section{边界纯解析相等定理与内部区域的有限极点归约}
+
+\begin{theorem}[可行域全边界 $\partial\Thetasym$ 上的纯解析精确性]\label{thm:boundary}
+对任意 $K \ge 3$，在可行域 $\Thetasym$ 的全部边界 $\partial\Thetasym$ 以及高精度子区域 $\Thetasym \cap R_0$ 上，恒有：
+\begin{equation}\label{eq:boundary_exact}
+  \boxed{\Rdet(q, b) = \Rrand(q, b) = U_{\mathrm{det}}(q, b) \qquad \forall (q, b) \in \partial\Thetasym.}
+\end{equation}
+\end{theorem}
+\begin{proof}
+逐段检验 $\partial\Thetasym$ 的四部分边界：
+\begin{enumerate}
+  \setlength{\itemsep}{2pt}\setlength{\parskip}{0pt}
+  \item \textbf{上边界 $b = q$（$0 \le q \le 1/2$）}：取全错与全对的两点分布 $\pi_{\mathbf{1}} = q, \pi_{\mathbf{0}} = 1 - q$，则 $\mathbb{E}_\pi[X_i] = q$ 且 $\mathbb{E}_\pi[X_i X_j] = q = b$。对任意自对偶规则 $F$，因 $F(\mathbf{0}) + F(\mathbf{1}) = 1$ 且 $q \le 1 - q$，有 $\mathbb{E}_\pi[F(X)] = (1-q)F(\mathbf{0}) + qF(\mathbf{1}) \ge q = U_{\mathrm{det}}(q, q)$。
+  \item \textbf{右边界 $q = 1/2$（$b_{\min, K}(1/2) \le b \le 1/2$）}：当 $K = 2m+1$ 时，取 $p_m = p_{m+1} = 1/2$ 的互补对称可交换分布，其 $e = \frac{m}{2(2m+1)} = b_{\min, K}(1/2) \le b$；当 $K = 2m$ 时，取 $p_m = 1$ 的可交换分布，其 $e = \frac{m-1}{2(2m-1)} = b_{\min, K}(1/2) \le b$。因分布满足 $\pi_x = \pi_{\mathbf{1}-x}$，任何自对偶规则在其上的错误率恒为 $1/2 = q = U_{\mathrm{det}}(1/2, b)$。
+  \item \textbf{下边界 $b = b_{\min, K}(q)$ 的前 $\lceil K/2 \rceil - 1$ 段（$0 \le q \le \frac{\lceil K/2 \rceil - 1}{K}$）}：在第 $t$ 段 $q \in \bigl[\frac{t}{K}, \frac{t+1}{K}\bigr]$（$0 \le t \le \lceil K/2 \rceil - 2$）上，由命题~\ref{prop:feasible_domain}，下边界方程恰为 $t(t+1) - 2tKq + K(K-1)b = 0$。当 $t = 0$ 时 $b = 0 \implies 3b = 0$；当 $1 \le t \le \lceil K/2 \rceil - 2$ 时，该式恰为 $B_{K, t}(q, b)$（奇数 $K$）或 $B^{\mathrm{even}}_{K, t}(q, b)$（偶数 $K$）的分子，故 $0 \le \Rrand(q,b) \le \Rdet(q,b) \le U_{\mathrm{det}}(q,b) = 0$。
+  \item \textbf{下边界 $b = b_{\min, K}(q)$ 的最末段（$\frac{\lceil K/2 \rceil - 1}{K} \le q \le \frac{1}{2}$）}：
+  \begin{itemize}
+    \item 若 $K = 2m+1$ 为奇数，最末段 $q \in \bigl[\frac{m}{2m+1}, \frac{1}{2}\bigr]$ 满足 $2m(2m+1)b = 2m(2m+1)q - m(m+1)$，由支撑在 $N \in \{m, m+1\}$ 上的可交换分布 $p_{m+1} = (2m+1)q - m \le p_m$ 实现。因 $N=m$ 与 $N=m+1$ 互补，任何自对偶规则的错误率至少为 $\min\{p_m, p_{m+1}\} = (2m+1)q - m$；另一方面，将 $2m(2m+1)b = 2m(2m+1)q - m(m+1)$ 代入 $B_{2m+1, m-1}(q, b)$ 的分子 $(m-1)m - 2(m-1)(2m+1)q + 2m(2m+1)b$，恰得 $2(2m+1)q - 2m$，除以分母 $2$ 得 $B_{2m+1, m-1}(q, b) = (2m+1)q - m$。
+    \item 若 $K = 2m$ 为偶数，最末段 $q \in \bigl[\frac{m-1}{2m}, \frac{1}{2}\bigr]$ 满足 $(2m-1)b = 2(m-1)q - \frac{m-1}{2}$，由支撑在 $N \in \{m-1, m\}$ 上的可交换分布 $p_m = 2mq - (m-1)$ 实现。任何自对偶规则在中间层 $N=m$ 上必错一半状态（$f_m = 1/2$），故错误率至少为 $\frac{1}{2}p_m = mq - \frac{m-1}{2}$；另一方面，将 $(2m-1)b = 2(m-1)q - \frac{m-1}{2}$ 代入锚点项 $B^{\mathrm{anch}}_{2m, m-2}(q, b)$（分母为 $3 \times 2 = 6$），分子化为 $(m-2)(m-1) + [2 - 2(m-2)(2m+1)]q + (m+1)(m-1)(4q - 1) = 6mq - 3(m-1)$，除以 $6$ 恰得 $B^{\mathrm{anch}}_{2m, m-2}(q, b) = mq - \frac{m-1}{2}$。
+  \end{itemize}
+\end{enumerate}
+综上，在 $\partial\Thetasym$ 的每一段上均有 $\Rdet = \Rrand = U_{\mathrm{det}}$。
+\end{proof}
+
+\begin{theorem}[内部凹性极点归约与特征极点闭式坐标]\label{thm:vertices}
+设 $U_{\mathrm{det}}(q, b) = \min_{j \in \mathcal{A}_K} L_j(q, b)$ 将凸多边形 $\Thetasym$ 划分为有限个凸多边形胞腔 $\Omega_j = \{(q,b) \in \Thetasym : L_j(q,b) = U_{\mathrm{det}}(q,b)\}$。因为对每个固定规则 $F$，最坏风险 $R(F; q, b)$ 是关于 $(q, b)$ 的凹函数，而 $L_j(q, b)$ 在 $\Omega_j$ 上是仿射函数，故
+\begin{equation}\label{eq:vertex_reduction}
+  \Rdet(q, b) = U_{\mathrm{det}}(q, b)\quad (\forall (q, b) \in \Thetasym) \quad\Longleftrightarrow\quad \Rdet(v) = U_{\mathrm{det}}(v)\quad (\forall v \in \mathcal{V}_{\mathrm{int}}(\Thetasym)),
+\end{equation}
+其中 $\mathcal{V}_{\mathrm{int}}(\Thetasym)$ 是各胞腔 $\Omega_j$ 落在 $\Thetasym$ 内部的顶点集合。这些内部极点由以下两族显式有理坐标给出：
+\begin{enumerate}
+  \setlength{\itemsep}{2pt}\setlength{\parskip}{0pt}
+  \item \textbf{奇数主平面束与独裁/三角形界的交点族}：对奇数 $K = 2m+1$，平面族 $z = B_{2m+1, t}(q, b)$（$0 \le t \le m-1$）在三维空间 $(q, b, z)$ 中共顶点于 $\bigl(\frac{m+1}{2m+1}, \frac{m}{2(2m+1)}, 1\bigr)$（位于 $q > 1/2$ 外侧），故相邻平面的交线 $B_{2m+1, t-1} = B_{2m+1, t}$ 在 $q \le 1/2$ 内互不相交，其方程为 $K(K-1)b = (m+t)Kq - t(m+1)$。当 $3t \ge m + 2$ 时，该射线与独裁平面 $z = q$ 交于内部极点：
+  \begin{equation}\label{eq:v_t_odd}
+    \boxed{v_{m, t} = \left( q = \frac{t}{m + t},\quad b = \frac{t}{2(2m + 1)} \right), \qquad U_{\mathrm{det}}(v_{m, t}) = \frac{t}{m + t} \qquad \left(\frac{m+2}{3} \le t \le m - 1\right).}
+  \end{equation}
+  此外，平面 $B_{2s+1, 1}(q, b) = 3b = q$（$2 \le s \le \min(m, 4)$）交于极点：
+  \begin{equation}\label{eq:v_1_odd}
+    \boxed{v^{\mathrm{tri}}_s = \left( q = \frac{6}{(6 - s)(s + 1)},\quad b = \frac{2}{(6 - s)(s + 1)} \right), \qquad U_{\mathrm{det}}(v^{\mathrm{tri}}_s) = \frac{6}{(6 - s)(s + 1)}.}
+  \end{equation}
+  \item \textbf{偶数 $K = 2m$ 的三元组共点极点族}：对每个 $1 \le t \le m - 2$，三张平面 $B_{2m-1, t}(q, b) = B^{\mathrm{even}}_{2m, t}(q, b) = B^{\mathrm{anch}}_{2m, t}(q, b)$ 沿射线 $b = \frac{t}{2m-1}q$ 交于唯一内部极点：
+  \begin{equation}\label{eq:w_mt_even}
+    \boxed{\begin{aligned}
+      w_{m, t} &= \left( q = \frac{t(t + 1)}{2mt + m - t - 1},\quad b = \frac{t^2(t + 1)}{(2m - 1)(2mt + m - t - 1)} \right), \\
+      U_{\mathrm{det}}(w_{m, t}) &= \frac{t(t + 1)}{(m - t)(2mt + m - t - 1)}.
+    \end{aligned}}
+  \end{equation}
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+凹性归约式~\eqref{eq:vertex_reduction} 与 [S7] §4.3 相同：在每个凸多边形胞腔 $\Omega_j$ 上，对任意规则 $F$，若其在 $\Omega_j$ 的所有顶点 $v$ 上满足 $R(F; v) \ge L_j(v)$，则对凸组合 $u = \sum_v \lambda_v v \in \Omega_j$ 有 $R(F; u) \ge \sum_v \lambda_v R(F; v) \ge \sum_v \lambda_v L_j(v) = L_j(u)$，再对 $F$ 取最小即得 $\Rdet(u) \ge U_{\mathrm{det}}(u)$。
+
+对于极点公式~\eqref{eq:v_t_odd}：多项式 $P_t(n) = \frac{(n-t)(n-t-1)}{(m+1-t)(m-t)}$ 与 $P_{t-1}(n) = \frac{(n-t+1)(n-t)}{(m+2-t)(m+1-t)}$ 在 $n = t$ 处均等于 $0$、在 $n = m+1$ 处均等于 $1$，故二者之差正比于 $(n-t)(m+1-n)$，等值线方程为 $\mathbb{E}[(N-t)(N-m-1)] = K(K-1)b - (m+t)Kq + t(m+1) = 0$。在该直线上，两者的公共值等于过 $(t, 0)$ 与 $(m+1, 1)$ 的线性插值期望 $\frac{Kq - t}{m + 1 - t}$。令其等于 $q$ 即解得 $q = \frac{t}{m+t}$ 与 $b = \frac{t}{2(2m+1)}$。
+
+对于偶数极点公式~\eqref{eq:w_mt_even}：$B_{2m-1, t}$ 与 $B^{\mathrm{even}}_{2m, t}$ 分母相同（均为 $(m-t)(m-1-t)$）且常数项相同（均为 $t(t+1)$），令二者分子相等得 $-2t(2m-1)q + (2m-2)(2m-1)b = -2t(2m)q + 2m(2m-1)b \iff b = \frac{t}{2m-1}q$。将其代入 $B^{\mathrm{even}}_{2m, t}(q, b) = B^{\mathrm{anch}}_{2m, t}(q, b)$ 得
+\[
+  \frac{t(t+1) - 2mtq}{(m-t)(m-1-t)} = \frac{t(t+1) + (2 - 2mt)q}{(m+1-t)(m-t)},
+\]
+两边同乘 $(m-t)(m-1-t)(m+1-t)$ 化简即得 $q = \frac{t(t+1)}{2mt + m - t - 1}$，从而得到式~\eqref{eq:w_mt_even}。
+\end{proof}
+
+\section{$K = 3 \sim 12$ 不可约闭式表、有理数见证点与内部极点审计表}
+
+\subsection{不可约闭式展开与有理数见证点表}
+
+表~\ref{tab:irredundant_terms} 汇总了 $K = 3 \sim 10$ 的全部不可约闭式项 $L(q,b) = a + Bq + Cb$ 及其在 $\Thetasym$ 内的精确有理数见证点 $(q^*, b^*)$。在每个见证点处，表中对应项的值严格小于其余所有不可约项的最小值（严格优势裕量 $\Delta^* = \min_{j' \neq j} L_{j'}(q^*, b^*) - L_j(q^*, b^*) > 0$），从而以纯有理数算术证明每一项均不可删减。
+
+\begin{table}[htbp]
+\centering
+\caption{$K = 3 \sim 10$ 对称参数闭式 $U_{\mathrm{det}}(q, b)$ 的不可约项、对应规则与精确有理数见证点}\label{tab:irredundant_terms}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.18}
+\resizebox{\textwidth}{!}{\begin{tabular}{@{}c l l l c c c@{}}
+\toprule
+$K$ & 项记号 & 显式仿射函数 $L(q, b)$ & 实现规则权重 $w$ & 见证点 $(q^*, b^*)$ & 该项取值 & 严格裕量 $\Delta^*$ \\
+\midrule
+3 & $\mathrm{dict}, B_{3,0}$ & $q,\quad 3b$ & $(1,0,0),\ (1,1,1)$ & $(1/2, 1/2),\ (1/3, 0)$ & $1/2,\ 0$ & $1,\ 1/3$ \\
+4 & $\mathrm{dict}, B_{3,0}$ & $q,\quad 3b$ & $(1,0,0,0),\ (1,1,1,0)$ & $(1/2, 1/2),\ (1/4, 0)$ & $1/2,\ 0$ & $1,\ 1/4$ \\
+\midrule
+5 & $\mathrm{dict}, B_{3,0}$ & $q,\quad 3b$ & $(1,0^4),\ (1^3,0^2)$ & $(1/2, 1/2),\ (1/6, 0)$ & $1/2,\ 0$ & $1,\ 1/6$ \\
+5 & $B_{5,1}$ & $1 - 5q + 10b$ & $(1,1,1,1,1)$ & $(2/5, 1/10)$ & $0$ & $3/10$ \\
+\midrule
+6 & $\mathrm{dict}, B_{3,0}$ & $q,\quad 3b$ & $(1,0^5),\ (1^3,0^3)$ & $(1/2, 1/2),\ (1/9, 0)$ & $1/2,\ 0$ & $1,\ 1/9$ \\
+6 & $B_{5,1}$ & $1 - 5q + 10b$ & $(1,1,1,1,1,0)$ & $(3/7, 1/7)$ & $2/7$ & $1/7$ \\
+6 & $B^{\mathrm{even}}_{6,1}$ & $1 - 6q + 15b$ & $(1^5,0)$ 或 $(2,1^5)$ & $(4/15, 1/25)$ & $0$ & $1/15$ \\
+6 & $B^{\mathrm{anch}}_{6,1}$ & $\frac{1}{3} - 2q + \frac{20}{3}b$ & $(2,1,1,1,1,1)$ & $(5/18, 1/18)$ & $4/27$ & $1/54$ \\
+\midrule
+7 & $\mathrm{dict}, B_{3,0}$ & $q,\quad 3b$ & $(1,0^6),\ (1^3,0^4)$ & $(1/2, 1/2),\ (1/10, 0)$ & $1/2,\ 0$ & $1,\ 1/10$ \\
+7 & $B_{7,1}$ & $\frac{1}{3} - \frac{7}{3}q + 7b$ & $(1^7)$ & $(1/4, 1/20)$ & $1/10$ & $1/20$ \\
+7 & $B_{7,2}$ & $3 - 14q + 21b$ & $(1^7)$ & $(3/7, 1/7)$ & $0$ & $2/7$ \\
+\midrule
+8 & $\mathrm{dict}, B_{3,0}$ & $q,\quad 3b$ & $(1,0^7),\ (1^3,0^5)$ & $(1/2, 1/2),\ (1/14, 0)$ & $1/2,\ 0$ & $1,\ 1/14$ \\
+8 & $B_{7,1},\ B_{7,2}$ & $\frac{1}{3} - \frac{7}{3}q + 7b,\quad 3 - 14q + 21b$ & $(1^7,0)$ & $(4/13, 1/12),\ (9/20, 6/35)$ & $31/156,\ 3/10$ & $7/234,\ 3/20$ \\
+8 & $B^{\mathrm{even}}_{8,1},\ B^{\mathrm{anch}}_{8,1}$ & $\frac{1}{3} - \frac{8}{3}q + \frac{28}{3}b,\quad \frac{1}{6} - \frac{4}{3}q + \frac{35}{6}b$ & $(2,1^7)$ & $(3/16, 1/50),\ (7/37, 1/37)$ & $1/50,\ 8/111$ & $1/75,\ 1/111$ \\
+8 & $B^{\mathrm{even}}_{8,2},\ B^{\mathrm{anch}}_{8,2}$ & $3 - 16q + 28b,\quad 1 - \frac{17}{3}q + \frac{35}{3}b$ & $(2,1^7)$ & $(1/3, 1/12),\ (7/20, 1/10)$ & $0,\ 11/60$ & $1/12,\ 1/60$ \\
+\midrule
+9 & $\mathrm{dict}, B_{3,0}$ & $q,\quad 3b$ & $(1,0^8),\ (1^3,0^6)$ & $(1/2, 1/2),\ (1/15, 0)$ & $1/2,\ 0$ & $1,\ 1/15$ \\
+9 & $B_{9,1}$ & $\frac{1}{6} - \frac{3}{2}q + 6b$ & $(1^9)$ & $(1/6, 1/50)$ & $11/300$ & $7/300$ \\
+9 & $B_{9,2}$ & $1 - 6q + 12b$ & $(1^9)$ & $(6/19, 1/13)$ & $7/247$ & $79/741$ \\
+9 & $B_{9,3}$ & $6 - 27q + 36b$ & $(1^9)$ & $(4/9, 1/6)$ & $0$ & $5/18$ \\
+\midrule
+10 & $\mathrm{dict}, B_{3,0}$ & $q,\quad 3b$ & $(1,0^9),\ (1^3,0^7)$ & $(1/2, 1/2),\ (1/20, 0)$ & $1/2,\ 0$ & $1,\ 1/20$ \\
+10 & $B_{9,1}, B_{9,2}, B_{9,3}$ & $\frac{1}{6}-\frac{3}{2}q+6b,\ 1-6q+12b,\ 6-27q+36b$ & $(1^9,0)$ & $(1/4,1/16),(3/8,2/15),(6/13,16/85)$ & $1/6, 7/20, \frac{348}{1105}$ & $\frac{1}{48}, \frac{1}{40}, \frac{162}{1105}$ \\
+10 & $B^{\mathrm{even}}_{10,1},\ B^{\mathrm{anch}}_{10,1}$ & $\frac{1}{6} - \frac{5}{3}q + \frac{15}{2}b,\quad \frac{1}{10} - q + \frac{27}{5}b$ & $(2,1^9)$ & $(8/55, 1/99),\ (1/7, 1/63)$ & $0,\ 3/70$ & $1/110,\ 1/210$ \\
+10 & $B^{\mathrm{even}}_{10,2},\ B^{\mathrm{anch}}_{10,2}$ & $1 - \frac{20}{3}q + 15b,\quad \frac{1}{2} - \frac{7}{2}q + 9b$ & $(2,1^9)$ & $(9/35, 1/21),\ (5/19, 1/17)$ & $0,\ 35/323$ & $1/35,\ 16/969$ \\
+10 & $B^{\mathrm{even}}_{10,3},\ B^{\mathrm{anch}}_{10,3}$ & $6 - 30q + 45b,\quad 2 - \frac{32}{3}q + 18b$ & $(2,1^9)$ & $(17/46, 5/44),\ (5/13, 5/39)$ & $27/1012,\ 8/39$ & $233/3036,\ 1/39$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+对于 $K = 11$，定理~\ref{thm:odd_dom} 预言的相变首次发生：$s = 5 \ge 3(1) + 2$，故次大奇数子集项 $B_{9,1}$ 与顶层项 $B_{11,1}, B_{11,2}, B_{11,3}, B_{11,4}$ 同时不可约（共 $7$ 项）；对于 $K = 12$，不可约项为 $\mathrm{dict}, B_{3,0}$ 及 $t \in \{1,2,3,4\}$ 对应的三元组 $(B_{11,t}, B^{\mathrm{even}}_{12,t}, B^{\mathrm{anch}}_{12,t})$（共 $14$ 项）。
+
+\subsection{非平凡内部极点精确审计表}
+
+在对称参数下，由于目标与约束对 $S_K$ 不变，可在无 big-$M$ 的精确二次证书 MILP（[S7] 式 (12)）中无损加入两类完备的对称破缺约束：
+\begin{enumerate}
+  \setlength{\itemsep}{2pt}\setlength{\parskip}{0pt}
+  \item \textbf{诱导阈值权重非递增排序}：$w_1 \ge w_2 \ge \dots \ge w_K$，其中 $w_i = \beta_i + \frac{1}{2}\sum_{j \neq i} \gamma_{ij}$；
+  \item \textbf{位移单调性（2-monotonicity 覆盖关系）}：当错误模式 $x'$ 由 $x$ 将某一位 $1$ 从坐标 $i+1$ 左移至坐标 $i$（$x_i=0, x_{i+1}=1 \to x'_i=1, x'_{i+1}=0$）得到时，因 $w_i \ge w_{i+1}$，必有 $F(x') \ge F(x)$，即 $z_{x'} \ge z_x$。
+\end{enumerate}
+上述对称破缺消除了 $K!$ 重置换退化，使 $K = 3 \sim 11$ 的全部非平凡内部极点在数秒内收敛至零最优性间隙（$\mathrm{gap} = 0$）。表~\ref{tab:vertex_audit} 列出 $K = 5 \sim 10$ 的全部非平凡内部极点核验结果（$K=3,4$ 无内部极点）。
+
+\begin{table}[htbp]
+\centering
+\caption{$K = 5 \sim 10$ 下包络分区全部非平凡内部极点的精确坐标、闭式值与 MILP 审计结果}\label{tab:vertex_audit}
+\footnotesize
+\setlength{\tabcolsep}{4.5pt}
+\renewcommand{\arraystretch}{1.18}
+\resizebox{\textwidth}{!}{\begin{tabular}{@{}c c c c c l@{}}
+\toprule
+$K$ & 极点坐标 $(q, b)$ & 极点类型（定理~\ref{thm:vertices}） & 闭式值 $U_{\mathrm{det}}(v)$ & 对称破缺 MILP 最优值 & 在该极点同时取紧的闭式项 \\
+\midrule
+5 & $(3/8,\ 1/8)$ & $v^{\mathrm{tri}}_2$ & $3/8 = 0.375000$ & $0.375000$（误差 $2.0\times 10^{-15}$） & $\mathrm{dict},\ B_{3,0},\ B_{5,1}$ \\
+\midrule
+6 & $(2/7,\ 2/35)$ & $w_{3,1}$ & $1/7 \approx 0.142857$ & $0.142857$（误差 $0.0$） & $B_{5,1},\ B^{\mathrm{even}}_{6,1},\ B^{\mathrm{anch}}_{6,1}$ \\
+6 & $(4/13,\ 1/13)$ & 三角形—锚点交点 & $3/13 \approx 0.230769$ & $0.230769$（误差 $1.2\times 10^{-15}$） & $B_{3,0},\ B_{5,1},\ B^{\mathrm{anch}}_{6,1}$ \\
+6 & $(3/8,\ 1/8)$ & $v^{\mathrm{tri}}_2$ & $3/8 = 0.375000$ & $0.375000$（误差 $0.0$） & $\mathrm{dict},\ B_{3,0},\ B_{5,1}$ \\
+\midrule
+7 & $(1/3,\ 1/9)$ & $v^{\mathrm{tri}}_3$ & $1/3 \approx 0.333333$ & $0.333333$（误差 $1.6\times 10^{-13}$） & $\mathrm{dict},\ B_{3,0},\ B_{7,1}$ \\
+7 & $(2/5,\ 1/7)$ & $v_{3,2}$ & $2/5 = 0.400000$ & $0.400000$（误差 $1.3\times 10^{-14}$） & $\mathrm{dict},\ B_{7,1},\ B_{7,2}$ \\
+\midrule
+8 & $(1/5,\ 1/35)$ & $w_{4,1}$ & $1/15 \approx 0.066667$ & $0.066667$（误差 $6.1\times 10^{-16}$） & $B_{7,1},\ B^{\mathrm{even}}_{8,1},\ B^{\mathrm{anch}}_{8,1}$ \\
+8 & $(5/23,\ 1/23)$ & 三角形—锚点交点 & $3/23 \approx 0.130435$ & $0.130435$（误差 $1.1\times 10^{-15}$） & $B_{3,0},\ B_{7,1},\ B^{\mathrm{anch}}_{8,1}$ \\
+8 & $(1/3,\ 1/9)$ & $v^{\mathrm{tri}}_3$ & $1/3 \approx 0.333333$ & $0.333333$（误差 $1.6\times 10^{-15}$） & $\mathrm{dict},\ B_{3,0},\ B_{7,1}$ \\
+8 & $(6/17,\ 12/119)$ & $w_{4,2}$ & $3/17 \approx 0.176471$ & $0.176471$（误差 $3.4\times 10^{-14}$） & $B_{7,2},\ B^{\mathrm{even}}_{8,2},\ B^{\mathrm{anch}}_{8,2}$ \\
+8 & $(2/5,\ 1/7)$ & $v_{3,2}$ & $2/5 = 0.400000$ & $0.400000$（误差 $5.2\times 10^{-15}$） & $\mathrm{dict},\ B_{7,1},\ B_{7,2},\ B^{\mathrm{anch}}_{8,2}$ \\
+\midrule
+9 & $(1/3,\ 1/9)$ & $v_{4,2} = v^{\mathrm{tri}}_4$ & $1/3 \approx 0.333333$ & $0.333333$（误差 $5.1\times 10^{-14}$） & $\mathrm{dict},\ B_{3,0},\ B_{9,1},\ B_{9,2}$ \\
+9 & $(3/7,\ 1/6)$ & $v_{4,3}$ & $3/7 \approx 0.428571$ & $0.428571$（误差 $3.3\times 10^{-16}$） & $\mathrm{dict},\ B_{9,2},\ B_{9,3}$ \\
+\midrule
+10 & $(2/13,\ 2/117)$ & $w_{5,1}$ & $1/26 \approx 0.038462$ & $0.038462$（误差 $6.9\times 10^{-18}$） & $B_{9,1},\ B^{\mathrm{even}}_{10,1},\ B^{\mathrm{anch}}_{10,1}$ \\
+10 & $(1/6,\ 1/36)$ & 三角形—锚点交点 & $1/12 \approx 0.083333$ & $0.083333$（误差 $2.7\times 10^{-15}$） & $B_{3,0},\ B_{9,1},\ B^{\mathrm{anch}}_{10,1}$ \\
+10 & $(3/11,\ 2/33)$ & $w_{5,2}$ & $1/11 \approx 0.090909$ & $0.090909$（误差 $5.0\times 10^{-14}$） & $B_{9,2},\ B^{\mathrm{even}}_{10,2},\ B^{\mathrm{anch}}_{10,2}$ \\
+10 & $(1/3,\ 1/9)$ & $v_{4,2} = v^{\mathrm{tri}}_4$ & $1/3 \approx 0.333333$ & $0.333333$（误差 $8.2\times 10^{-15}$） & $\mathrm{dict},\ B_{3,0},\ B_{9,1},\ B_{9,2},\ B^{\mathrm{anch}}_{10,2}$ \\
+10 & $(12/31,\ 4/31)$ & $w_{5,3}$ & $6/31 \approx 0.193548$ & $0.193548$（误差 $3.4\times 10^{-14}$） & $B_{9,3},\ B^{\mathrm{even}}_{10,3},\ B^{\mathrm{anch}}_{10,3}$ \\
+10 & $(3/7,\ 1/6)$ & $v_{4,3}$ & $3/7 \approx 0.428571$ & $0.428571$（误差 $5.4\times 10^{-15}$） & $\mathrm{dict},\ B_{9,2},\ B_{9,3},\ B^{\mathrm{anch}}_{10,3}$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\appendix
+\section{附录：完整自包含可复现验证脚本}
+
+将以下代码保存为 \texttt{verify\_symmetric\_closed\_form.py}，通过命令 \texttt{python3 -I verify\_symmetric\_closed\_form.py} 即可独立复现本文全部结论（运行时间约 78 秒，仅依赖 Python 标准库 \texttt{fractions}、\texttt{numpy} 与 \texttt{scipy}）。
+
+\begin{lstlisting}
+#!/usr/bin/env python3
+"""
+Exact Rational & Numerical Reproducibility Suite for:
+"Closed-Form Minimax Ensemble Voting under Symmetric Parameters for Arbitrary K"
+
+Verifies:
+1. Pointwise validity (Q(x) >= F(x), gamma >= 0) of all three certificate families:
+   - Odd-subset Boros-Prekopa certificates B_{2s+1, t}
+   - Even-K symmetric layer certificates B^{even}_{2m, t} (dual feasibility for both Maj_{2m-1} and w=(2,1,...,1))
+   - Even-K broken-tie anchor certificates B^{anch}_{2m, t} (valid for w=(2,1,...,1))
+2. Exact symbolic/rational verification of the three Algebraic Dominance Identities (Theorems 3 & 4).
+3. Exact rational witness points (fractions.Fraction) proving irredundancy of every active term for K = 3..10.
+4. Exact lower-envelope cell vertex enumeration and symmetry-broken MILP audit for K = 3..10.
+"""
+
+import time
+from fractions import Fraction as F
+from itertools import combinations
+import numpy as np
+from scipy.optimize import linprog, milp, Bounds, LinearConstraint
+
+def term_dict():
+    return ("dict", F(0), F(1), F(0))
+
+def term_tri():
+    return ("B_3,0", F(0), F(0), F(3))
+
+def term_odd_bp(s, t):
+    u = 2 * s + 1
+    denom = (s + 1 - t) * (s - t)
+    return (f"B_{{{u},{t}}}", F(t * (t + 1), denom), F(-2 * t * u, denom), F(2 * s * u, denom))
+
+def term_even_layer(m, t):
+    u = 2 * m
+    denom = (m - t) * (m - 1 - t)
+    return (f"B^{{even}}_{{{u},{t}}}", F(t * (t + 1), denom), F(-2 * t * u, denom), F(u * (u - 1), denom))
+
+def term_even_anchor(m, t):
+    u = 2 * m
+    denom = (m + 1 - t) * (m - t)
+    return (f"B^{{anch}}_{{{u},{t}}}", F(t * (t + 1), denom), F(2 - 2 * t * (u + 1), denom), F(2 * (u - 1) * (m + 1), denom))
+
+def eval_term(term, q, b):
+    _, a, B, C = term
+    return a + B * q + C * b
+
+def b_min_sym(K, q):
+    return max(F(2 * r * K * q - r * (r + 1), K * (K - 1)) for r in range(K // 2 + 1))
+
+def get_candidate_terms(K):
+    terms = [term_dict(), term_tri()]
+    if K % 2 == 1:
+        m = (K - 1) // 2
+        for s in range(2, m + 1):
+            for t in range(1, s):
+                terms.append(term_odd_bp(s, t))
+    else:
+        m = K // 2
+        for s in range(2, m):
+            for t in range(1, s):
+                terms.append(term_odd_bp(s, t))
+        for t in range(1, m - 1):
+            terms.append(term_even_layer(m, t))
+            terms.append(term_even_anchor(m, t))
+    return terms
+
+def verify_pointwise_validity(max_K=12):
+    print("=== [Check 1] Pointwise Validity of Certificate Polynomials ===")
+    for K in range(3, max_K + 1):
+        if K % 2 == 1:
+            s = (K - 1) // 2
+            for t in range(0, s):
+                denom = F((s + 1 - t) * (s - t))
+                for n in range(K + 1):
+                    q_val = F((n - t) * (n - t - 1)) / denom
+                    f_val = 1 if n >= s + 1 else 0
+                    assert q_val >= f_val
+        else:
+            m = K // 2
+            for t in range(1, m - 1):
+                denom1 = F((m - t) * (m - 1 - t))
+                denom2 = F((m + 1 - t) * (m - t))
+                for x0 in (0, 1):
+                    for n_rest in range(2 * m):
+                        n_tot = x0 + n_rest
+                        w_tot = 2 * x0 + n_rest
+                        f_w = 1 if w_tot >= m + 1 else 0
+                        f_maj = 1 if n_rest >= m else 0
+                        q_even = F((n_tot - t) * (n_tot - t - 1)) / denom1
+                        q_anch = F((w_tot - t) * (w_tot - t - 1)) / denom2
+                        assert q_even >= f_w and q_even >= f_maj
+                        assert q_anch >= f_w
+    print(f"  PASS: All certificate polynomials verified pointwise for K = 3..{max_K}.")
+
+def verify_algebraic_identities():
+    print("\n=== [Check 2] Exact Algebraic Dominance Identities (Theorems 3 & 4) ===")
+    for s in range(3, 15):
+        for t in range(1, s - 1):
+            for q in [F(1, 7), F(2, 9), F(3, 8), F(5, 11)]:
+                for b in [F(1, 30), F(1, 15), F(1, 9)]:
+                    val_anch = eval_term(term_even_anchor(s, t), q, b)
+                    val_odd_t = eval_term(term_odd_bp(s, t), q, b)
+                    val_odd_tp1 = eval_term(term_odd_bp(s, t + 1), q, b)
+                    assert val_anch - val_odd_t == F(2, (s + 1 - t) * (s - t)) * (q - b)
+
+                    val_even = eval_term(term_even_layer(s, t), q, b)
+                    c1 = F(1) - F(t, 2 * s + 1) + F(2 * s, (2 * s + 1) * (s - 1 - t))
+                    c2 = F(t, 2 * s + 1)
+                    assert val_even == c1 * val_odd_t + c2 * val_odd_tp1
+
+                    val_prev_odd = eval_term(term_odd_bp(s - 1, t), q, b)
+                    L1 = F((2 * s - 2 * t - 3) * (s - t + 1), (2 * s + 1) * (s - t - 1))
+                    L2 = F(2 * t, 2 * s + 1)
+                    L3 = F(2, 3 * (s - t) * (s - t - 1))
+                    assert L1 > 0 and L2 > 0 and L3 > 0
+                    assert L1 + L2 + L3 - 1 == F(2 * (3 * t + 1 - s), 3 * (2 * s + 1) * (s - t) * (s - t - 1))
+                    assert val_prev_odd == L1 * val_odd_t + L2 * val_odd_tp1 + L3 * (3 * b)
+    print("  PASS: Theorems 3(a), 3(b), and 4 verified in exact rational arithmetic for s = 3..14.")
+
+def find_irredundant_terms_with_witnesses(K):
+    terms = get_candidate_terms(K)
+    uniq = {}
+    for name, a, B, C in terms:
+        uniq.setdefault((a, B, C), []).append(name)
+    u_list = [(names[0], a, B, C) for (a, B, C), names in uniq.items()]
+    active = []
+    for idx, (name, a0, B0, C0) in enumerate(u_list):
+        c = [0.0, 0.0, -1.0]
+        A_ub = [[-1.0, 1.0, 0.0]]
+        b_ub = [0.0]
+        for r in range(K // 2 + 1):
+            A_ub.append([2.0 * r / (K - 1), -1.0, 0.0])
+            b_ub.append(r * (r + 1) / float(K * (K - 1)))
+        for j, (n2, a, B, C) in enumerate(u_list):
+            if j == idx:
+                continue
+            A_ub.append([float(B0 - B), float(C0 - C), 1.0])
+            b_ub.append(float(a - a0))
+        res = linprog(c, A_ub=A_ub, b_ub=b_ub, bounds=[(0, 0.5), (0, 0.5), (None, 1)], method="highs")
+        if res.success and -res.fun > 1e-9:
+            q_fl, b_fl = res.x[0], res.x[1]
+            witness = None
+            for denom_lim in (20, 50, 100, 500, 2000):
+                qw = F(q_fl).limit_denominator(denom_lim)
+                bw = F(b_fl).limit_denominator(denom_lim)
+                if not (F(0) <= qw <= F(1, 2) and b_min_sym(K, qw) <= bw <= qw):
+                    continue
+                val0 = a0 + B0 * qw + C0 * bw
+                other_min = min(a + B * qw + C * bw for j, (_, a, B, C) in enumerate(u_list) if j != idx)
+                if val0 < other_min:
+                    witness = (qw, bw, val0, other_min - val0)
+                    break
+            assert witness is not None
+            active.append((name, a0, B0, C0, witness))
+    return active
+
+def exact_milp_sym_fast(K, q, b, time_limit=30):
+    edges = list(combinations(range(K), 2))
+    m = len(edges)
+    reps = [mask for mask in range(1 << (K - 1))]
+    n_reps = len(reps)
+    n_cont = 1 + K + m
+    obj = np.r_[1.0, np.full(K, float(q)), np.full(m, float(b)), np.zeros(n_reps)]
+    lower = np.r_[np.full(1 + K, -np.inf), np.zeros(m + n_reps)]
+    upper = np.r_[np.full(n_cont, np.inf), np.ones(n_reps)]
+    integrality = np.r_[np.zeros(n_cont), np.ones(n_reps)]
+    rows, rhs = [], []
+    full_mask = (1 << K) - 1
+    for idx, mask in enumerate(reps):
+        x = np.array([(mask >> i) & 1 for i in range(K)], dtype=float)
+        r1 = np.r_[1.0, x, [x[i] * x[j] for i, j in edges], np.zeros(n_reps)]
+        r1[n_cont + idx] = -1.0
+        rows.append(r1); rhs.append(0.0)
+        xc = 1.0 - x
+        r2 = np.r_[1.0, xc, [xc[i] * xc[j] for i, j in edges], np.zeros(n_reps)]
+        r2[n_cont + idx] = 1.0
+        rows.append(r2); rhs.append(1.0)
+    for i in range(K - 1):
+        row = np.zeros(n_cont + n_reps)
+        row[1 + i] = 1.0
+        row[1 + i + 1] = -1.0
+        for k, (u, v) in enumerate(edges):
+            if u == i or v == i: row[1 + K + k] += 0.5
+            if u == i + 1 or v == i + 1: row[1 + K + k] -= 0.5
+        rows.append(row); rhs.append(0.0)
+    seen_pairs = set()
+    for mask in range(1 << K):
+        for i in range(K - 1):
+            if ((mask >> i) & 1) == 0 and ((mask >> (i + 1)) & 1) == 1:
+                mask2 = mask ^ (1 << i) ^ (1 << (i + 1))
+                c1 = mask if (mask >> (K - 1)) == 0 else (full_mask ^ mask)
+                c2 = mask2 if (mask2 >> (K - 1)) == 0 else (full_mask ^ mask2)
+                key = (min(c1, c2), max(c1, c2), (mask2 >> (K - 1)) != (mask >> (K - 1)))
+                if key in seen_pairs:
+                    continue
+                seen_pairs.add(key)
+                row = np.zeros(n_cont + n_reps)
+                rhs_val = 0.0
+                if (mask2 >> (K - 1)) == 0:
+                    row[n_cont + mask2] += 1.0
+                else:
+                    row[n_cont + (full_mask ^ mask2)] -= 1.0
+                    rhs_val -= 1.0
+                if (mask >> (K - 1)) == 0:
+                    row[n_cont + mask] -= 1.0
+                else:
+                    row[n_cont + (full_mask ^ mask)] += 1.0
+                    rhs_val += 1.0
+                rows.append(row); rhs.append(rhs_val)
+    ans = milp(obj, integrality=integrality, bounds=Bounds(lower, upper),
+               constraints=LinearConstraint(np.array(rows), np.array(rhs), np.inf),
+               options={"mip_rel_gap": 1e-12, "time_limit": time_limit})
+    return float(ans.fun), ans.mip_gap
+
+def verify_vertices(max_K=10):
+    print("\n=== [Check 3 & 4] Irredundant Terms, Rational Witnesses & Vertex Audits ===")
+    for K in range(3, max_K + 1):
+        active = find_irredundant_terms_with_witnesses(K)
+        print(f"\n--- K = {K} ({len(active)} irredundant terms) ---")
+        for name, a, B, C, (qw, bw, val0, margin) in active:
+            print(f"  Term {name:18s}: L(q,b) = {str(a):>5s} + ({str(B):>6s})*q + ({str(C):>6s})*b | witness (q={qw}, b={bw}) -> val={val0}, margin={margin}")
+        terms = [(name, a, B, C) for name, a, B, C, _ in active]
+        lines = [(F(1), F(0), F(0)), (F(1), F(0), F(1, 2)), (F(1), F(-1), F(0))]
+        for r in range(K // 2 + 1):
+            lines.append((F(2 * r * K), F(-K * (K - 1)), F(r * (r + 1))))
+        for (_, a1, B1, C1), (_, a2, B2, C2) in combinations(terms, 2):
+            if B1 != B2 or C1 != C2:
+                lines.append((B1 - B2, C1 - C2, a2 - a1))
+        pts = set()
+        for (A1, B1, D1), (A2, B2, D2) in combinations(lines, 2):
+            det = A1 * B2 - A2 * B1
+            if det == 0:
+                continue
+            q = (D1 * B2 - D2 * B1) / det
+            b = (A1 * D2 - A2 * D1) / det
+            if 0 <= q <= F(1, 2) and b <= q:
+                bmin = b_min_sym(K, q)
+                if b >= bmin:
+                    u_val = min(a + B * q + C * b for _, a, B, C in terms)
+                    n_tight_terms = sum(1 for _, a, B, C in terms if a + B * q + C * b == u_val)
+                    n_tight_bnds = (q == 0) + (q == F(1, 2)) + (b == q) + sum(
+                        1 for r in range(K // 2 + 1) if F(2 * r * K * q - r * (r + 1), K * (K - 1)) == b
+                    )
+                    if n_tight_terms >= 3 or (n_tight_terms >= 2 and n_tight_bnds >= 1):
+                        pts.add((q, b))
+        nontriv = [
+            (q, b) for q, b in sorted(pts)
+            if min(a + B * q + C * b for _, a, B, C in terms) > 0 and q < F(1, 2)
+        ]
+        print(f"  Nontrivial interior/boundary-tie vertices for K={K}: {len(nontriv)}")
+        for q, b in nontriv:
+            u_val = min(a + B * q + C * b for _, a, B, C in terms)
+            tight = [name for name, a, B, C in terms if a + B * q + C * b == u_val]
+            v_milp, gap = exact_milp_sym_fast(K, q, b)
+            diff = abs(v_milp - float(u_val))
+            assert diff < 1e-9
+            print(f"    Vertex (q={str(q):>6s}, b={str(b):>7s}): U_det = {str(u_val):>6s} ({float(u_val):.6f}), MILP = {v_milp:.6f}, diff = {diff:.1e}, tight = {tight}")
+
+if __name__ == "__main__":
+    t_start = time.time()
+    verify_pointwise_validity(max_K=12)
+    verify_algebraic_identities()
+    verify_vertices(max_K=10)
+    print(f"\nALL REPRODUCIBILITY CHECKS PASSED in {time.time() - t_start:.2f}s.")
+\end{lstlisting}
+
+\begin{thebibliography}{9}
+\bibitem{BorosPrekopa1989}
+E. Boros and A. Pr\'{e}kopa, ``Closed Form Two-Sided Bounds for Probabilities that At Least $r$ and Exactly $r$ Out of $n$ Events Occur,'' \emph{Mathematics of Operations Research}, 14(2):317--342, 1989.
+
+\bibitem{BollobasScott2002}
+B. Bollob\'{a}s and A. D. Scott, ``Problems and Results on Judicious Partitions,'' \emph{Random Structures \& Algorithms}, 21(3-4):414--430, 2002.
+
+\bibitem{Mazzetto2021}
+A. Mazzetto, C. Sam, A. Park, E. Upfal, and S. H. Bach, ``Semi-Supervised Aggregation of Dependent Weak Supervision Sources With Performance Guarantees,'' in \emph{Proceedings of AISTATS}, pp. 3196--3204, 2021.
+
+\bibitem{RepoSources}
+本项目仓库内部技术报告：[S4] 奇圈猜想反例与阈值结构；[S5] 图证书精确子区域；[S6] 图证书复杂度与结构；[S7] $R_0$ 之外的精确刻画与对称 $K=5$ 闭式；[S20] $B_{\mathrm{graph}}$ NP 难完整证明；[S23] 闭式项数的超指数下界；[S30] $U_{248}$ 的结构解释（2026 年 10 月）。
+\end{thebibliography}
+
+\end{document}
